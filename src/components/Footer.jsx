@@ -1,0 +1,76 @@
+import React from 'react';
+
+const company_navigation = [
+  { name: 'About Us', href: '#' },
+  { name: 'Terms of Use', href: '#' },
+  { name: 'Advertise', href: '#' },
+  { name: 'Privacy Policy', href: '#' }
+];
+
+const regions_navigation = [
+  { name: 'Malappuram', href: '#' },
+  { name: 'Kozhikode', href: '#' },
+  { name: 'Wayanad', href: '#' },
+  { name: 'Kannur', href: '#' },
+  { name: 'Kasargod', href: '#' }
+];
+
+const social_navigation = [
+  { name: 'Facebook', href: '#', icon: '📘' },
+  { name: 'Instagram', href: '#', icon: '📸' },
+  { name: 'X', href: '#', icon: '❌' }
+];
+
+const support_navigation = [
+  { name: 'Help (Text Chat)', href: '#' }
+];
+
+const Footer = () => {
+  return (
+    <div className='bg-gray-300 p-6'>
+      <div className="max-w-7xl mx-auto grid grid-cols-5 gap-8">
+        <div className="flex flex-col items-start">
+          <img
+            className="h-12 w-12 mb-4"
+            src="public/images/REAL-TY.png"
+            alt="Real-Ty"
+          />
+        </div>
+        <div>
+          <h4 className="text-lg font-medium text-gray-600 mb-4">Company</h4>
+          {company_navigation.map((item) => (
+            <a key={item.name} href={item.href} className="block text-gray-500 hover:text-gray-700 mb-2">
+              {item.name}
+            </a>
+          ))}
+        </div>
+        <div>
+          <h4 className="text-lg font-medium text-gray-600 mb-4">Regions</h4>
+          {regions_navigation.map((item) => (
+            <a key={item.name} href={item.href} className="block text-gray-500 hover:text-gray-700 mb-2">
+              {item.name}
+            </a>
+          ))}
+        </div>
+        <div>
+          <h4 className="text-lg font-medium text-gray-600 mb-4">Get Social</h4>
+          {social_navigation.map((item) => (
+            <a key={item.name} href={item.href} className="flex items-center text-gray-500 hover:text-gray-700 mb-2">
+              <span className="mr-2">{item.icon}</span> {item.name}
+            </a>
+          ))}
+        </div>
+        <div>
+          <h4 className="text-lg font-medium text-gray-600 mb-4">Support</h4>
+          {support_navigation.map((item) => (
+            <a key={item.name} href={item.href} className="block text-gray-500 hover:text-gray-700 mb-2">
+              {item.name}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Footer;
