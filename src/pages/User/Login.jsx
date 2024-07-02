@@ -17,7 +17,7 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        console.log("EEEEEE")
+        
 
         try {
            
@@ -44,13 +44,13 @@ const Login = () => {
 
 const handleGoogleLogin = async (credentialResponse) => {
     try {
-        const res = await axios.post('http://localhost:8000/api/auth/social/google/', {
+        const res = await axios.post('http://localhost:8000/api/dj-rest-auth/google/', {
             code: credentialResponse.code,
         });
         localStorage.setItem('access', res.data.access);
         localStorage.setItem('refresh', res.data.refresh);
         dispatch(loginSuccess(res.data.user));
-        navigate('/agentprofile');
+        navigate('/');
         toast.success('Google Login Successful..');
     } catch (error) {
         console.error(error);
@@ -95,11 +95,15 @@ const handleGoogleLogin = async (credentialResponse) => {
                     <div className="border-t border-gray-300 flex-grow ml-3"></div>
                 </div>
                 <div className="flex flex-col space-y-2">
-                    <GoogleLogin
-                        clientId="30022518210-qqkvm7mipcjg5v4onr4nmeksluep5qvb.apps.googleusercontent.com"
-                        onSuccess={handleGoogleLogin}
-                        onError={() => console.log('Google Login Failed')}
-                    />
+                <GoogleLogin
+  onSuccess={credentialResponse => {
+    console.log(credentialResponse)
+    handleGoogleLogin(credentialResponse)
+  }}
+  onError={() => {
+    console.log('Login Failed');
+  }}
+/>
                     
                 </div>
                 <div className="text-center mt-4">

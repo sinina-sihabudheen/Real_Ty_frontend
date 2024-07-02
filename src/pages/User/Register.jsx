@@ -78,11 +78,13 @@ const Register = () => {
         try {
             const response = await axios.post('http://localhost:8000/api/register/', postData);
             console.log("USERNAME:",postData.username)
+            toast.success('Otp sent to the mail..');
             setOtpSent(true);
             toast.success('Otp sent to the mail..');
         } catch (error) {
             if (error.response) {
                 console.error('Server Response:', error.response.data);
+                toast.error('Server Response:Email error');
                 const {  email } = error.response.data;
                 if (email) alert(`Email error: ${email[0]}`);
                 if (email) toast.error(`Email error: ${email[0]}`);
