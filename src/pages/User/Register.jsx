@@ -77,6 +77,7 @@ const Register = () => {
 
         try {
             const response = await axios.post('http://localhost:8000/api/register/', postData);
+            console.log("USERNAME:",postData.username)
             setOtpSent(true);
             toast.success('Otp sent to the mail..');
         } catch (error) {
@@ -99,7 +100,7 @@ const Register = () => {
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8000/api/api/verify-otp/', {
+            const response = await axios.post('http://localhost:8000/api/verify-otp/', {
                 email,
                 token: otp,
             });
@@ -107,7 +108,7 @@ const Register = () => {
             localStorage.setItem('refresh', response.data.refresh);
             dispatch(registerSuccess(response.data.user));
             toast.success('Registered Successfully..');
-            navigate('/')
+            navigate('/login')
             
         } catch (error) {
             console.error(error);

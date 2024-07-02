@@ -17,13 +17,18 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        console.log("EEEEEE")
+
         try {
-            const response = await axios.post('http://localhost:8000/api/api/auth/login/', {
+           
+            const response = await axios.post('http://localhost:8000/api/auth/login/', {
                 email,
                 password,
             });
+            
             localStorage.setItem('access', response.data.access);
             localStorage.setItem('refresh', response.data.refresh);
+            console.log("EMAIL:",email,password,response.data.access)
             dispatch(loginSuccess(response.data.user));
             navigate('/');
             toast.success('Login Successful..');
