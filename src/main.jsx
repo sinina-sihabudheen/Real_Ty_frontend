@@ -5,14 +5,19 @@ import App from "./App";
 import { Provider } from "react-redux";
 import store from "./redux/Store.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import { Toaster } from "sonner";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
+    <ErrorBoundary>
     <GoogleOAuthProvider clientId="614359146389-1ibea34vmh7al388n8jvcbtf330fenau.apps.googleusercontent.com">
       <Provider store={store}>
+      <Toaster />
         <App />
       </Provider>
     </GoogleOAuthProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

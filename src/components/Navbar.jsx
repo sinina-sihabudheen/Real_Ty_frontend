@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-// import { logout } from '../redux/authSlice';
 import { logout } from '../redux/authSlice.jsx'
-import { initFlowbite } from 'flowbite';
+
+
+
 
 const Navbar = () => {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { isAuthenticated, user } = useSelector((state) => state.auth);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-
-    useEffect(() => {
-        initFlowbite();
-    }, []);
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+    
+    const dispatch = useDispatch();
 
     const handleLogout = () => {
         dispatch(logout());
-        setDropdownOpen(false);
-        navigate('/'); // Redirect to home or login page after logout
+        navigate('/'); 
     };
 
     return (

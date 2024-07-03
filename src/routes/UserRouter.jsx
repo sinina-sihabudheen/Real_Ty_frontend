@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Login from "../pages/User/Login";
 import Register from "../pages/User/Register";
 import Home from "../pages/User/Home";
@@ -13,9 +13,7 @@ function UserRouter() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-   
-
+      <Route path="/register" element={<Register />} /> 
 
       <Route element={<UserAuth />}>
         <Route path="/agentprofile" element={<AgentProfile />} />

@@ -3,8 +3,6 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
 import { IoMdClose } from 'react-icons/io';
-import { useDispatch } from 'react-redux';
-import { registerSuccess } from '../../redux/authSlice';
 
 
 const Register = () => {
@@ -23,7 +21,6 @@ const Register = () => {
     const [otpSent, setOtpSent] = useState(false);   
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     useEffect(() => {
         const fetchRegions = async () => {
@@ -47,6 +44,12 @@ const Register = () => {
             toast.error('All fields are required..');
             return;
         }
+        const usernameRegex = /^[a-zA-Z]*$/;
+        if (!usernameRegex.test(username)) {
+            alert('Username should only contain letters.');
+            toast.error('Username should only contain letters.');
+            return;
+        }
 
         if (!validateEmail(email)) {
             alert('Invalid email format.');
@@ -54,11 +57,41 @@ const Register = () => {
             return;
         }
 
+        if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+            alert('Password must be at least 8 characters long and contain at least one digit and one letter.');
+            toast.error('Password must be at least 8 characters long and contain at least one digit and one letter.');
+            return;
+        }
+    
+
         if (password !== confirmPassword) {
             alert('Passwords do not match.');
             toast.error('Passwords not match..');
             return;
         }
+        
+        
+        const contactNumberRegex = /^[56789]\d{9}$/;
+        if (!contactNumberRegex.test(contactNumber)) {
+            let errorMessage = '';
+
+            if (contactNumber.length !== 10) {
+                errorMessage += 'Contact number should be 10 digits long.';
+            }
+
+            if (!/^[56789]/.test(contactNumber)) {
+                if (errorMessage !== '') {
+                    errorMessage += ' ';
+                }
+                errorMessage += 'Contact number should start with 5, 6, 7, 8, or 9.';
+            }
+    
+            alert(errorMessage);
+            toast.error(errorMessage);
+            return;
+        }
+
+
 
         const postData = {
             username,
@@ -101,20 +134,27 @@ const Register = () => {
 
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
+        
         try {
             const response = await axios.post('http://localhost:8000/api/verify-otp/', {
                 email,
                 token: otp,
             });
-            localStorage.setItem('access', response.data.access);
-            localStorage.setItem('refresh', response.data.refresh);
-            dispatch(registerSuccess(response.data.user));
-            toast.success('Registered Successfully..');
+            console.log(response.data.success);
+            if(response.data.success=true){
+            toast.success(response.data.message);
             navigate('/login')
+
+            }
+            else{
+                toast.error(response.data.message)
+
+            }
+            
             
         } catch (error) {
             console.error(error);
-            toast.error('Invalid OTP: Please try again..');
+            toast.error(' Please try again..');
 
         }
     };
@@ -302,3 +342,5 @@ const Register = () => {
 };
 
 export default Register;
+
+

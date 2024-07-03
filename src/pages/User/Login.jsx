@@ -4,9 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../redux/authSlice';
-// import { GoogleLogin } from '@react-oauth/google';
-import { GoogleLogin, googleLogout } from '@react-oauth/google';
-
+import { GoogleLogin } from '@react-oauth/google';
+import {jwtDecode} from 'jwt-decode';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -16,8 +15,7 @@ const Login = () => {
     const dispatch = useDispatch();
 
     const handleLogin = async (e) => {
-        e.preventDefault();
-        
+        e.preventDefault();       
 
         try {
            
@@ -26,10 +24,22 @@ const Login = () => {
                 password,
             });
             
-            localStorage.setItem('access', response.data.access);
-            localStorage.setItem('refresh', response.data.refresh);
-            console.log("EMAIL:",email,password,response.data.access)
-            dispatch(loginSuccess(response.data.user));
+            const { access, refresh, role} = response.data;
+
+            const decodedToken = jwtDecode(access);
+            const user = {
+                id: decodedToken.user_id,
+                email: decodedToken.email,
+            };
+
+            localStorage.setItem('access', access);
+            localStorage.setItem('refresh', refresh);
+            localStorage.setItem('role', role);
+            localStorage.setItem('user', JSON.stringify(user)); 
+
+            console.log("EMAIL:", email, password, access);
+            dispatch(loginSuccess({ access, refresh, role, user }));
+            
             navigate('/');
             toast.success('Login Successful..');
 
@@ -37,7 +47,6 @@ const Login = () => {
         } catch (error) {
             console.error(error);
             toast.error('Login Failed: Please try again..');
-
         }
     };
    

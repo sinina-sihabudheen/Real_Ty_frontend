@@ -1,21 +1,38 @@
-// src/components/Home.jsx
-import React, { useEffect } from "react";
+
+import React, { useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
-const navigation = [
-  { name: "Malappuram", href: "#" },
-  { name: "Kozhikode", href: "#" },
-  { name: "Wayanad", href: "#" },
-  { name: "Kannur", href: "#" },
-  { name: "Kasargode", href: "#" },
-];
+
 
 const Home = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
- 
+  const [regions, setRegions] = useState([]);
+
+  useEffect(() => {
+    const fetchRegions = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/regions/");
+        if (!response.ok) {
+          throw new Error("Failed to fetch regions");
+        }
+        const data = await response.json();
+        setRegions(data); 
+      } catch (error) {
+        console.error("Error fetching regions:", error);
+       
+      }
+    };
+  
+    fetchRegions();
+  }, []);
+
+  const navigation = regions.map((region) => ({
+    name: region.name,
+    href: `#${region.slug}`, 
+  }));
 
   return (
     <>
@@ -29,7 +46,8 @@ const Home = () => {
             alt="homepage"
           />
         </div>
-        <div className="relative bottom-12 left-0 right-0 sm:ml-6 ">
+        
+        <div className="relative bottom-12 left-0 right-0 sm:ml-6">
           <div className="flex justify-center space-x-14">
             {navigation.map((item) => (
               <div
