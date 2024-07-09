@@ -1,20 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { logout } from '../redux/authSlice.jsx'
-
-
-
+import { logout } from '../redux/authSlice';
+import { handleFetchUserData } from '../utils/auth';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-    
     const dispatch = useDispatch();
+    
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            handleFetchUserData(setUser, setIsLoading, setError);
+        }
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [dropdownRef]);
 
     const handleLogout = () => {
         dispatch(logout());
-        navigate('/'); 
+        navigate('/');
+    };
+
+    const toggleDropdown = () => {
+        setDropdownOpen(!dropdownOpen);
     };
 
     return (
@@ -41,17 +67,46 @@ const Navbar = () => {
                     </div>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         {isAuthenticated ? (
-                            <div className="relative flex items-center space-x-4">
-                                <button onClick={() => navigate("/agentprofile")} className="text-gray-500 hover:text-gray-300 font-medium">
-                                    Profile
-                                </button>
+                            <div className="relative flex items-center space-x-4" ref={dropdownRef}>
                                 <button
-                                    type="button"
-                                    onClick={handleLogout}
-                                    className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                                    onClick={toggleDropdown}
+                                    className="text-gray-500 hover:text-gray-300 font-medium flex items-center"
                                 >
-                                    Logout
+                                    {user ? user.username : 'Profile'}
+                                    <svg
+                                        className="ml-1 h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
                                 </button>
+                                {dropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                        <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                                            <button
+                                                onClick={() => navigate("/agentprofile")}
+                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                role="menuitem"
+                                            >
+                                                Profile
+                                            </button>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                role="menuitem"
+                                            >
+                                                Logout
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="flex space-x-4">
@@ -71,3 +126,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

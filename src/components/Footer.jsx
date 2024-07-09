@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState,useEffect } from 'react';
+import { handleFetchRegions } from '../utils/auth';
 
 const company_navigation = [
   { name: 'About Us', href: '#' },
@@ -7,18 +8,9 @@ const company_navigation = [
   { name: 'Privacy Policy', href: '#' }
 ];
 
-const regions_navigation = [
-  { name: 'Malappuram', href: '#' },
-  { name: 'Kozhikode', href: '#' },
-  { name: 'Wayanad', href: '#' },
-  { name: 'Kannur', href: '#' },
-  { name: 'Kasargod', href: '#' }
-];
-
 const social_navigation = [
-  { name: 'Facebook', href: '#', icon: '📘' },
-  { name: 'Instagram', href: '#', icon: '📸' },
-  { name: 'X', href: '#', icon: '❌' }
+  { name: 'Facebook', href: '#'},
+  { name: 'Instagram', href: '#'}
 ];
 
 const support_navigation = [
@@ -26,6 +18,12 @@ const support_navigation = [
 ];
 
 const Footer = () => {
+  const [regions, setRegions] = useState([]);
+
+  useEffect(() => {
+    handleFetchRegions(setRegions);
+  }, []);
+
   return (
     <div className='bg-gray-300 p-6'>
       <div className="max-w-7xl mx-auto grid grid-cols-5 gap-8">
@@ -46,7 +44,7 @@ const Footer = () => {
         </div>
         <div>
           <h4 className="text-lg font-medium text-gray-600 mb-4">Regions</h4>
-          {regions_navigation.map((item) => (
+          {regions.map((item) => (
             <a key={item.name} href={item.href} className="block text-gray-500 hover:text-gray-700 mb-2">
               {item.name}
             </a>
@@ -56,7 +54,7 @@ const Footer = () => {
           <h4 className="text-lg font-medium text-gray-600 mb-4">Get Social</h4>
           {social_navigation.map((item) => (
             <a key={item.name} href={item.href} className="flex items-center text-gray-500 hover:text-gray-700 mb-2">
-              <span className="mr-2">{item.icon}</span> {item.name}
+              <span className="mr-2"></span> {item.name}
             </a>
           ))}
         </div>

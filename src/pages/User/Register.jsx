@@ -1,9 +1,11 @@
 import React, { useState,useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
 import { IoMdClose } from 'react-icons/io';
-
+import { GoogleLogin } from '@react-oauth/google';
+import { handleRegister, handleVerifyOtp, handleResendOtp, handleGoogleRegister, handleFetchRegions } from '../../utils/auth';
+import { FaEye } from "react-icons/fa";
+import { FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
    
@@ -19,145 +21,96 @@ const Register = () => {
     const [regions, setRegions] = useState([]);
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);   
+    const [otpExpired, setOtpExpired] = useState(false);
+    const [passwordView,setPasswordView] = useState(false)
+    const [confirmPasswordView,setConfirmPasswordView] = useState(false)
+
 
     const navigate = useNavigate();
 
+    
     useEffect(() => {
-        const fetchRegions = async () => {
-            try {
-                const response = await axios.get('http://localhost:8000/api/regions/');
-                setRegions(response.data);
-            } catch (error) {
-                console.error('Error fetching regions:', error);
-            }
-        };
+        handleFetchRegions(setRegions);
+      }, []);
 
-        fetchRegions();
-    }, []);
+    useEffect(() => {
+        if (otpSent) {
+            const otpExpiryTimer = setTimeout(() => {
+                setOtpExpired(true);
+                toast.error('OTP has expired.');
+            }, 60000); //300000 for 5minutes
+
+            return () => clearTimeout(otpExpiryTimer);
+        }
+    }, [otpSent]);
 
    
-    const handleRegister = async (e) => {
+    const handleRegisterSubmit = (e) => {
         e.preventDefault();
-
+    
         if (!username || !email || !password || !confirmPassword || !address || !contactNumber) {
-            alert('All fields are required.');
-            toast.error('All fields are required..');
-            return;
+          toast.error('All fields are required.');
+          return;
         }
+    
         const usernameRegex = /^[a-zA-Z]*$/;
         if (!usernameRegex.test(username)) {
-            alert('Username should only contain letters.');
-            toast.error('Username should only contain letters.');
-            return;
-        }
-
-        if (!validateEmail(email)) {
-            alert('Invalid email format.');
-            toast.error('Invalid email format.');
-            return;
-        }
-
-        if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
-            alert('Password must be at least 8 characters long and contain at least one digit and one letter.');
-            toast.error('Password must be at least 8 characters long and contain at least one digit and one letter.');
-            return;
+          toast.error('Username should only contain letters.');
+          return;
         }
     
-
-        if (password !== confirmPassword) {
-            alert('Passwords do not match.');
-            toast.error('Passwords not match..');
-            return;
+        if (!validateEmail(email)) {
+          toast.error('Invalid email format.');
+          return;
         }
-        
-        
+    
+        if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+          toast.error('Password must be at least 8 characters long and contain at least one digit and one letter.');
+          return;
+        }
+    
+        if (password !== confirmPassword) {
+          toast.error('Passwords do not match.');
+          return;
+        }
+    
         const contactNumberRegex = /^[56789]\d{9}$/;
         if (!contactNumberRegex.test(contactNumber)) {
-            let errorMessage = '';
-
-            if (contactNumber.length !== 10) {
-                errorMessage += 'Contact number should be 10 digits long.';
-            }
-
-            if (!/^[56789]/.test(contactNumber)) {
-                if (errorMessage !== '') {
-                    errorMessage += ' ';
-                }
-                errorMessage += 'Contact number should start with 5, 6, 7, 8, or 9.';
-            }
+          let errorMessage = '';
     
-            alert(errorMessage);
-            toast.error(errorMessage);
-            return;
+          if (contactNumber.length !== 10) {
+            errorMessage += 'Contact number should be 10 digits long.';
+          }
+    
+          if (!/^[56789]/.test(contactNumber)) {
+            if (errorMessage !== '') {
+              errorMessage += ' ';
+            }
+            errorMessage += 'Contact number should start with 5, 6, 7, 8, or 9.';
+          }
+    
+          toast.error(errorMessage);
+          return;
         }
-
-
-
+    
         const postData = {
-            username,
-            email,
-            password,
-            confirm_password: confirmPassword,
-            address,
-            contact_number: contactNumber,
-            is_seller: isSeller,
+          username,
+          email,
+          password,
+          confirm_password: confirmPassword,
+          address,
+          contact_number: contactNumber,
+          is_seller: isSeller,
         };
-
+    
         if (isSeller) {
-            postData.agency_name = agencyName;
-            postData.regions = selectedRegions.map(region => region.id);
+          postData.agency_name = agencyName;
+          postData.regions = selectedRegions.map(region => region.id);
         }
+    
+        handleRegister(postData, setOtpSent, setOtpExpired);
+      };
 
-        try {
-            const response = await axios.post('http://localhost:8000/api/register/', postData);
-            console.log("USERNAME:",postData.username)
-            toast.success('Otp sent to the mail..');
-            setOtpSent(true);
-            toast.success('Otp sent to the mail..');
-        } catch (error) {
-            if (error.response) {
-                console.error('Server Response:', error.response.data);
-                toast.error('Server Response:Email error');
-                const {  email } = error.response.data;
-                if (email) alert(`Email error: ${email[0]}`);
-                if (email) toast.error(`Email error: ${email[0]}`);
-            } else if (error.request) {
-                console.error('Request Error:', error.request);
-                toast.error('Error registering: No response from server.');
-            } else {
-                console.error('Error:', error.message);
-                toast.error('Error registering: Please try again..');
-            }
-        }
-    };
-
-
-    const handleVerifyOtp = async (e) => {
-        e.preventDefault();
-        
-        try {
-            const response = await axios.post('http://localhost:8000/api/verify-otp/', {
-                email,
-                token: otp,
-            });
-            console.log(response.data.success);
-            if(response.data.success=true){
-            toast.success(response.data.message);
-            navigate('/login')
-
-            }
-            else{
-                toast.error(response.data.message)
-
-            }
-            
-            
-        } catch (error) {
-            console.error(error);
-            toast.error(' Please try again..');
-
-        }
-    };
 
     const handleRegionChange = (e) => {
         const selectedIds = Array.from(e.target.selectedOptions, option => parseInt(option.value));
@@ -170,10 +123,7 @@ const Register = () => {
         return re.test(String(email).toLowerCase());
     };
 
-    const handleSocialLogin = () => {
-        window.location.href = `http://localhost:8000/api/auth/social/login/google/?next=http://localhost:5173/social-callback`;
-    };
-
+    
 
 
     return (
@@ -185,7 +135,7 @@ const Register = () => {
                 </div>  
             {!otpSent ? (
                 <div>
-                <form onSubmit={handleRegister}>
+                <form onSubmit={handleRegisterSubmit}>
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
                         <input
                             type="text"
@@ -210,25 +160,31 @@ const Register = () => {
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
 
                         <input
-                            type="password"
+                            type={passwordView? "text" : "password"}
                             placeholder="Password"
                             className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
+                        <div className='cursor-pointer mt-2' onClick={()=>setPasswordView(!passwordView)}>
+                            {passwordView ? <FaEye/> :<FaEyeSlash/>}
+                        </div>
                        
                     </div>
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
 
                         <input
-                            type="password"
+                            type={confirmPasswordView? "text" : "password"}
                             placeholder="Confirm Password"
                             className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
                         />
+                        <div className='cursor-pointer mt-2' onClick={()=>setConfirmPasswordView(!confirmPasswordView)}>
+                            {confirmPasswordView ? <FaEye/> :<FaEyeSlash/>}
+                        </div>
                        
                     </div>
 
@@ -291,6 +247,19 @@ const Register = () => {
                         Register
                     </button>
                 </form>
+                <div className="flex items-center justify-center my-4">
+                    <div className="border-t border-gray-300 flex-grow mr-3"></div>
+                    <span className="text-gray-500">OR</span>
+                    <div className="border-t border-gray-300 flex-grow ml-3"></div>
+                </div>
+                <div className="flex flex-col space-y-2">
+                    <GoogleLogin
+                        onSuccess={credentialResponse => handleGoogleRegister(credentialResponse)}
+                        onError={() => {
+                        console.log('Registration Failed');
+                        }}
+                    />
+                </div>
                 <div className="text-center mt-4">
                     <p className="text-gray-500">
                         Already have an account? <Link to="/login" className="text-blue-500 hover:text-blue-700">Login</Link>
@@ -312,7 +281,8 @@ const Register = () => {
                                     <h1> Please enter OTP</h1>
                                     </div>
                                 <div>
-                                <form onSubmit={handleVerifyOtp}>
+                                <form onSubmit={(e) => { e.preventDefault(); handleVerifyOtp(email, otp, navigate); }}>
+
                                     <div className="flex flex-col space-y-16">
                                         <div className="flex flex-row justify-center text-center px-2">
                                             <input
@@ -324,13 +294,24 @@ const Register = () => {
                                         </div> 
                                         <div className="flex flex-col space-y-5">
                                             <div>
-                                                <button type='submit' className="flex flex-row items-center justify-center text-center w-full border rounded-xl outline-none py-5 bg-blue-400 border-none text-white text-sm shadow-sm">
+                                                <button type='submit' className="flex flex-row items-center justify-center text-center w-full border rounded-xl outline-none py-5 bg-blue-500 border-none text-white text-sm shadow-sm">
                                                     Verify Account
                                                 </button>
                                             </div>
                                         </div> 
                                     </div>                           
                                 </form>
+                                {otpExpired && (
+                                <div className="text-center mt-4">
+                                    <button 
+                                    // onClick={handleResendOtp} 
+                                    onClick={() => handleResendOtp(email, setOtpExpired, setOtp)}
+
+                                    className="bg-red-400 text-white px-4 py-2 rounded-md">
+                                        Resend OTP
+                                    </button>
+                                </div>
+                                )}
                             </div>
                         </div>
                     </div>

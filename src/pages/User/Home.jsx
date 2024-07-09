@@ -1,34 +1,15 @@
 
 import React, { useEffect, useState} from "react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-
-
+import { handleFetchRegions } from '../../utils/auth';
 
 const Home = () => {
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [regions, setRegions] = useState([]);
 
   useEffect(() => {
-    const fetchRegions = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/api/regions/");
-        if (!response.ok) {
-          throw new Error("Failed to fetch regions");
-        }
-        const data = await response.json();
-        setRegions(data); 
-      } catch (error) {
-        console.error("Error fetching regions:", error);
-       
-      }
-    };
-  
-    fetchRegions();
+    handleFetchRegions(setRegions);
   }, []);
-
   const navigation = regions.map((region) => ({
     name: region.name,
     href: `#${region.slug}`, 
