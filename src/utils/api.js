@@ -16,13 +16,32 @@ api.interceptors.request.use(
   error => Promise.reject(error)
 );
 
+// api.interceptors.response.use(
+//   response => response,
+//   error => Promise.reject(error)
+// );
+
 api.interceptors.response.use(
   response => response,
-  error => Promise.reject(error)
+  error => {
+    if (error.response) {
+      console.error('Response error:', error.response);
+      return Promise.reject(error.response); 
+    } else if (error.request) {
+      console.error('Request error:', error.request);
+      return Promise.reject(error.request); 
+    } else {
+      console.error('Error:', error.message);
+      return Promise.reject(error.message); 
+    }
+  }
 );
 
 export const loginUser = (email, password) => {
   return api.post('/api/auth/login/', { email, password });
+};
+export const loginAdmin = (email, password) => {
+  return api.post('/api/admin-login/', { email, password });
 };
 
 export const googleLoginUser = (credential) => {
@@ -54,5 +73,23 @@ export const fetchUserData = () => {
   return api.get('/api/user/');
 };
 
+
+export const updateUserProfile = async (formData) => {
+  const response = await axios.put('/api/update-user/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const changeUserPassword = async (data) => {
+  const response = await axios.post('/api/change-password/', data, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data;
+};
 
 export default api;

@@ -20,19 +20,32 @@ export const handleLogin = async (email, password, dispatch, navigate) => {
     localStorage.setItem('role', role);
     localStorage.setItem('user', JSON.stringify(user));
 
-    dispatch(loginSuccess({ access, refresh, role, user }));
    
 
     if (role != 'admin') {
+        dispatch(loginSuccess({ access, refresh, role, user }));
+        toast.success('Login Successful');
         navigate('/');
         }  
+
     else {
-            navigate('/login'); 
+          toast.error('Admin login is not allowed from this portal');
+          navigate('/login'); 
         }   
-    toast.success('Login Successful');
+
   } catch (error) {
     console.error(error);
     toast.error('Login Failed: Please try again');
+   
+    if (error.response) {
+      toast.error(`Login Failed: ${error.response.data.message}`);
+    }
+    else if (error.request) {
+      toast.error(`Login Failed: ${error.request.data.message}`);
+    } else {
+      toast.error('Login Failed: Please try again');
+    }
+
   }
 };
 
@@ -94,14 +107,10 @@ export const handleVerifyOtp = async (email, otp, navigate) => {
             }
             else{
                 toast.error(response.data.message)
-
             }
-            
-            
         } catch (error) {
             console.error(error);
             toast.error(' Please try again..');
-
         }
     };
 export const handleResendOtp = async (email, setOtpExpired, setOtp) => {
@@ -114,9 +123,6 @@ export const handleResendOtp = async (email, setOtpExpired, setOtp) => {
             toast.error('Error resending OTP: Please try again.');
         }
     };
-
-
-
 
 
 export const handleGoogleRegister = async (credentialResponse, navigate) => {

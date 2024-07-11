@@ -16,6 +16,8 @@ function UserRouter() {
       <Route element={<UserAuth />}>
         <Route path="/agentprofile" element={<AgentProfile />} />
       </Route>
+      
+
     </Routes>
   );
 }

@@ -5,7 +5,7 @@ import AdminHomePage from "../pages/Admin/AdminHomePage";
 import { useSelector } from "react-redux";
 
 const AdminRouter = () => {
-  const isAdminAuthenticated = useSelector(state => state.auth.isAdminAuthenticated); 
+  const isAdminAuthenticated = useSelector(state => state.adminAuth.isAdminAuthenticated);
 
   return (
     <Routes>
@@ -13,7 +13,7 @@ const AdminRouter = () => {
       {isAdminAuthenticated ? (
         <>
           <Route path="/adminhomepage" element={<AdminHomePage />} />
-        
+          <Route path="*" element={<Navigate to="/admin/adminhomepage" />} />
         </>
       ) : (
         <Route path="*" element={<Navigate to="/admin/login" />} />
