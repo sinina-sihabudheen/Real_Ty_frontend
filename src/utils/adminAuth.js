@@ -1,68 +1,5 @@
 
-// import { loginAdmin, fetchRegions, fetchUserData } from './api';
-// import { adminLoginSuccess } from '../redux/adminAuthSlice';
-// import {jwtDecode} from 'jwt-decode';
-// import { toast } from 'sonner';
-
-// export const handleAdminLogin = async (email, password, dispatch, navigate) => {
-//   try {
-//     const response = await loginAdmin(email, password);
-//     const { access, refresh, role } = response.data;
-
-//     const decodedToken = jwtDecode(access);
-//     const user = {
-//       id: decodedToken.user_id,
-//       email: decodedToken.email,
-//     };
-
-//     localStorage.setItem('adminAccess', access);
-//     localStorage.setItem('adminRefresh', refresh);
-//     localStorage.setItem('adminRole', role);
-//     localStorage.setItem('adminUser', JSON.stringify(user));
-
-//     dispatch(adminLoginSuccess({ access, refresh, role, user }));
-   
-//     // if (role === 'admin') {
-//     //     navigate('/adminhomepage');
-//     //     }  
-//     // else {
-//     //         navigate('/login'); 
-//     //     }       
-//     navigate('/adminhomepage');
-//     toast.success('Login Successful');
-//   } catch (error) {
-//     navigate('/admin');
-//     console.error(error);
-//     toast.error('Login Failed: Please try again');
-//   }
-// };
-
-
-// // Fetch Regions Handler
-// export const handleFetchRegions = async (setRegions) => {
-//   try {
-//     const response = await fetchRegions();
-//     setRegions(response.data);
-//   } catch (error) {
-//     console.error('Error fetching regions:', error);
-//   }
-// };
-
-// // Fetch User Data Handler
-// export const handleFetchUserData = async (setUser, setIsLoading, setError) => {
-//   try {
-//     const response = await fetchUserData();
-//     setUser(response.data);
-//     setIsLoading(false);
-//   } catch (error) {
-//     setError('Error fetching user data');
-//     setIsLoading(false);
-//   }
-// };
-
-
-
-import { loginAdmin, fetchRegions, fetchUserData } from './api';
+import { loginAdmin, fetchRegions, fetchUserData, fetchUsersData, fetchBuyersData, fetchSellersData } from './api';
 import { adminLoginSuccess } from '../redux/adminAuthSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
@@ -118,3 +55,37 @@ export const handleFetchUserData = async (setUser, setIsLoading, setError) => {
     setIsLoading(false);
   }
 };
+
+export const handleFetchUsersData = async (setUser, setIsLoading, setError) => {
+  try {
+    const response = await fetchUsersData();
+    setUser(response.data);
+    setIsLoading(false);
+  } catch (error) {
+    setError('Error fetching user data');
+    setIsLoading(false);
+  }
+};
+
+export const handleFetchSellersData = async (setUser, setIsLoading, setError) => {
+  try {
+    const response = await fetchSellersData();
+    setUser(response.data);
+    setIsLoading(false);
+  } catch (error) {
+    setError('Error fetching user data');
+    setIsLoading(false);
+  }
+};
+
+export const handleFetchBuyersData = async (setUser, setIsLoading, setError) => {
+  try {
+    const response = await fetchBuyersData();
+    setUser(response.data);
+    setIsLoading(false);
+  } catch (error) {
+    setError('Error fetching user data');
+    setIsLoading(false);
+  }
+};
+

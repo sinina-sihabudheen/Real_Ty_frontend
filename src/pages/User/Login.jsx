@@ -5,6 +5,12 @@ import { GoogleLogin } from '@react-oauth/google';
 import { handleLogin, handleGoogleLogin } from '../../utils/auth';
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
+import { signInWithGooglePopup } from "../../firebase"
+
+
+
+
+
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -15,7 +21,14 @@ const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    
+
+
+    const logGoogleUser = async () => {
+            const response = await signInWithGooglePopup();
+            console.log("RESPONSE",response);
+            navigate('/agentprofile')
+        }
+        
     const handleSubmit = (e) => {
         e.preventDefault();
         handleLogin(email, password, dispatch, navigate);
@@ -60,7 +73,7 @@ const Login = () => {
                     <span className="text-gray-500">OR</span>
                     <div className="border-t border-gray-300 flex-grow ml-3"></div>
                 </div>
-                <div className="flex flex-col space-y-2">
+                {/* <div className="flex flex-col space-y-2">
                 <GoogleLogin
                     onSuccess={credentialResponse => {
                         handleGoogleLogin(credentialResponse)
@@ -71,9 +84,12 @@ const Login = () => {
                     }}
                 />
                     
+                </div> */}
+                <div>
+                     <button onClick={logGoogleUser}>Sign In With Google</button>
                 </div>
                 <div className="text-center mt-4">
-                    <Link to="/forgot-password" className="text-gray-500 hover:text-gray-700 text-sm">Forgot Password?</Link>
+                    <Link to="/forgotpassword" className="text-gray-500 hover:text-gray-700 text-sm">Forgot Password?</Link>
                 </div>
                 <div className="text-center mt-4">
                     <p className="text-gray-500">

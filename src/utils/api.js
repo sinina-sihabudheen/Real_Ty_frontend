@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000', 
+  withCredentials:true,
+  
 });
 
 api.interceptors.request.use(
@@ -16,10 +18,7 @@ api.interceptors.request.use(
   error => Promise.reject(error)
 );
 
-// api.interceptors.response.use(
-//   response => response,
-//   error => Promise.reject(error)
-// );
+
 
 api.interceptors.response.use(
   response => response,
@@ -74,22 +73,38 @@ export const fetchUserData = () => {
 };
 
 
-export const updateUserProfile = async (formData) => {
-  const response = await axios.put('/api/update-user/', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
+export const updateUser = (formData) => {
+  return api.put('/api/update-user/', formData);
 };
 
-export const changeUserPassword = async (data) => {
-  const response = await axios.post('/api/change-password/', data, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  return response.data;
+
+export const passwordChange = (data) => {
+  return api.post('/api/change-password/', data);
 };
+
+export const updateUserRole = (data) => {
+  return api.put('/api/upadate_role/', data)
+};
+
+export const forgotPassword = (data) => {
+  return api.post('/api/forgot_password/', data)
+};
+
+export const resetPassword = (data) => {
+  return api.post('/api/reset_password/', data);
+};
+
+export const fetchUsersData = () => {
+  return api.get('/api/users_list/');
+};
+
+export const fetchSellersData = () => {
+  return api.get('/api/sellers_list/');
+};
+
+export const fetchBuyersData = () => {
+  return api.get('/api/buyers_list/');
+};
+
 
 export default api;

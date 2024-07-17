@@ -1,5 +1,5 @@
 
-import { loginUser, googleLoginUser, registerUser, verifyOtp, resendOtp, fetchRegions, fetchUserData } from './api';
+import { loginUser, googleLoginUser, registerUser, verifyOtp, resendOtp, fetchRegions, fetchUserData, passwordChange,updateUser, updateUserRole, forgotPassword } from './api';
 import { loginSuccess } from '../redux/authSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
@@ -45,7 +45,6 @@ export const handleLogin = async (email, password, dispatch, navigate) => {
     } else {
       toast.error('Login Failed: Please try again');
     }
-
   }
 };
 
@@ -161,3 +160,65 @@ export const handleFetchUserData = async (setUser, setIsLoading, setError) => {
     setIsLoading(false);
   }
 };
+
+export const changeUserPassword = async (data) => {
+  const response = await passwordChange(data, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data;
+};
+
+export const updateUserProfile = async (formData) => {
+  const response = await updateUser(formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+
+export const handleUpdateRole = async (formData) => {
+  const response = await updateUserRole(formData, {
+      headers: {
+          'Content-Type': 'application/json',
+      },
+  });
+  return response.data;
+};
+
+  export const handleResetPassword = async (postData, setOtpSent, setOtpExpired) => {
+    try {
+      const response = await forgotPassword(postData);
+      toast.success('OTP sent to the mail..');
+      setOtpSent(true);
+      setOtpExpired(false);
+    } catch (error) {
+      if (error.response) {
+        console.error('Server Response:', error.response.data);
+        const { email } = error.response.data;
+        if (email) {
+          toast.error(`Email error: ${email[0]}`);
+        }
+      } else if (error.request) {
+        console.error('Request Error:', error.request);
+        toast.error('Error: No response from server.');
+      } else {
+        console.error('Error:', error.message);
+        toast.error('Error: Please try again..');
+      }
+    }
+  };
+
+  export const handleNewPasswordSet = async (postData) => {
+    try {
+      const response = await resetPassword(postData);
+      toast.success('Password reset successfully.');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error resetting password.');
+    }
+  };
+

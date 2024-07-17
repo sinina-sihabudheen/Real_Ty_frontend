@@ -123,9 +123,6 @@ const Register = () => {
         return re.test(String(email).toLowerCase());
     };
 
-    
-
-
     return (
         <div className="flex justify-center items-center min-h-screen max-h-full py-4 bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">

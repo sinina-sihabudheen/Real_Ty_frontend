@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { handleFetchUserData} from '../../utils/auth';
-import { updateUserProfile, changeUserPassword} from '../../utils/api';
+import { handleFetchUserData, changeUserPassword, updateUserProfile, handleUpdateRole} from '../../utils/auth';
 import { toast } from 'sonner';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+// import 'react-toastify/dist/ReactToastify.css';
+import { format } from 'date-fns';
+import { Navigate, useNavigate } from 'react-router-dom';
+
+
 
 const AgentProfile = () => {
   const [user, setUser] = useState(null);
@@ -14,12 +20,25 @@ const AgentProfile = () => {
   const [security, setSecurity] = useState(false)
   const [passwordView,setPasswordView] = useState(false)
   const [confirmPasswordView,setConfirmPasswordView] = useState(false)
+  const [currentPasswordView,setCurrentPasswordView] = useState(false)
+  const [dateOfBirth, setDateOfBirth] = useState(null);
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     handleFetchUserData(setUser, setIsLoading, setError);
+
   }, []);
 
+  useEffect(() => {
+    if (user && user.date_of_birth) {
+      setDateOfBirth(new Date(user.date_of_birth));
+    }
+  }, [user]);
+
+
   const handleProfileEditClick = () => {
+    console.log('Profile Image URL:', user.profile_image);
     setProfileEdit(true);
     setSecurity(false); 
   };
@@ -29,13 +48,17 @@ const AgentProfile = () => {
     setProfileEdit(false); 
   };
 
+
   const handleProfileUpdate = async (event) => {
     event.preventDefault();
-    console.log("WWWWWWW");
+    console.log('Profile Image URL:', user.profile_image);
+
     const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData.entries());
+    if (dateOfBirth) {
+      formData.append('date_of_birth', format(dateOfBirth, 'yyyy-MM-dd'));
+    }    
     try {
-      await updateUserProfile(data);
+      await updateUserProfile(formData);
       toast.success('Profile updated successfully');
       handleFetchUserData(setUser, setIsLoading, setError);
       setProfileEdit(false);
@@ -44,23 +67,55 @@ const AgentProfile = () => {
     }
   };
 
-  const handlePasswordChange = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData.entries());
-    try {
-      await changeUserPassword(data);
-      toast.success('Password changed successfully');
-      setSecurity(false);
-    } catch (error) {
-      toast.error('Error changing password. Please try again.');
-    }
+const handlePasswordChange = async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(event.target);
+  const data = {
+    current_password: formData.get('currentPassword'),
+    new_password: formData.get('newPassword'),
+    confirm_password: formData.get('confirm_password'),
   };
+
+  try {
+    await changeUserPassword(data);
+    toast.success('Password changed successfully');
+    setSecurity(false);
+  } catch (error) {
+    console.error(error);
+    toast.error('Error changing password. Please try again.');
+  }
+};
+
   const handleCancel = () => {
     setProfileEdit(false);
     setSecurity(false);
   };
+   
+  const handleSell = () => {
+    navigate('/sellerregister')
+  };
 
+  const handleListedProperties = () => {
+    navigate('/listedproperties')
+  };
+ 
+  const handleBuy = async () => {
+    if (!user.is_buyer) {
+      try {
+        const updatedUser = await handleUpdateRole({ is_buyer: true });
+        setUser(updatedUser);
+        toast.success('Seller role added to your account..');
+        navigate('/propertylist');
+      } catch (error) {
+        console.error('Error updating user role:', error); 
+        toast.error('Error adding seller role. Please try again.');
+
+      }
+    } else {
+      navigate('/propertylist');
+    }
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -79,6 +134,16 @@ const AgentProfile = () => {
         <div className='flex space-x-5'>
             {!profileEdit && !security && (
             <div className="w-full max-w-sm mx-auto bg-gray-300 rounded-lg p-4">
+              {user.is_seller && user.is_buyer ? (
+                <div>
+                  <button className="w-6/12 bg-gray-400 text-white py-1 rounded-md" >Roles: seller/buyer</button>
+                </div>
+              ) : user.is_seller ? (
+              <div><button className="w-3/12 bg-gray-400 text-white py-1 rounded-md">Role:Seller</button></div>
+              ) : (
+              <div><button className="w-3/12 bg-gray-400 text-white py-1 rounded-md">Role:Buyer</button></div>
+              )}
+              
               <h3 className="text-xl font-bold text-gray-700 text-center mb-4 ">Profile Settings</h3>
               <h5 className="text-gray-500 text-center">Update your profile details here.</h5>
               <div className="space-y-2">
@@ -105,28 +170,30 @@ const AgentProfile = () => {
               <h2 className="text-xl text-gray-700 font-bold">My Profile</h2>
               <div className="mt-4 flex items-center space-x-4">
                 <img 
-                  src={ user.profile_image || '/images/user.png'}
+                  src={user.profile_image? user.profile_image : '/images/user.png'}                  
                   alt="Profile" 
                   className="w-16 h-16 rounded-full" 
                 />
+               
                 <div>
                   <h3 className="text-lg text-gray-600 font-semibold uppercase">{user.username}</h3>
                   <p className="text-gray-500">Email: {user.email}</p>
-                  <p className="text-gray-500">Joined on: {user.created_at}</p>
+                  {/* <p className="text-gray-500">DOB: {user.date_of_birth}</p> */}
                   <p className="text-gray-500 capitalize">Addresss: {user.address}</p>
                   <p className="text-gray-500">Contact Number: +91 {user.contact_number}</p>
                 </div>
                 {user.is_seller ? (
                   <div className='flex space-x-8'>
-                      <button className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Listed Properties</button>
-                      <button className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Buy Property</button>
+                      <button onClick={handleListedProperties} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Listed Properties</button>
+                      <button onClick={handleBuy} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">To Buy</button>
                   </div>
                   ):(
                   <div className='flex space-x-8'>
-                      <button className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Buy</button>
-                      <button className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Sell Property</button>
+                      <button onClick={handleBuy} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">To Buy</button>
+                      <button onClick={handleSell} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">To Sell</button>
                   </div>
                     )}
+
               </div>
           </div>
        </div>
@@ -138,21 +205,26 @@ const AgentProfile = () => {
                     <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
                       <input 
                         type="text" 
+                        name="username"
                         defaultValue={user.username} 
                         className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
                     </div>
-                    <label className="block text-gray-400 mb-1">Date of Birth</label>
-                    <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
-                      <input 
-                        type="text" 
-                        placeholder="DD/MM/YYYY" 
-                        defaultValue={user.date_of_birth} 
-                        className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400 " />                      
-                    </div>
+                    
+                  <label className="block text-gray-400 mb-1">Date of Birth</label>
+                  <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">
+                    <DatePicker
+                      selected={dateOfBirth}
+                      onChange={(date) => setDateOfBirth(date)}
+                      dateFormat="dd/MM/yyyy"
+                      className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
+                    />
+                  </div>
+
                     <label className="block text-gray-400 mb-1">Address</label>
                     <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
                       <input 
-                        type="text" 
+                        type="text"                       
+                        name="address"
                         defaultValue={user.address} 
                         className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />     
                     </div>
@@ -160,8 +232,18 @@ const AgentProfile = () => {
                     <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
                       <input 
                         type="text" 
+                        name="contact_number"
                         defaultValue={user.contact_number} 
                         className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
+                    </div>
+
+                    <label className="block text-gray-400 mb-1">Profile Image</label>
+                    <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">
+                      <input
+                        type="file"
+                        name="profile_image"
+                        className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
+                      />
                     </div>
                 </div>
                 <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">Apply Changes</button>
@@ -171,18 +253,25 @@ const AgentProfile = () => {
           {security && (
             <form onSubmit={handlePasswordChange} >                
                 <div className="mb-4  items-center w-6/12">
-                  <h3 className="text-lg text-gray-500 font-semibold mb-2">Security Change</h3>
-                  <label className="block text-gray-400 mb-1">Email</label>
-                  <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">
-                    <input 
-                      type="text" 
-                      defaultValue={user.email} 
-                      className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
-                      </div>
-                  <label className="block text-gray-400 mb-1">Password</label>                  
-                  <div className="mb-4 flex w-6/12 items-center border rounded-md px-4 py-2">
+                  <h3 className="text-lg text-gray-500 font-semibold mb-2">Security Changes</h3>
+                  <h5 className=" text-gray-500  mb-2">Change Password</h5>
+                  <label className="block text-gray-400 mb-1">Current Password</label>                  
+                  <div className="mb-4 flex w-full items-center border rounded-md px-4 py-2">
                       <input
-                          type={passwordView? "text" : "password"}                         
+                          type={currentPasswordView? "text" : "password"}   
+                          name="currentPassword"
+                          className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"                       
+                          required
+                      />
+                      <div className='cursor-pointer mt-2' onClick={()=>setCurrentPasswordView(!currentPasswordView)}>
+                          {currentPasswordView ? <FaEye/> :<FaEyeSlash/>}
+                      </div>
+                  </div>     
+                  <label className="block text-gray-400 mb-1">Password</label>                  
+                  <div className="mb-4 flex w-full items-center border rounded-md px-4 py-2">
+                      <input
+                          type={passwordView? "text" : "password"}   
+                          name="newPassword"
                           className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"                       
                           required
                       />
@@ -191,9 +280,10 @@ const AgentProfile = () => {
                       </div>
                   </div>                   
                   <label className="block text-gray-400 mb-1">Re Enter The Password</label>
-                  <div className="mb-4 flex w-6/12 items-center border rounded-md px-4 py-2">
+                  <div className="mb-4 flex w-full items-center border rounded-md px-4 py-2">
                         <input
                             type={confirmPasswordView? "text" : "password"}
+                            name="confirm_password"
                             className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
                             required
                         />
@@ -217,5 +307,3 @@ const AgentProfile = () => {
 };
 
 export default AgentProfile;
-
-
