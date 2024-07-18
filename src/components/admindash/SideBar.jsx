@@ -22,6 +22,9 @@ const Sidebar = () => {
                 <Link to="/admin/buyers" className="text-gray-500 hover:text-blue-700">Buyers</Link>
             </p>
             <p className="text-gray-500">
+                <Link to="/admin/regions" className="text-gray-500 hover:text-blue-700">Regions</Link>
+            </p>
+            <p className="text-gray-500">
                 <Link to="" className="text-gray-500 hover:text-blue-500">Ads</Link>
             </p>      
         </nav>

@@ -4,9 +4,9 @@ import { useSelector } from "react-redux";
 
 function AdminAuth() {
     const isAdminAuthenticated = useSelector(state => state.adminAuth.isAdminAuthenticated)
-    const isAdmin = localStorage.getItem("admin")
+    // const isAdmin = localStorage.getItem("admin")
+    const isAdmin = localStorage.getItem('admin') === 'true'; 
 
-    // Check if admin is authenticated and the admin flag is set
     return isAdminAuthenticated && isAdmin ? <Outlet /> : <Navigate to="/admin/login" />
 }
 

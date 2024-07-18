@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 import { Link, useNavigate} from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { handleFetchUserData } from '../../utils/adminAuth';
+import { handleFetchUsersData } from '../../utils/adminAuth';
 import Sidebar from '../../components/admindash/SideBar';
 import AdminHeader from '../../components/admindash/AdminHeader';
 
@@ -14,8 +14,22 @@ const AllUsers = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-            handleFetchUserData(setUsers, setIsLoading, setError);    
-        }, []);
+        const fetchData = async () => {
+            try {
+                await handleFetchUsersData(setUsers, setIsLoading, setError);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setError('Error fetching user data');
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    console.log("Users:",users);
+    console.log("IsLoading:",isLoading);
+    console.log("Error:",error);
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -38,6 +52,7 @@ const AllUsers = () => {
             <table className="w-full bg-gray-100 table-auto border-collapse border border-gray-400">
                 <thead>        
                     <tr>
+                    <th className="border px-4 py-2">SL No.</th>
                     <th className="border px-4 py-2">ID</th>
                     <th className="border px-4 py-2">Username</th>
                     <th className="border px-4 py-2">Email</th>
@@ -47,6 +62,7 @@ const AllUsers = () => {
                 <tbody>
                 {users.map((user, index) => (
                     <tr key={index}>
+                        <td className="border px-4 py-2">{index+1}</td>
                         <td className="border px-4 py-2">{user.id}</td>
                         <td className="border px-4 py-2">{user.username}</td>
                         <td className="border px-4 py-2">{user.email}</td>
