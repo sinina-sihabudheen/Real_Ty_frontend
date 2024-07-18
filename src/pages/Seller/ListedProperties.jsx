@@ -1,6 +1,8 @@
 import React from 'react'
 import { handleFetchUserData } from '../../utils/auth';
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
 
 
 
@@ -64,8 +66,10 @@ export const ListedProperties = () => {
         </div>
     </section>
     <div className='flex space-x-8'>
-                      <button  className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>
-      </div>
+    <Link to="/property_type" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
+        <button className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>                          
+    </Link>
+    </div>
     </div>
     </>
   )

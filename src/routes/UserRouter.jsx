@@ -9,6 +9,8 @@ import SellerRegister from "../pages/Seller/SellerRegister";
 import { ListedProperties } from "../pages/Seller/ListedProperties";
 import PropertyList from "../pages/User/PropertyList";
 import ForgotPassword from "../pages/User/ForgotPassword";
+import PropertyType from "../pages/Seller/PropertyType";
+import PropertyForm from "../pages/Seller/PropertyForm";
 
 function UserRouter() {
   return (
@@ -22,6 +24,11 @@ function UserRouter() {
         <Route path="/sellerregister" element={<SellerRegister isBuyer />} />
         <Route path="/listedproperties" element={<ListedProperties isSeller />} />
         <Route path="/propertylist" element={<PropertyList />} />
+        <Route path="/property_type" element={<PropertyType />} />
+        <Route path="/property_form" element={<PropertyForm />} />
+
+
+
       </Route>
     </Routes>
   );
