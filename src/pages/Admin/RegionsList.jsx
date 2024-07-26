@@ -35,7 +35,7 @@ const RegionsList = () => {
                     </tr>
                 </thead>
                 <tbody>
-                {regions.map((region, index) => (
+                {regions.map((region, index) => ( 
                 <tr key={index}>                       
                     <td className="border px-4 py-2">{index+1}</td>
                     <td className="border px-4 py-2">{region.id}</td>

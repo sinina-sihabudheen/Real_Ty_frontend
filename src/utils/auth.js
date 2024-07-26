@@ -1,5 +1,12 @@
 
-import { loginUser, googleLoginUser, registerUser, verifyOtp, resendOtp, fetchRegions, fetchUserData, passwordChange,updateUser, updateUserRole, forgotPassword } from './api';
+import { loginUser, googleLoginUser, 
+  registerUser, verifyOtp, resendOtp, 
+  fetchRegions, fetchUserData, resetPassword,
+  passwordChange, fetchAmenities, getResidentialPropertyDetails,
+  updateUser, updateUserRole, forgotPassword, 
+  fetchSellerLands, getLandPropertyDetails,
+  fetchSellerResidents, updateResidentialProperty, 
+  updateLandProperty } from './api';
 import { loginSuccess } from '../redux/authSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
@@ -8,7 +15,7 @@ export const handleLogin = async (email, password, dispatch, navigate) => {
   try {
     const response = await loginUser(email, password);
     const { access, refresh, role } = response.data;
-
+    console.log("role",role);
     const decodedToken = jwtDecode(access);
     const user = {
       id: decodedToken.user_id,
@@ -17,10 +24,9 @@ export const handleLogin = async (email, password, dispatch, navigate) => {
 
     localStorage.setItem('access', access);
     localStorage.setItem('refresh', refresh);
-    localStorage.setItem('role', role);
+    localStorage.setItem('role', JSON.stringify(role));
     localStorage.setItem('user', JSON.stringify(user));
-
-   
+    console.log('Token stored in localStorage');  
 
     if (role != 'admin') {
         dispatch(loginSuccess({ access, refresh, role, user }));
@@ -47,25 +53,66 @@ export const handleLogin = async (email, password, dispatch, navigate) => {
     }
   }
 };
-
-export const handleGoogleLogin = async (credentialResponse, dispatch, navigate) => {
+export const handleGoogleLogin = async (idToken, dispatch, navigate) => {
   try {
-    const response = await googleLoginUser(credentialResponse.credential);
-    const { access, refresh, user } = response.data;
+    const { access, refresh, role } = await googleLoginUser(idToken);
+    
+    console.log("Access Token:", access);
 
+    if (typeof access !== 'string') {
+      throw new Error('Invalid token format');
+    }
+
+    const decodedToken = jwtDecode(access);
+    const user = {
+      id: decodedToken.user_id,
+      email: decodedToken.email,
+    };
+    console.log("ACCESSED",user);
     localStorage.setItem('access', access);
     localStorage.setItem('refresh', refresh);
+    localStorage.setItem('role', JSON.stringify(role));
     localStorage.setItem('user', JSON.stringify(user));
 
-    dispatch(loginSuccess(user));
-    navigate('/');
-    toast.success('Google Login Successful');
+    console.log('Token stored in localStorage');
+
+    if (Array.isArray(role) && role.includes('admin')) {
+      toast.error('Admin login is not allowed from this portal');
+      navigate('/login');
+    } else {
+      dispatch(loginSuccess({ access, refresh, role, user }));
+      toast.success('Login Successful');
+      navigate('/');
+    }
+    // if (role !== 'admin') {
+    //   dispatch(loginSuccess({ access, refresh, role, user }));
+    //   toast.success('Login Successful');
+    //   navigate('/');
+    // } else {
+    //   toast.error('Admin login is not allowed from this portal');
+    //   navigate('/login');
+    // }
+    if (Array.isArray(role) && role.includes('admin')) {
+      toast.error('Admin login is not allowed from this portal');
+      navigate('/login');
+    } else {
+      dispatch(loginSuccess({ access, refresh, role, user }));
+      toast.success('Login Successful');
+      navigate('/');
+    }
   } catch (error) {
     console.error(error);
-    toast.error('Google Login Failed: Please try again');
+    toast.error('Login Failed: Please try again');
+
+    if (error.response) {
+      toast.error(`Login Failed: ${error.response.data.message}`);
+    } else if (error.request) {
+      toast.error('Login Failed: No response from server');
+    } else {
+      toast.error('Login Failed: Please try again');
+    }
   }
 };
-
 
 export const handleRegister = async (postData, setOtpSent, setOtpExpired) => {
   try {
@@ -149,6 +196,17 @@ export const handleFetchRegions = async (setRegions) => {
   }
 };
 
+//Fetch amenity handler
+export const handleFetchAmenity = async (setAmenities) => {
+  try {
+    const response = await fetchAmenities();
+    setAmenities(response.data);
+  } catch (error) {
+    console.error('Error fetching regions:', error);
+  }
+};
+
+
 // Fetch User Data Handler
 export const handleFetchUserData = async (setUser, setIsLoading, setError) => {
   try {
@@ -221,4 +279,87 @@ export const handleUpdateRole = async (formData) => {
       toast.error('Error resetting password.');
     }
   };
+
+//Fetch seller's lands handler
+export const handleFetchSellerLands = async (setLands) => {
+  try {
+    const response = await fetchSellerLands();
+    setLands(response.data);
+  } catch (error) {
+    console.error('Error fetching seller lands :', error);
+  }
+};
+
+export const handleFetchSellerResidents = async (setResidents) => {
+  try {
+    const response = await fetchSellerResidents();
+    setResidents(response.data);
+  } catch (error) {
+    console.error('Error fetching seller residents :', error);
+  }
+};
+
+export const handleLandPropertyDetails = async (propertyId) => {
+  try {
+    const response = await getLandPropertyDetails(propertyId);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch land property details:', error);
+    throw error; 
+  }
+};
+
+export const handleResidentialPropertyDetails = async (propertyId) => {
+  try {
+    const response = await getResidentialPropertyDetails(propertyId);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch residential property details:', error);
+    throw error; 
+  }
+};
+
+
+export const handleUpdateLandProperty = async (propertyId, propertyData) => {
+  try {
+    const formData = new FormData();
+    for (const key in propertyData) {
+      if (propertyData[key] !== undefined && propertyData[key] !== null) {
+        formData.append(key, propertyData[key]);
+      }
+    }
+
+    const response = await updateLandProperty(propertyId, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to update land property:', error);
+    throw error; 
+  }
+};
+
+
+export const handleUpdateResidentialProperty = async (propertyId, propertyData) => {
+  try {
+    const formData = new FormData();
+    for (const key in propertyData) {
+      if (propertyData[key] !== undefined && propertyData[key] !== null) {
+        formData.append(key, propertyData[key]);
+      }
+    }
+
+    const response = await updateResidentialProperty(propertyId, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to update residential property:', error);
+    throw error; 
+  }
+};
 

@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Select from 'react-select';
 import { useSelector } from 'react-redux';
-import { createLandProperty, createResidentialProperty } from '../../utils/api';
-import { handleFetchAmenity } from '../../utils/auth'; 
+import { getLandPropertyDetails,getResidentialPropertyDetails, updateLandProperty, updateResidentialProperty } from '../../utils/api';
+import { handleFetchAmenity } from '../../utils/auth';
 
-const PropertyForm = () => {
-  const location = useLocation();
-  const { category } = location.state || {};
-  const user = useSelector(state => state.auth.user); 
-  const navigate = useNavigate()
+const EditProperty = () => {
+  const { id, category } = useParams();
+  const user = useSelector(state => state.auth.user);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     price: '',
     description: '',
     area: '',
     amenities: [],
     location: '',
-    images: [],
+    images: null,
     video: null,
     numRooms: '',
     numBathrooms: '',
@@ -30,20 +29,22 @@ const PropertyForm = () => {
 
   useEffect(() => {
     handleFetchAmenity(setAmenitiesOptions);
-  }, []);
+    getLandPropertyDetails(id, category).then(data => {
+      setFormData(data);
+    }).catch(err => {
+      console.error('Failed to fetch property details:', err);
+      setError('Failed to fetch property details');
+    });
+  }, [id, category]);
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
-   
     setFormData({
       ...formData,
       [name]: files ? files[0] : value,
     });
   };
-  
-  const handleCancel = () => {
-  navigate('/agentprofile') 
-  };
+
   const handleSelectChange = (selectedOptions) => {
     setFormData({
       ...formData,
@@ -57,44 +58,37 @@ const PropertyForm = () => {
     setError('');
 
     const propertyData = new FormData();
-   
-    propertyData.append('category', category);  
-    propertyData.append('area', formData.area || '');  
-    propertyData.append('property_type', category || '');  
 
-    propertyData.append('description', formData.description || '');  
-    propertyData.append('num_rooms', formData.numRooms || '');  
-    propertyData.append('num_bathrooms', formData.numBathrooms || '');  
+    propertyData.append('category', category);
+    propertyData.append('area', formData.area || '');
+    propertyData.append('property_type', category || '');
 
-    // formData.amenities.forEach(amenity => propertyData.append('amenities', amenity.value)); 
-    formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
+    propertyData.append('description', formData.description || '');
+    propertyData.append('num_rooms', formData.numRooms || '');
+    propertyData.append('num_bathrooms', formData.numBathrooms || '');
 
+    formData.amenities.forEach(amenity => propertyData.append('amenities', amenity.value));
 
     propertyData.append('price', formData.price || '');
     propertyData.append('location', formData.location || '');
     propertyData.append('images', formData.images || '');
-    // propertyData.append('video', formData.video || '');
-    // if (formData.images) {
-    //   Array.from(formData.images).forEach(image => propertyData.append('images', image));
-    // }
-    if (formData.video) {
-      propertyData.append('video', formData.video);
-    }
+    propertyData.append('video', formData.video || '');
     propertyData.append('size', formData.size || '');
     propertyData.append('land_area', formData.landArea || '');
-    propertyData.append('seller', user.id || '');  
+
+    propertyData.append('seller', user.id || '');
 
     try {
       if (category === 'Land') {
-        await createLandProperty(propertyData);
+        await updateLandProperty(id, propertyData);
       } else if (category === 'Apartment' || category === 'Villa') {
-        await createResidentialProperty(propertyData)
+        await updateResidentialProperty(id, propertyData);
       }
-      alert('Property created successfully!');
-      navigate('/listedproperties')
+      alert('Property updated successfully!');
+      navigate('/listedproperties');
     } catch (error) {
-      console.error('Failed to create property:', error);
-      setError('Failed to create property');
+      console.error('Failed to update property:', error);
+      setError('Failed to update property');
     } finally {
       setLoading(false);
     }
@@ -118,16 +112,7 @@ const PropertyForm = () => {
               placeholder="Select Amenities"
             />
             <input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Location" />
-            <input 
-              type="file" 
-              name="images" 
-              onChange={handleInputChange} 
-              accept="image/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload image" 
-              multiple
-              required 
-            />
+            <input type="file" name="images" onChange={handleInputChange} accept="image/*" className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Upload image" />
             <input type="file" name="video" onChange={handleInputChange} accept="video/*" className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Upload video" />
           </>
         );
@@ -140,7 +125,6 @@ const PropertyForm = () => {
             <input type="number" name="numBathrooms" value={formData.numBathrooms} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Number of Bathrooms" />
             <input type="text" name="size" value={formData.size} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Size in Square Feet" />
             <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Description in short"></textarea>
-
             <Select
               name="amenities"
               value={formData.amenities}
@@ -150,24 +134,8 @@ const PropertyForm = () => {
               className="w-full mb-4"
               placeholder="Select Amenities"
             />
-            <input 
-              type="file" 
-              name="images" 
-              onChange={handleInputChange} 
-              accept="image/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload image" 
-              multiple
-              required
-            />
-            <input 
-              type="file" 
-              name="video" 
-              onChange={handleInputChange} 
-              accept="video/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload video" 
-            />
+            <input type="file" name="images" onChange={handleInputChange} accept="image/*" className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Upload image" />
+            <input type="file" name="video" onChange={handleInputChange} accept="video/*" className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Upload video" />
           </>
         );
       case 'Villa':
@@ -179,7 +147,6 @@ const PropertyForm = () => {
             <input type="number" name="numBathrooms" value={formData.numBathrooms} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Number of Bathrooms" />
             <input type="text" name="size" value={formData.size} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Size in Square Feet" />
             <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Description in short"></textarea>
-
             <Select
               name="amenities"
               value={formData.amenities}
@@ -189,54 +156,30 @@ const PropertyForm = () => {
               className="w-full mb-4"
               placeholder="Select Amenities"
             />
-            <input type="text" name="landArea" value={formData.landArea} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Land Area" required/>
-            <input 
-              type="file" 
-              name="images" 
-              onChange={handleInputChange} 
-              accept="image/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload image" 
-              multiple
-              required
-            />
-            
-            <input 
-              type="file" 
-              name="video" 
-              onChange={handleInputChange} 
-              accept="video/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload video" 
-            />
+            <input type="file" name="images" onChange={handleInputChange} accept="image/*" className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Upload image" />
+            <input type="file" name="video" onChange={handleInputChange} accept="video/*" className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Upload video" />
           </>
         );
-     
       default:
         return null;
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="mb-4">
-        <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
-      </div>
-      <h1 className="text-xl font-bold mb-4">Enter the {category} details here..</h1>
-      <form className="w-full max-w-md space-y-4" onSubmit={handleSubmit}>
+    <div className="p-4">
+      <h1 className="text-xl font-bold mb-4">Edit Property</h1>
+      {error && <p className="text-red-500">{error}</p>}
+      <form onSubmit={handleSubmit}>
         {renderFormFields()}
-        {error && <p className="text-red-500">{error}</p>}
-        <div className="flex justify-between">
-          {/* <button type="button" className="px-4 py-2 bg-red-500 text-white rounded">CANCEL</button> */}
-          <button type="submit" className="px-4 py-2 bg-red-500 text-white rounded" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit'}
-          </button>
-          <button type="button" onClick={handleCancel} className="bg-gray-400 text-white px-4 py-2 rounded-md">Cancel</button>
-
-        </div>
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+          {loading ? 'Updating...' : 'Update Property'}
+        </button>
+        <button type="button" onClick={() => navigate('/listedproperties')} className="bg-gray-500 text-white px-4 py-2 rounded ml-2">
+          Cancel
+        </button>
       </form>
     </div>
   );
 };
 
-export default PropertyForm;
+export default EditProperty;

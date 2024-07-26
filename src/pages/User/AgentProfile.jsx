@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-// import 'react-toastify/dist/ReactToastify.css';
 import { format } from 'date-fns';
 import { Navigate, useNavigate } from 'react-router-dom';
 
@@ -38,7 +37,6 @@ const AgentProfile = () => {
 
 
   const handleProfileEditClick = () => {
-    console.log('Profile Image URL:', user.profile_image);
     setProfileEdit(true);
     setSecurity(false); 
   };
@@ -51,12 +49,13 @@ const AgentProfile = () => {
 
   const handleProfileUpdate = async (event) => {
     event.preventDefault();
-    console.log('Profile Image URL:', user.profile_image);
 
     const formData = new FormData(event.target);
     if (dateOfBirth) {
       formData.append('date_of_birth', format(dateOfBirth, 'yyyy-MM-dd'));
-    }    
+    }  
+    formData.append('profile_image', formData.profile_image || '');
+  
     try {
       await updateUserProfile(formData);
       toast.success('Profile updated successfully');
@@ -198,7 +197,7 @@ const handlePasswordChange = async (event) => {
           </div>
        </div>
        {profileEdit && (
-            <form onSubmit={handleProfileUpdate}> 
+            <form onSubmit={handleProfileUpdate} encType="multipart/form-data"> 
                 <div className="mb-4">
                   <h3 className="text-lg text-gray-500 font-semibold mb-2">Account Details</h3>
                     <label className="block text-gray-400 mb-1">Profile Name</label>
@@ -242,6 +241,7 @@ const handlePasswordChange = async (event) => {
                       <input
                         type="file"
                         name="profile_image"
+                        accept="image/jpeg,image/png,image/gif"
                         className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
                       />
                     </div>

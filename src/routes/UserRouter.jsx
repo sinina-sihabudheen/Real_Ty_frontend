@@ -11,6 +11,9 @@ import PropertyList from "../pages/User/PropertyList";
 import ForgotPassword from "../pages/User/ForgotPassword";
 import PropertyType from "../pages/Seller/PropertyType";
 import PropertyForm from "../pages/Seller/PropertyForm";
+import ListingPackages from "../pages/Seller/ListingPackages";
+import EditProperty from "../pages/Seller/EditProperty";
+import SinglePropertyDetails from "../pages/User/SinglePropertyDetails";
 
 function UserRouter() {
   return (
@@ -26,8 +29,9 @@ function UserRouter() {
         <Route path="/propertylist" element={<PropertyList />} />
         <Route path="/property_type" element={<PropertyType />} />
         <Route path="/property_form" element={<PropertyForm />} />
-
-
+        <Route path="/listing_package" element={<ListingPackages />} />
+        <Route path="/edit_property" element={<EditProperty />} />
+        <Route path="/single_property/:id/:category" element={<SinglePropertyDetails />} />
 
       </Route>
     </Routes>

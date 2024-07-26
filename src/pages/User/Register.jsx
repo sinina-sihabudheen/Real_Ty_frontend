@@ -53,11 +53,11 @@ const Register = () => {
           return;
         }
     
-        const usernameRegex = /^[a-zA-Z]*$/;
-        if (!usernameRegex.test(username)) {
-          toast.error('Username should only contain letters.');
-          return;
-        }
+        // const usernameRegex = /^[a-zA-Z]*$/;
+        // if (!usernameRegex.test(username)) {
+        //   toast.error('Username should only contain letters.');
+        //   return;
+        // }
     
         if (!validateEmail(email)) {
           toast.error('Invalid email format.');

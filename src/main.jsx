@@ -10,14 +10,17 @@ import { Toaster } from "sonner";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
+ 
     <ErrorBoundary>
-    <GoogleOAuthProvider clientId="614359146389-1ibea34vmh7al388n8jvcbtf330fenau.apps.googleusercontent.com">
-      <Provider store={store}>
-      <Toaster />
-        <App />
-      </Provider>
-    </GoogleOAuthProvider>
+      <GoogleOAuthProvider clientId="30022518210-qqkvm7mipcjg5v4onr4nmeksluep5qvb.apps.googleusercontent.com">
+        <Provider store={store}>
+        <Toaster />
+          <React.StrictMode>
+          <App />
+          </React.StrictMode>
+        </Provider>
+      </GoogleOAuthProvider>
     </ErrorBoundary>
-  </React.StrictMode>
+ 
 );
+

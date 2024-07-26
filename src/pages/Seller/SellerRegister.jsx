@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { handleFetchRegions, handleUpdateRole } from '../../utils/auth';
 
+
 const SellerRegister = ({ isBuyer }) => {
     const [agencyName, setAgencyName] = useState('');
     const [selectedRegions, setSelectedRegions] = useState([]);

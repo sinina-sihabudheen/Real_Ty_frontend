@@ -27,7 +27,7 @@ export const handleAdminLogin = async (email, password, dispatch, navigate) => {
     localStorage.setItem('refresh', refresh);
     localStorage.setItem('role', role);
     localStorage.setItem('adminUser', JSON.stringify(adminUser));
-    localStorage.setItem('admin', true); // Set isAdmin flag
+    localStorage.setItem('admin', true); 
 
 
     dispatch(adminLoginSuccess({ access, refresh, role, adminUser }));
