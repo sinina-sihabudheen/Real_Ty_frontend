@@ -23,15 +23,15 @@ const AdminHeader = () => {
 
   return (
     <div className="flex justify-between items-center mb-6">
-      <div className="flex items-center space-x-4">
+      <div className="flex w-full ml-10 items-center space-x-4">
         <input
           type="text"
           placeholder="Search here"
           className="p-2 border border-gray-300 rounded"
         />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded">Filter Period</button>
+        {/* <button className="bg-blue-500 text-white px-4 py-2 rounded">Filter Period</button> */}
       </div>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center mr-10 space-x-4">
         <span>Hello, {user.username}</span>
         <img src="/images/user.png" alt="Profile" className="h-10 w-10 rounded-full" />
       </div>

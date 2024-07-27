@@ -46,35 +46,51 @@ const AllUsers = () => {
         <div className='grid'>
         <AdminHeader />
        
-        <div className="w-3/4 bg-white">
-            <h2>All Users</h2>
-            <div className="p-4">
-            <table className="w-full bg-gray-100 table-auto border-collapse border border-gray-400">
+        <div className="container mx-auto">
+            <h2 className='text-xl font-bold mb-4'>All Users</h2>
+            <div className="p-4 overflow-x-auto">
+            <table className="min-w-full border border-gray-500">
                 <thead>        
                     <tr>
-                    <th className="border px-4 py-2">SL No.</th>
-                    <th className="border px-4 py-2">ID</th>
-                    <th className="border px-4 py-2">Username</th>
-                    <th className="border px-4 py-2">Email</th>
-                    <th className="border px-4 py-2">Actions</th>
+                    <th className="border border-gray-400  bg-gray-300 shadow-md px-4 py-2">ID</th>
+                    <th className="border border-gray-400  bg-gray-300 shadow-md px-4 py-2">SL No.</th>
+                    <th className="border border-gray-400  bg-gray-300 shadow-md px-4 py-2">Username</th>
+                    <th className="border border-gray-400  bg-gray-300 shadow-md px-4 py-2">Email</th>
+                    <th className="border border-gray-400  bg-gray-300 shadow-md px-4 py-2">Active</th>
+                    <th className="border border-gray-400  bg-gray-300 shadow-md px-4 py-2">View</th>
+
                     </tr>
                 </thead>
                 <tbody>
                 {users.map((user, index) => (
-                    <tr key={index}>
-                        <td className="border px-4 py-2">{index+1}</td>
-                        <td className="border px-4 py-2">{user.id}</td>
-                        <td className="border px-4 py-2">{user.username}</td>
-                        <td className="border px-4 py-2">{user.email}</td>
-                        <td className="border px-4 py-2">                  
+                    <tr key={index} className="border-t">
+                        <td className="border border-gray-400  bg-gray-200 shadow-md px-4 py-2">{index+1}</td>
+                        <td className="border border-gray-400  bg-gray-200 shadow-md px-4 py-2">{user.id}</td>
+                        <td className="border border-gray-400  bg-gray-200 shadow-md px-4 py-2">{user.username}</td>
+                        <td className="border border-gray-400  bg-gray-200 shadow-md px-4 py-2">{user.email}</td>
+                        {/* <td className="border px-4 py-2">                  
                             
-                            <button className="bg-blue-400 w-full hover:bg-blue-300 text-white font-bold py-2 px-4 rounded" >
+                            <button className="bg-blue-500 text-white px-4 py-1 rounded" >
                             Edit
                             </button>
                             <button className="bg-red-400 w-full hover:bg-red-300 text-white font-bold py-2 px-4 rounded" >
                             Delete
                             </button>                 
                         
+                        </td> */}
+                        <td className="px-4 py-2 border-gray-400  bg-gray-200 shadow-md border">
+                            <span
+                                className={`px-2 py-1 rounded ${
+                                user.is_active ? 'bg-green-400 text-green-800' : 'bg-red-400 text-red-800 '
+                                }`}
+                            >
+                                {user.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td className="px-4 border-gray-400  bg-gray-200 shadow-md py-2 border">
+                            <button className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 rounded">
+                                View More
+                            </button>
                         </td>
                     </tr>
                 
@@ -88,8 +104,4 @@ const AllUsers = () => {
   )
 }
 export default AllUsers;
-
-
-
-
 

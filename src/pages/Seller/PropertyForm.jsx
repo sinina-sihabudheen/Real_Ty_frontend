@@ -32,15 +32,49 @@ const PropertyForm = () => {
     handleFetchAmenity(setAmenitiesOptions);
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-   
-    setFormData({
-      ...formData,
-      [name]: files ? files[0] : value,
-    });
-  };
   
+
+  // const handleInputChange = (e) => {
+  //   const { name, files } = e.target;
+  
+  //   if (name === 'images') {
+  //     setFormData({
+  //       ...formData,
+  //       [name]: files,  
+  //     });
+  //   } else {
+  //     setFormData({
+  //       ...formData,
+  //       [name]: files ? files[0] : e.target.value,  
+  //     });
+  //   }
+  // };
+
+  const handleInputChange = (e) => {
+    const { name, files } = e.target;
+    if (name === 'images') {
+      setFormData({
+        ...formData,
+        images: [...formData.images, ...files]
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: files ? files[0] : e.target.value,
+      });
+    }
+  };
+
+  const handleDeleteImage = (index) => {
+    const newImages = [...formData.images];
+    newImages.splice(index, 1);
+    setFormData({ ...formData, images: newImages });
+  };
+
+  const handleDeleteVideo = () => {
+    setFormData({ ...formData, video: null });
+  };
+
   const handleCancel = () => {
   navigate('/agentprofile') 
   };
@@ -61,33 +95,33 @@ const PropertyForm = () => {
     propertyData.append('category', category);  
     propertyData.append('area', formData.area || '');  
     propertyData.append('property_type', category || '');  
-
     propertyData.append('description', formData.description || '');  
     propertyData.append('num_rooms', formData.numRooms || '');  
     propertyData.append('num_bathrooms', formData.numBathrooms || '');  
-
-    // formData.amenities.forEach(amenity => propertyData.append('amenities', amenity.value)); 
-    formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
-
-
     propertyData.append('price', formData.price || '');
     propertyData.append('location', formData.location || '');
-    propertyData.append('images', formData.images || '');
-    // propertyData.append('video', formData.video || '');
-    // if (formData.images) {
-    //   Array.from(formData.images).forEach(image => propertyData.append('images', image));
+    propertyData.append('size', formData.size || '');
+    propertyData.append('land_area', formData.landArea || '');
+    propertyData.append('seller', user.id || '');   
+
+    formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
+    formData.images.forEach(image => propertyData.append('new_images', image));
+    
+    // if (formData.images.length > 0) {
+    //   Array.from(formData.images).forEach(image => propertyData.append('new_images', image));
     // }
+
     if (formData.video) {
       propertyData.append('video', formData.video);
     }
-    propertyData.append('size', formData.size || '');
-    propertyData.append('land_area', formData.landArea || '');
-    propertyData.append('seller', user.id || '');  
-
+    
     try {
       if (category === 'Land') {
+        console.log("DATA ",propertyData);
+
         await createLandProperty(propertyData);
       } else if (category === 'Apartment' || category === 'Villa') {
+        console.log("DATA ",propertyData);
         await createResidentialProperty(propertyData)
       }
       alert('Property created successfully!');
@@ -127,8 +161,46 @@ const PropertyForm = () => {
               placeholder="Upload image" 
               multiple
               required 
+            />            
+            <input 
+              type="file" 
+              name="video" 
+              onChange={handleInputChange} 
+              accept="video/*" 
+              className="w-full px-4 py-2 border border-gray-300 rounded" 
+              placeholder="Upload video" 
             />
-            <input type="file" name="video" onChange={handleInputChange} accept="video/*" className="w-full px-4 py-2 border border-gray-300 rounded" placeholder="Upload video" />
+            {formData.images && formData.images.map((image, index) => (
+              <div key={index} className="relative inline-block mr-2">
+                <img src={URL.createObjectURL(image)} alt={`preview ${index}`} className="w-16 h-16 object-cover" />
+                <button
+                  type="button"
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
+                  onClick={() => handleDeleteImage(index)}
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+            {formData.video && (
+              <div className="relative inline-block mt-4">
+                <video
+                  width="320"
+                  height="240"
+                  controls
+                >
+                  <source src={URL.createObjectURL(formData.video)} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <button
+                  type="button"
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
+                  onClick={handleDeleteVideo}
+                >
+                  &times;
+                </button>
+              </div>
+            )}
           </>
         );
       case 'Apartment':
@@ -168,6 +240,7 @@ const PropertyForm = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded" 
               placeholder="Upload video" 
             />
+           
           </>
         );
       case 'Villa':
@@ -209,6 +282,7 @@ const PropertyForm = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded" 
               placeholder="Upload video" 
             />
+           
           </>
         );
      

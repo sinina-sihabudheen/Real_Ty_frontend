@@ -30,7 +30,7 @@ function UserRouter() {
         <Route path="/property_type" element={<PropertyType />} />
         <Route path="/property_form" element={<PropertyForm />} />
         <Route path="/listing_package" element={<ListingPackages />} />
-        <Route path="/edit_property" element={<EditProperty />} />
+        <Route path="/edit_property/:id/:category" element={<EditProperty />} />
         <Route path="/single_property/:id/:category" element={<SinglePropertyDetails />} />
 
       </Route>

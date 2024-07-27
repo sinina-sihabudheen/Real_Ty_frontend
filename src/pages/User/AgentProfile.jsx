@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { handleFetchUserData, changeUserPassword, updateUserProfile, handleUpdateRole} from '../../utils/auth';
@@ -35,6 +35,12 @@ const AgentProfile = () => {
     }
   }, [user]);
 
+
+    const fileInputRef = useRef(null);
+  
+    const handleClick = () => {
+      fileInputRef.current.click();
+    };
 
   const handleProfileEditClick = () => {
     setProfileEdit(true);
@@ -171,15 +177,21 @@ const handlePasswordChange = async (event) => {
                 <img 
                   src={user.profile_image? user.profile_image : '/images/user.png'}                  
                   alt="Profile" 
-                  className="w-16 h-16 rounded-full" 
+                  className="w-20 h-20 rounded-full" 
                 />
                
                 <div>
                   <h3 className="text-lg text-gray-600 font-semibold uppercase">{user.username}</h3>
                   <p className="text-gray-500">Email: {user.email}</p>
                   {/* <p className="text-gray-500">DOB: {user.date_of_birth}</p> */}
-                  <p className="text-gray-500 capitalize">Addresss: {user.address}</p>
-                  <p className="text-gray-500">Contact Number: +91 {user.contact_number}</p>
+                  <p className="text-gray-500 capitalize">Addresss: {user.address ? user.address : null}</p>
+                  <p className="text-gray-500">Contact Number: +91 {user.contact_number ? user.contact_number : null}</p>
+                  {/* {user.is_seller   &&    
+                  <div>           
+                  <p className="text-gray-500">Agency Name: {user.agency_name }</p>
+                  <p className="text-gray-500">Regions Added: {user.region}</p>
+                  </div>
+                  } */}
                 </div>
                 {user.is_seller ? (
                   <div className='flex space-x-8'>
@@ -235,15 +247,54 @@ const handlePasswordChange = async (event) => {
                         defaultValue={user.contact_number} 
                         className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
                     </div>
+               
+                    {/* {user.is_seller   &&    
+                      <div>  
+                        <label className="block text-gray-400 mb-1">Agency Name</label>
+                        <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
+                          <input 
+                            type="text" 
+                            name="agency_name"
+                            defaultValue={user.agency_name} 
+                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
+                        </div>
+
+                        <label className="block text-gray-400 mb-1">Regions</label>
+                        <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
+                          <input 
+                            type="text" 
+                            name="regions"
+                            defaultValue={user.regions} 
+                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
+                        </div>
+                      </div>
+                    }        */}
 
                     <label className="block text-gray-400 mb-1">Profile Image</label>
-                    <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">
+                    {/* <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">
                       <input
                         type="file"
                         name="profile_image"
                         accept="image/jpeg,image/png,image/gif"
-                        className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
+                        className="w-full px-4 py-2 border-white focus:outline-none focus:border-blue-400"
                       />
+                    </div> */}
+                    <div className="file-upload-container mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">
+                      <input
+                        type="file"
+                        name="profile_image"
+                        accept="image/jpeg,image/png,image/gif"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }} 
+                        onChange={(e) => console.log(e.target.files[0])} 
+                      />
+                      <button
+                        type="button"
+                        className="custom-file-upload"
+                        onClick={handleClick}
+                      >
+                        Choose File
+                      </button>
                     </div>
                 </div>
                 <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">Apply Changes</button>

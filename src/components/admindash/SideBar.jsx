@@ -4,15 +4,16 @@ import { Link } from 'react-router-dom';
 const Sidebar = () => {
 
   return (
-    <div className="w-1/4 bg-white p-4">
+    <div className="w-1/4 bg-white border border-gray-200 shadow-md p-4">
         <div className="mb-6">
-            <img src="/images/REAL-TY.png" alt="Logo" className="h-12 mx-auto" />
+            <img src="/images/REAL-TY.png" alt="Logo" className="h-15 mx-auto" />
         </div>
         <nav className="space-y-4">
             <a href="" className="block p-2 bg-green-200 rounded">Dashboard</a>
             <p className="text-gray-500">
                 <Link to="" className="text-gray-500 hover:text-blue-500">Properties</Link>
-            </p>        <p className="text-gray-500">
+            </p>        
+            <p className="text-gray-500">
                 <Link to="/admin/users" className="text-gray-500 hover:text-blue-500">All Users</Link>
             </p>
             <p className="text-gray-500">

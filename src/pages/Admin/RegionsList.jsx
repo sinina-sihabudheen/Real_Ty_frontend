@@ -25,31 +25,30 @@ const RegionsList = () => {
         <div className="w-3/4 bg-white">
             <h2>All Regions</h2>
             <div className="p-4">
-            <table className="w-full bg-gray-100 table-auto border-collapse border border-gray-400">
+            <table className="w-full  table-auto border-collapse border border-gray-400">
                 <thead>        
                     <tr>
-                        <th className="border px-4 py-2">SL No.</th>
-                        <th className="border px-4 py-2">ID</th>
-                        <th className="border px-4 py-2">Region Name</th>
-                        <th className="border px-4 py-2">Actions</th>
+                        <th className="border bg-gray-300 border-gray-400 shadow-md px-4 py-2">SL No.</th>
+                        <th className="border bg-gray-300 border-gray-400 shadow-md px-4 py-2">ID</th>
+                        <th className="border bg-gray-300 border-gray-400 shadow-md px-4 py-2">Region Name</th>
+                        <th className="border bg-gray-300 border-gray-400 shadow-md px-4 py-2">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 {regions.map((region, index) => ( 
                 <tr key={index}>                       
-                    <td className="border px-4 py-2">{index+1}</td>
-                    <td className="border px-4 py-2">{region.id}</td>
-                    <td className="border px-4 py-2">{region.name}</td>
+                    <td className="border bg-gray-200 border-gray-400 shadow-md px-4 py-2">{index+1}</td>
+                    <td className="border bg-gray-200 border-gray-400 shadow-md px-4 py-2">{region.id}</td>
+                    <td className="border bg-gray-200 border-gray-400 shadow-md px-4 py-2">{region.name}</td>
                  
 
-                    <td className="border px-4 py-2">             
-                        <button className="bg-red-400 w-full hover:bg-red-300 text-white font-bold py-2 px-4 rounded" >
+                    <td className="border flex space-x-4 bg-gray-200 border-gray-300 shadow-md px-4 py-2">             
+                        <button className="bg-red-400 w-full hover:bg-red-600 text-white font-bold py-2 px-4 rounded" >
                             Delete
                         </button>    
-                        <button className="bg-blue-400 w-full hover:bg-red-300 text-white font-bold py-2 px-4 rounded" >
+                        <button className="bg-blue-400 w-full hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" >
                             Block
-                        </button>               
-                        
+                        </button>            
                     </td>
                 </tr>
                 
