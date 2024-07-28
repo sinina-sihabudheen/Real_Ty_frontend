@@ -1,5 +1,7 @@
 
-import { loginAdmin, fetchRegions, fetchUserData, fetchUsersData, fetchBuyersData, fetchSellersData } from './api';
+import { loginAdmin, fetchRegions, fetchUserData, 
+  fetchUsersData, fetchBuyersData, fetchSellersData,
+  fetchResidentsList, fetchLandsList } from './api';
 import { adminLoginSuccess } from '../redux/adminAuthSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
@@ -100,6 +102,32 @@ export const handleFetchBuyersData = async (setUser, setIsLoading, setError) => 
   } catch (error) {
     setError('Error fetching user data');
     setIsLoading(false);
+  }
+};
+
+export const handleFetchLandsList = async (setLands, setIsLoading, setError) => {
+  try {
+    const response = await fetchLandsList();
+    console.log('lands data:', response.data);
+    setLands(response.data);
+    setIsLoading(false);
+  } catch (error) {
+    setError('Error fetching user data');
+    setIsLoading(false);
+  }
+};
+
+export const handleFetchResidentsList = async (setProperties) => {
+  try {
+    const response = await fetchResidentsList();
+    console.log('residents data:', response.data);
+    setProperties(response.data);
+    // setIsLoading(false);
+  } catch (error) {
+    // setError('Error fetching user data');
+    // setIsLoading(false);
+    console.error('Error fetching seller residents :', error);
+
   }
 };
 

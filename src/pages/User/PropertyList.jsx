@@ -1,34 +1,79 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar';
 import Filter from '../../components/listing/Filter';
 import Search from '../../components/listing/Search';
 import Footer from '../../components/Footer';
+import { handleFetchLandsList, handleFetchResidentsList } from '../../utils/adminAuth';
+import { Link } from 'react-router-dom';
 
 
-
+const standardizeImage = (url, width, height) => {
+    return `${url}?w=${width}&h=${height}&fit=crop`;
+  };
+  
 const PropertyList = () => {
-    const villas = [
-        { id: 1, price: '30 Lakhs', details: '2 Bedrooms, 3 Bathrooms', location: 'Malappuram', image: 'public/images/home1.jpg' },
-        { id: 2, price: '80 Lakhs', details: '5 Bedrooms, 5 Bathrooms', location: 'Kozhikode', image: 'public/images/home1.jpg' },
-        { id: 3, price: '40 Lakhs', details: '3 Bedrooms, 3 Bathrooms', location: 'Malappuram', image: 'public/images/home3.jpg' },
+    const [villas, setVillas] = useState([]);
+    const [apartments, setApartments] =useState([]);
+    const [lands, setLands] = useState([])
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    useEffect(() => {
+        const fetchData = () => {
+            try {
+                handleFetchLandsList(setLands, setIsLoading, setError);
+                handleFetchResidentsList((residents) => {
+                    setVillas(residents.filter(r => r.property_type === 'Villa'));
+                    setApartments(residents.filter(r => r.property_type === 'Apartment'));
+                  });
+                console.log("VILLAS:",villas);
+                console.log("APARTMENTS:",apartments);
 
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setError('Error fetching user data');
+                setIsLoading(false);
+            }
+        };
 
-      ];
+        fetchData();
+    }, []);
+
+    const renderFirstImage = (images) => {
+        if (images.length > 0) {
+          return (
+            <img
+              src={standardizeImage(images[0].image, 100, 100)}
+              alt="Property"
+              className="w-full h-48 object-cover rounded"
+            />
+          );
+        }
+        return null;
+      };
+
+      const renderProperties = (properties) => {
+        return properties.map((property) => (
+          <div key={property.id} className="p-4 bg-white rounded shadow-md w-80">
+            <Link to={`/single_property/${property.id}/${property.property_type || 'Land'}`}>
+              {renderFirstImage(property.images)}
+              <h3 className="mt-2 font-semibold">{Math.round(property.price)} Lakhs</h3>
+              <h3 className="mt-2 font-semibold">{Math.round(property.size || property.area)} {property.property_type ? 'square feet' : 'cents'}</h3>
+              <p>{property.location}</p>
+              <p>{property.seller.user.username}</p>
+
+            </Link>
+          </div>
+        ));
+      };
     
-      const apartments = [
-        { id: 1, price: '55 Lakhs', details: '3 Bedrooms, 4 Bathrooms', location: 'Malappuram', image: 'public/images/apart2.jpg' },
-        { id: 2, price: '75 Lakhs', details: '3 Bedrooms, 6 Bathrooms', location: 'Kozhikode', image: 'public/images/apart3.jpeg' },
-        { id: 3, price: '50 Lakhs', details: '2 Bedrooms, 3 Bathrooms', location: 'Kozhikode', image: 'public/images/apart2.jpg' },
 
-      ];
-    
-      const lands = [
-        { id: 1, size: '5 acres', location: 'Malappuram', image: 'public/images/land1.jpeg' },
-        { id: 2, size: '10 acres', location: 'Kozhikode', image: 'public/images/land3.jpeg' },
-        { id: 3, size: '10 acres', location: 'Kozhikode', image: 'public/images/land3.jpeg' },
+    if (isLoading) {
+        return <div>Loading...</div>;
+        }
 
-    
-      ];
+    if (error) {
+        return <div>{error}</div>;
+        }
   return (
     <>
     <Navbar />
@@ -37,46 +82,37 @@ const PropertyList = () => {
     <div className='flex'>
     <Filter />
     <div>
-        <div>PropertyList</div>
         <div className="w-3/4 p-4">
-        <section className="mb-6">
-            <h2 className="font-bold mb-4">Newly Added Villas</h2>
-            <div className="grid grid-cols-3 gap-4">
-            {villas.map((villa) => (
-            <div key={villa.id} className="p-4 bg-white rounded shadow-md">
-                <img src={villa.image} alt={villa.details} className="w-full h-32 object-cover rounded" />
-                <h3 className="mt-2 font-semibold">{villa.price}</h3>
-                <p>{villa.details}</p>
-                <p>{villa.location}</p>
-            </div>
-            ))}
-            </div>
-        </section>
+        {villas.length > 0 && (
+            <section className="mb-6">
+                <h2 className="font-bold mb-4">Newly Added Villas</h2>
+                
+                <div className="grid grid-cols-3 gap-4">
+                    {renderProperties(villas)}
+                </div>
+                    
+            </section>
+        )}
+        {apartments.length > 0 && (
         <section className="mb-6">
             <h2 className="font-bold mb-4">Newly Added Apartments</h2>
+            
             <div className="grid grid-cols-3 gap-4">
-            {apartments.map((apartment) => (
-            <div key={apartment.id} className="p-4 bg-white rounded shadow-md">
-                <img src={apartment.image} alt={apartment.details} className="w-full h-32 object-cover rounded" />
-                <h3 className="mt-2 font-semibold">{apartment.price}</h3>
-                <p>{apartment.details}</p>
-                <p>{apartment.location}</p>
+                {renderProperties(apartments)}
             </div>
-            ))}
-            </div>
+          
         </section>
+        )}
+        {lands.length > 0 && (
         <section className="mb-6">
             <h2 className="font-bold mb-4">Newly Added Lands</h2>
+            
             <div className="grid grid-cols-3 gap-4">
-            {lands.map((land) => (
-            <div key={land.id} className="p-4 bg-white rounded shadow-md">
-                <img src={land.image} alt={land.size} className="w-full h-32 object-cover rounded" />
-                <h3 className="mt-2 font-semibold">{land.size}</h3>
-                <p>{land.location}</p>
+                {renderProperties(lands)}
             </div>
-            ))}
-            </div>
-        </section>     
+            
+        </section> 
+        )}    
         </div>
         </div>
         </div>

@@ -248,6 +248,16 @@ export const fetchSellerResidents = () => {
   return api.get('api/seller-residents');
 };
 
+
+export const fetchResidentsList = () => {
+  return api.get('api/residentslist');
+};
+
+
+export const fetchLandsList = () => {
+  return api.get('api/landslist');
+};
+
 // Get the details of a specific land property
 export const getLandPropertyDetails = () => {
   return api.get(`/api/lands/${propertyId}/`);

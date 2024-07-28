@@ -7,6 +7,8 @@ import AllUsers from "../pages/Admin/AllUsers";
 import SellersList from "../pages/Admin/SellersList";
 import BuyersList from "../pages/Admin/BuyersList";
 import RegionsList from "../pages/Admin/RegionsList";
+import PropertyCategory from "../pages/Admin/PropertyCategory";
+import PropertyLists from "../pages/Admin/PropertyLists";
 
 const AdminRouter = () => {
   return (
@@ -18,6 +20,8 @@ const AdminRouter = () => {
         <Route path="/sellers" element={<SellersList />} />
         <Route path="/buyers" element={<BuyersList />} />
         <Route path="/regions" element={< RegionsList/>} />
+        <Route path="/propertycategory" element={< PropertyCategory/>} />
+        <Route path="/propertylist" element={<PropertyLists />} />
         <Route path="*" element={<Navigate to="/admin/adminhomepage" />} />
       </Route>
     </Routes>
