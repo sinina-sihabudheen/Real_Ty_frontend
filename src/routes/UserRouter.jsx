@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import Login from "../pages/User/Login";
 import Register from "../pages/User/Register";
 import Home from "../pages/User/Home";
-import AgentProfile from "../pages/User/AgentProfile";
 import UserAuth from "../auth/UserAuth";
 import SellerRegister from "../pages/Seller/SellerRegister";
 import { ListedProperties } from "../pages/Seller/ListedProperties";
@@ -14,6 +13,9 @@ import PropertyForm from "../pages/Seller/PropertyForm";
 import ListingPackages from "../pages/Seller/ListingPackages";
 import EditProperty from "../pages/Seller/EditProperty";
 import SinglePropertyDetails from "../pages/User/SinglePropertyDetails";
+import SubscriptionPage from "../components/subscriptions/Stripe";
+import UserProfile from "../pages/User/UserProfile";
+import SellerProfile from "../pages/User/SellerProfile";
 
 function UserRouter() {
   return (
@@ -23,7 +25,7 @@ function UserRouter() {
       <Route path="/register" element={<Register />} />
       <Route path="/forgotpassword" element={<ForgotPassword />} />
       <Route element={<UserAuth />}>
-        <Route path="/agentprofile" element={<AgentProfile />} />
+        <Route path="/userprofile" element={<UserProfile />} />
         <Route path="/sellerregister" element={<SellerRegister isBuyer />} />
         <Route path="/listedproperties" element={<ListedProperties isSeller />} />
         <Route path="/propertylist" element={<PropertyList />} />
@@ -32,6 +34,9 @@ function UserRouter() {
         <Route path="/listing_package" element={<ListingPackages />} />
         <Route path="/edit_property/:id/:category" element={<EditProperty />} />
         <Route path="/single_property/:id/:category" element={<SinglePropertyDetails />} />
+        <Route path="/subscription" element={<SubscriptionPage />} />
+        <Route path="/sellerprofile/:sellerId" element={<SellerProfile />} />
+
 
       </Route>
     </Routes>

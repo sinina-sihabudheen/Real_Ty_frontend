@@ -21,7 +21,7 @@ const AdminRouter = () => {
         <Route path="/buyers" element={<BuyersList />} />
         <Route path="/regions" element={< RegionsList/>} />
         <Route path="/propertycategory" element={< PropertyCategory/>} />
-        <Route path="/propertylist" element={<PropertyLists />} />
+        <Route path="/propertylist/:category" element={<PropertyLists />} />
         <Route path="*" element={<Navigate to="/admin/adminhomepage" />} />
       </Route>
     </Routes>

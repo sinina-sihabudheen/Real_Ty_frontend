@@ -3,9 +3,10 @@ import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
 import { IoMdClose } from 'react-icons/io';
 import { GoogleLogin } from '@react-oauth/google';
-import { handleRegister, handleVerifyOtp, handleResendOtp, handleGoogleRegister, handleFetchRegions } from '../../utils/auth';
+import { handleRegister, handleVerifyOtp, handleResendOtp,handleGoogleLogin, handleFetchRegions } from '../../utils/auth';
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 
 const Register = () => {
    
@@ -24,9 +25,13 @@ const Register = () => {
     const [otpExpired, setOtpExpired] = useState(false);
     const [passwordView,setPasswordView] = useState(false)
     const [confirmPasswordView,setConfirmPasswordView] = useState(false)
+    const [errors, setErrors] = useState({});
+    const [message, setMessage] = useState('');
+    const [timer, setTimer] = useState(60);
 
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     
     useEffect(() => {
@@ -35,16 +40,36 @@ const Register = () => {
 
     useEffect(() => {
         if (otpSent) {
+            const otpExpiration = setInterval(() => {
+                setTimer(prevTimer => prevTimer - 1);
+              }, 1000);
+
             const otpExpiryTimer = setTimeout(() => {
                 setOtpExpired(true);
                 toast.error('OTP has expired.');
+                clearInterval(otpExpiryTimer);
+
             }, 60000); //300000 for 5minutes
 
-            return () => clearTimeout(otpExpiryTimer);
+            return () => {
+                clearInterval(otpExpiration);
+                clearTimeout(otpExpiryTimer);
+
+            }
         }
     }, [otpSent]);
 
-   
+    const handleGAuth = async (credentialResponse)=>{
+        // const response = await googleLoginUser(token);
+        try{
+            console.log('Credential response:', credentialResponse);
+            const response = await handleGoogleLogin(credentialResponse, dispatch, navigate);
+        }catch (error) {
+            console.error('Google login failed', error);
+            toast.error('Google Login Failed: Please try again');
+          }
+        };
+      
     const handleRegisterSubmit = (e) => {
         e.preventDefault();
     
@@ -52,12 +77,6 @@ const Register = () => {
           toast.error('All fields are required.');
           return;
         }
-    
-        // const usernameRegex = /^[a-zA-Z]*$/;
-        // if (!usernameRegex.test(username)) {
-        //   toast.error('Username should only contain letters.');
-        //   return;
-        // }
     
         if (!validateEmail(email)) {
           toast.error('Invalid email format.');
@@ -74,7 +93,7 @@ const Register = () => {
           return;
         }
     
-        const contactNumberRegex = /^[56789]\d{9}$/;
+        const contactNumberRegex = /^[6789]\d{9}$/;
         if (!contactNumberRegex.test(contactNumber)) {
           let errorMessage = '';
     
@@ -82,11 +101,11 @@ const Register = () => {
             errorMessage += 'Contact number should be 10 digits long.';
           }
     
-          if (!/^[56789]/.test(contactNumber)) {
+          if (!/^[6789]/.test(contactNumber)) {
             if (errorMessage !== '') {
               errorMessage += ' ';
             }
-            errorMessage += 'Contact number should start with 5, 6, 7, 8, or 9.';
+            errorMessage += 'Contact number should start with 6, 7, 8, or 9.';
           }
     
           toast.error(errorMessage);
@@ -107,8 +126,12 @@ const Register = () => {
           postData.agency_name = agencyName;
           postData.regions = selectedRegions.map(region => region.id);
         }
-    
-        handleRegister(postData, setOtpSent, setOtpExpired);
+        handleRegister(postData, setOtpSent, setOtpExpired, setErrors);
+        setTimer(60); 
+        // if (errors){
+        //     toast.error(errors)
+        // }
+
       };
 
 
@@ -143,6 +166,7 @@ const Register = () => {
                             required
                         />
                     </div>
+                    {/* {errors.username && <p className="text-red-500 text-sm">{errors.username.join(' ')}</p>} */}
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
                     <input
                         type="email"
@@ -153,6 +177,7 @@ const Register = () => {
                         required
                     />
                     </div>
+                    {errors.email && <p className="text-red-500 text-sm">{errors.email.join(' ')}</p>}
 
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
 
@@ -169,6 +194,8 @@ const Register = () => {
                         </div>
                        
                     </div>
+                    {errors.password && <p className="text-red-500 text-sm">{errors.password.join(' ')}</p>}
+
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
 
                         <input
@@ -184,6 +211,7 @@ const Register = () => {
                         </div>
                        
                     </div>
+                    {errors.confirm_password && <p className="text-red-500 text-sm">{errors.confirm_password.join(' ')}</p>}    
 
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
                         <input
@@ -195,6 +223,8 @@ const Register = () => {
                             required
                         />
                     </div>
+                    {errors.address && <p className="text-red-500 text-sm">{errors.address.join(' ')}</p>}
+
                     <div className="mb-4 flex items-center border rounded-md px-4 py-2">
                         <input
                             type="text"
@@ -205,15 +235,24 @@ const Register = () => {
                             required
                         />
                     </div>
+                    {errors.contact_number && <p className="text-red-500 text-sm">{errors.contact_number.join(' ')}</p>}
+
                      <div className="mb-4 flex items-center">
-                        <label className="mr-4">
-                            Register as Seller:
+                        <div>
+                        <label className="mr-4 text-gray-500">
+                            Register as Seller
+                        </label>
+                        </div>
+                        <div>
                             <input
                                 type="checkbox"
+                                className='border-gray-600 rounded'
                                 checked={isSeller}
                                 onChange={(e) => setIsSeller(e.target.checked)}
                             />
-                        </label>
+
+                       
+                        </div>
                     </div>
                     {isSeller && (
                         <div>
@@ -226,9 +265,15 @@ const Register = () => {
                                     onChange={(e) => setAgencyName(e.target.value)}
                                 />
                             </div>
-                            <div className="mb-4 flex items-center border rounded-md px-4 py-2">
+                            {errors.agency_name && <p className="text-red-500 text-sm">{errors.agency_name.join(' ')}</p>}
+
+                            <div className="mb-4 grid items-center border rounded-md px-4 py-2">
+                                <label className="mr-4 text-gray-500">
+                                    Select Regions to add your list
+                                </label>
                                 <select
                                     multiple
+                                    className='border-gray-300 text-gray-500 rounded'
                                     value={selectedRegions.map(region => region.id)}
                                     onChange={handleRegionChange}
                                 >
@@ -237,6 +282,8 @@ const Register = () => {
                                     ))}
                                 </select>
                             </div>
+                            {errors.regions && <p className="text-red-500 text-sm">{errors.regions.join(' ')}</p>}
+
                         </div>                   
                         
                     )}
@@ -249,13 +296,16 @@ const Register = () => {
                     <span className="text-gray-500">OR</span>
                     <div className="border-t border-gray-300 flex-grow ml-3"></div>
                 </div>
-                <div className="flex flex-col space-y-2">
+                <div>
                     <GoogleLogin
-                        onSuccess={credentialResponse => handleGoogleRegister(credentialResponse)}
+                        onSuccess={(credentialResponse) => {
+                            handleGAuth(credentialResponse)
+                        }}
                         onError={() => {
-                        console.log('Registration Failed');
+                        console.log("Login Failed");
                         }}
                     />
+                    
                 </div>
                 <div className="text-center mt-4">
                     <p className="text-gray-500">
@@ -291,6 +341,7 @@ const Register = () => {
                                         </div> 
                                         <div className="flex flex-col space-y-5">
                                             <div>
+
                                                 <button type='submit' className="flex flex-row items-center justify-center text-center w-full border rounded-xl outline-none py-5 bg-blue-500 border-none text-white text-sm shadow-sm">
                                                     Verify Account
                                                 </button>
@@ -300,8 +351,9 @@ const Register = () => {
                                 </form>
                                 {otpExpired && (
                                 <div className="text-center mt-4">
+                                    <p className="text-red-500">OTP expires in {timer} seconds</p>
+
                                     <button 
-                                    // onClick={handleResendOtp} 
                                     onClick={() => handleResendOtp(email, setOtpExpired, setOtp)}
 
                                     className="bg-red-400 text-white px-4 py-2 rounded-md">

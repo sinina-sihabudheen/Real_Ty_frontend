@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { useSelector } from 'react-redux';
 import { createLandProperty, createResidentialProperty } from '../../utils/api';
-import { handleFetchAmenity } from '../../utils/auth'; 
+import { handleFetchAmenity, handleCheckSubscriptionStatus } from '../../utils/auth'; 
 
 const PropertyForm = () => {
   const location = useLocation();
@@ -27,28 +27,27 @@ const PropertyForm = () => {
   const [amenitiesOptions, setAmenitiesOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
+  const [listingCount, setListingCount] = useState(0); 
+  const [daysLeft, setDaysLeft] = useState(0);
+  const [subscriptionType, setSubscriptionType] = useState(null);
+  const [paymentPlan, setPaymentPlan] = useState('free');
+
+
 
   useEffect(() => {
     handleFetchAmenity(setAmenitiesOptions);
   }, []);
 
-  
+  useEffect(() => {
+    handleCheckSubscriptionStatus(user.id, setIsSubscribed, 
+      setSubscriptionExpired, setListingCount, setDaysLeft, 
+      setSubscriptionType, setPaymentPlan);
 
-  // const handleInputChange = (e) => {
-  //   const { name, files } = e.target;
-  
-  //   if (name === 'images') {
-  //     setFormData({
-  //       ...formData,
-  //       [name]: files,  
-  //     });
-  //   } else {
-  //     setFormData({
-  //       ...formData,
-  //       [name]: files ? files[0] : e.target.value,  
-  //     });
-  //   }
-  // };
+  }, [user.id]);
+
+  console.log("SUBSCRIBED",isSubscribed);
 
   const handleInputChange = (e) => {
     const { name, files } = e.target;
@@ -90,6 +89,8 @@ const PropertyForm = () => {
     setLoading(true);
     setError('');
 
+    
+
     const propertyData = new FormData();
    
     propertyData.append('category', category);  
@@ -116,6 +117,7 @@ const PropertyForm = () => {
     }
     
     try {
+    
       if (category === 'Land') {
         console.log("DATA ",propertyData);
 
@@ -290,13 +292,32 @@ const PropertyForm = () => {
         return null;
     }
   };
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
+  if (!isSubscribed || subscriptionExpired || listingCount>=5) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="mb-4">
         <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
       </div>
-      <h1 className="text-xl font-bold mb-4">Enter the {category} details here..</h1>
+      <h1 className="text-xl font-bold mb-4">Subscription Status</h1>
+      <p>Your subscription has expired or you are not subscribed. Please subscribe to continue listing properties.</p>
+      <p>Listing count: {listingCount}</p>
+      <p>Days Left: {daysLeft}</p>
+
+
+      <a href="/listing_package" className="text-blue-500">Subscribe now</a>
+    </div>
+  );
+}
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="mb-4">
+        <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
+      </div>
+      <h1 className="text-xl font-bold mb-4">Enter the {category} details here</h1>
       <form className="w-full max-w-md space-y-4" onSubmit={handleSubmit}>
         {renderFormFields()}
         {error && <p className="text-red-500">{error}</p>}
@@ -309,6 +330,7 @@ const PropertyForm = () => {
 
         </div>
       </form>
+      
     </div>
   );
 };

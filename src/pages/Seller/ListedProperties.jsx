@@ -1,15 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import { handleFetchSellerLands, handleFetchSellerResidents, handleFetchUserData } from '../../utils/auth';
+import { handleFetchSellerLands, handleFetchSellerResidents, handleFetchUserData, handleCheckSubscriptionStatus } from '../../utils/auth';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { useSelector } from 'react-redux';
+
 
 const standardizeImage = (url, width, height) => {
   return `${url}?w=${width}&h=${height}&fit=crop`;
 };
 
 export const ListedProperties = () => {
+  const { sellerId } = useParams();
   const [user, setUser] = useState(null);
   const [lands, setLands] = useState([]);
   const [villas, setVillas] = useState([]);
@@ -17,6 +20,15 @@ export const ListedProperties = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const seller = useSelector(state => state.auth.user); 
+
+
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
+  const [listingCount, setListingCount] = useState(0); 
+  const [daysLeft, setDaysLeft] = useState(0);
+  const [subscriptionType, setSubscriptionType] = useState(null);
+  const [paymentPlan, setPaymentPlan] = useState('free');
 
   useEffect(() => {
     handleFetchUserData(setUser, setIsLoading, setError);
@@ -26,6 +38,13 @@ export const ListedProperties = () => {
       setApartments(residents.filter(r => r.property_type === 'Apartment'));
     });
   }, []);
+
+  useEffect(() => {
+    handleCheckSubscriptionStatus(seller.id, setIsSubscribed, 
+      setSubscriptionExpired, setListingCount, setDaysLeft, 
+      setSubscriptionType, setPaymentPlan);
+
+  }, [seller.id]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -111,33 +130,52 @@ export const ListedProperties = () => {
   return (
     <>
       <Navbar />
-      <div className="w-3/4 bg-gray-100 rounded-lg p-6 mx-auto">
-        <h2 className="text-xl text-gray-700 font-bold">My Profile</h2>
-        <div className="mt-8 flex items-center space-x-4">
-          <div>
-            <Link to="/agentprofile" >
-                <img
-                src={user.profile_image ? user.profile_image : '/images/user.png'}
-                alt="Profile"
-                className="w-16 h-16 rounded-full"
-                />
-            </Link>
+      <h6>My List</h6>
+        <div className="w-2/4 bg-gray-100 rounded-lg p-6 mx-auto">
+          <div className='flex justify-between items-center'>
+            <h2 className="text-xl text-gray-700 font-bold">My Profile</h2>
+            <div className='flex space-x-1'>
+              <p className='text-lg text-gray-500'>Subscription Status:</p>
+              <h1 className='text-blue-600 text-xl capitalize'>{paymentPlan}</h1>
+              {/* <p>{listingCount} items can add</p> */}
+
+            </div>
           </div>
-          
-          <div>
-            <h3 className="text-lg text-gray-600 font-semibold uppercase">{user.username}</h3>
-            <p className="text-gray-500">Email: {user.email}</p>
-            <p className="text-gray-500 capitalize">Address: {user.address}</p>
-            <p className="text-gray-500">Contact Number: +91 {user.contact_number ? user.contact_number : null}</p>
-          </div>
-          <div className="flex space-x-8">
-            <Link to="/property_type" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
-              <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>
-            </Link>
-          </div>
-          
+          <div className="mt-8 flex items-center space-x-4">
+              <div>
+                <Link to="/userprofile" >
+                    <img
+                    src={user.profile_image ? user.profile_image : '/images/user.png'}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full"
+                    />
+                </Link>
+              </div>              
+              <div>
+                <h3 className="text-lg text-gray-600 font-semibold uppercase">{user.username}</h3>
+                <p className="text-gray-500">Email: {user.email}</p>
+                <p className="text-gray-500 capitalize">Address: {user.address}</p>
+                <p className="text-gray-500">Contact Number: +91 {user.contact_number ? user.contact_number : null}</p>
+              </div>
+              <div className="flex space-x-8">
+                <Link to="/property_type" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
+                  <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>
+                </Link>
+                {paymentPlan==='basic' && (
+                   
+                   <Link to="/listing_package" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
+                     <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">For Premium Account</button>
+                   </Link>
+                )}
+                {paymentPlan==='premium' && subscriptionExpired && (
+                   
+                   <Link to="/subscription" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
+                     <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Go To Payment</button>
+                   </Link>
+                )}
+              </div>            
+            </div>
         </div>
-      </div>
 
       <div className="w-3/4 p-4 mx-auto">
         {lands.length > 0 && (

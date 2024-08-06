@@ -25,7 +25,6 @@ const Login = () => {
     try{
         console.log('Credential response:', credentialResponse);
         const response = await handleGoogleLogin(credentialResponse, dispatch, navigate);
-        console.log("API CALLED", response);
     }catch (error) {
         console.error('Google login failed', error);
         toast.error('Google Login Failed: Please try again');
@@ -35,8 +34,10 @@ const Login = () => {
   
 
   const handleSubmit = (e) => {
+
     e.preventDefault();
     handleLogin(email, password, dispatch, navigate);
+
   };
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import './tailwind.output.css'; // Ensure you import your tailwind CSS
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { useSelector } from 'react-redux';
+import { handleCreateSubscription } from '../../utils/auth';
 
-const stripePromise = loadStripe('your_stripe_publishable_key');
-
-const SubscriptionForm = () => {
+const SubscriptionPage = () => {
     const stripe = useStripe();
     const elements = useElements();
     const [email, setEmail] = useState('');
@@ -14,6 +11,7 @@ const SubscriptionForm = () => {
     const [paymentPlan, setPaymentPlan] = useState('premium');
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const user = useSelector(state => state.auth.user);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -40,25 +38,16 @@ const SubscriptionForm = () => {
             return;
         }
 
-        const response = await fetch('/payments/create-subscription/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // Adjust for your CSRF setup
-            },
-            body: JSON.stringify({
+        try {
+            await handleCreateSubscription({
                 payment_method_id: paymentMethod.id,
                 subscription_type: subscriptionType,
                 payment_plan: paymentPlan,
-            }),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            console.log('Subscription created:', result);
-        } else {
-            console.error('Subscription creation failed:', result);
-            setErrorMessage(result.error || 'Subscription creation failed.');
+                user_id: user.id, 
+            });
+            alert('Subscription successful! Your subscription has been updated.');
+        } catch (error) {
+            setErrorMessage('An error occurred. Please try again.');
         }
 
         setLoading(false);
@@ -125,10 +114,4 @@ const SubscriptionForm = () => {
     );
 };
 
-const App = () => (
-    <Elements stripe={stripePromise}>
-        <SubscriptionForm />
-    </Elements>
-);
-
-export default App;
+export default SubscriptionPage;

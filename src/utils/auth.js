@@ -6,16 +6,26 @@ import { loginUser, googleLoginUser,
   updateUser, updateUserRole, forgotPassword, 
   fetchSellerLands, getLandPropertyDetails,
   fetchSellerResidents, updateResidentialProperty, 
-  updateLandProperty } from './api';
+  updateLandProperty, createSubscription,
+  checkSubscriptionStatus,
+  fetchSellerDetails} from './api';
 import { loginSuccess } from '../redux/authSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
+import { loadStripe } from '@stripe/stripe-js';
+
+
 
 export const handleLogin = async (email, password, dispatch, navigate) => {
   try {
     const response = await loginUser(email, password);
+  
+    if(response.data.error){
+      toast.error("errr")
+      return
+    }
+    console.log(response);
     const { access, refresh, role } = response.data;
-    console.log("role",role);
     const decodedToken = jwtDecode(access);
     const user = {
       id: decodedToken.user_id,
@@ -40,19 +50,15 @@ export const handleLogin = async (email, password, dispatch, navigate) => {
         }   
 
   } catch (error) {
-    console.error(error);
-    toast.error('Login Failed: Please try again');
-   
-    if (error.response) {
-      toast.error(`Login Failed: ${error.response.data.message}`);
-    }
-    else if (error.request) {
-      toast.error(`Login Failed: ${error.request.data.message}`);
-    } else {
-      toast.error('Login Failed: Please try again');
-    }
+    console.log(error);
+      if (error){
+        toast.error(`Login Failed: ${error.message}`);
+      }
+      console.error('ERROR', error);
   }
 };
+
+
 export const handleGoogleLogin = async (idToken, dispatch, navigate) => {
   try {
     const { access, refresh, role } = await googleLoginUser(idToken);
@@ -84,14 +90,7 @@ export const handleGoogleLogin = async (idToken, dispatch, navigate) => {
       toast.success('Login Successful');
       navigate('/');
     }
-    // if (role !== 'admin') {
-    //   dispatch(loginSuccess({ access, refresh, role, user }));
-    //   toast.success('Login Successful');
-    //   navigate('/');
-    // } else {
-    //   toast.error('Admin login is not allowed from this portal');
-    //   navigate('/login');
-    // }
+  
     if (Array.isArray(role) && role.includes('admin')) {
       toast.error('Admin login is not allowed from this portal');
       navigate('/login');
@@ -101,40 +100,45 @@ export const handleGoogleLogin = async (idToken, dispatch, navigate) => {
       navigate('/');
     }
   } catch (error) {
-    console.error(error);
-    toast.error('Login Failed: Please try again');
-
-    if (error.response) {
-      toast.error(`Login Failed: ${error.response.data.message}`);
-    } else if (error.request) {
-      toast.error('Login Failed: No response from server');
-    } else {
-      toast.error('Login Failed: Please try again');
-    }
+    console.log(error);
+      if (error){
+        toast.error(`Login Failed: ${error.message}`);
+      }
+      console.error('ERROR', error);
   }
 };
 
-export const handleRegister = async (postData, setOtpSent, setOtpExpired) => {
+export const handleRegister = async (postData, setOtpSent, setOtpExpired, setErrors) => {
   try {
     const response = await registerUser(postData);
     console.log("USERNAME:", postData.username);
-    toast.success('Otp sent to the mail..');
     setOtpSent(true);
     setOtpExpired(false);
-  } catch (error) {
-    if (error.response) {
-      console.error('Server Response:', error.response.data);
-      const { email } = error.response.data;
-      if (email) {
-        alert(`Email error: ${email[0]}`);
-        toast.error(`Email error: ${email[0]}`);
+    toast.success('Otp sent to the mail..');
+  }
+  catch (error) {
+    console.log("QQQQQQ");
+    console.log('Server error Response:', error);
+
+    if (error) {
+      console.error('Server Response:', error.errors);
+      const errors = error.errors || {};
+      setErrors(errors);
+      for (const [field, messages] of Object.entries(errors)) {
+        // toast.error(`${field}: ${messages.join(' ')}`);
+          // Ensure messages is an array
+          if (Array.isArray(messages)) {
+            toast.error(`${field}: ${messages.join(' ')}`);
+          } else {
+            toast.error(`${field}: ${messages}`);
+          }
       }
     } else if (error.request) {
       console.error('Request Error:', error.request);
       toast.error('Error registering: No response from server.');
     } else {
       console.error('Error:', error.message);
-      toast.error('Error registering: Please try again..');
+      toast.error(`Error registering: ${error.message}`);
     }
   }
 };
@@ -156,7 +160,7 @@ export const handleVerifyOtp = async (email, otp, navigate) => {
             }
         } catch (error) {
             console.error(error);
-            toast.error(' Please try again..');
+            toast.error(' Please try again..',error.message);
         }
     };
 export const handleResendOtp = async (email, setOtpExpired, setOtp) => {
@@ -218,6 +222,24 @@ export const handleFetchUserData = async (setUser, setIsLoading, setError) => {
     setIsLoading(false);
   }
 };
+
+// Fetch Seller Data Handler
+export const handleFetchSellerDetails = async (sellerId) => {
+  try {
+    const response = await fetchSellerDetails(sellerId);
+    // setSeller(response.data);
+    console.log("Response of seller data",response);
+    return response
+    // setIsLoading(false);
+  } catch (error) {
+    // setError('Error fetching user data');
+    // setIsLoading(false);
+    toast.error("ERROR FETCHING SELLER DETAILS");
+    throw error;
+
+  }
+};
+
 
 export const changeUserPassword = async (data) => {
   const response = await passwordChange(data, {
@@ -301,7 +323,9 @@ export const handleFetchSellerResidents = async (setResidents) => {
 
 export const handleLandPropertyDetails = async (propertyId) => {
   try {
+    console.log("Calling api");
     const response = await getLandPropertyDetails(propertyId);
+    console.log("handled calling api")
     return response.data;
   } catch (error) {
     console.error('Failed to fetch land property details:', error);
@@ -363,3 +387,71 @@ export const handleUpdateResidentialProperty = async (propertyId, propertyData) 
   }
 };
 
+
+export const handleCheckSubscriptionStatus = async (
+  userId, setSubscriptionStatus, setSubscriptionExpired, 
+  setListingCount, setDaysLeft) => {
+  try {
+    const response = await checkSubscriptionStatus(userId);
+    setSubscriptionStatus(response.data.isSubscribed);
+    setSubscriptionExpired(response.data.subscriptionExpired);
+    setListingCount(response.data.propertyCount);
+    setDaysLeft(response.data.daysLeft);
+    // setSubscriptionType(response.data.subscriptionType);
+    // setPaymentPlan(response.data.paymentPlan);
+
+    console.log(response);
+    console.log("COUNT",response.data.propertyCount);
+  } catch (error) {
+    console.error('Error checking subscription status of the user:', error);
+  }
+};
+
+// // Handle create subscription
+// export const handleCreateSubscription = async (subscriptionData) => {
+//   try {
+//     const response = await createSubscription(subscriptionData);
+//     toast.success('Subscription created successfully.');
+//     return response.data;
+//   } catch (error) {
+//     console.error('Failed to create subscription:', error);
+//     if (error.response) {
+//       toast.error(`Error: ${error.response.data.message}`);
+//     } else if (error.request) {
+//       toast.error('No response from server.');
+//     } else {
+//       toast.error('An error occurred. Please try again.');
+//     }
+//     throw error; // Re-throw the error to handle it in the calling function if needed
+//   }
+// };
+
+export const handleCreateSubscription = async (subscriptionData) => {
+  try {
+   
+    // const response = await axios.post('/payments/create-subscription/', subscriptionData);
+    const response = await createSubscription(subscriptionData);
+
+    const { checkout_session_id } = response.data;
+    console.log(checkout_session_id);
+    console.log(response.data.checkout_session_id);
+    // Redirect to Stripe Checkout
+    const stripe = await loadStripe('pk_test_51PeAv3GYaADgjXW8SBDpSToR8TtuB29Hi5loSI4lQpi3zDc7zpZxrZiYxv6EDHiMffNmvsebBgpx0cCAyxLHiiDV00Xz1y0bpm'); // Your key is already provided in main.jsx
+    const { error } = await stripe.redirectToCheckout({ sessionId: checkout_session_id });
+
+    if (error) {
+      toast.error('Error redirecting to Checkout.');
+      console.error('Error redirecting to Checkout:', error);
+    }
+  } catch (error) {
+    console.error('Failed to create subscription:', error);
+    if (error.response) {
+      toast.error(`Error: ${error.response.data.error}`);
+    } else if (error.request) {
+      toast.error('No response from server.');
+    } else {
+      toast.error('An error occurred. Please try again.');
+    }
+    throw error; 
+  }
+};

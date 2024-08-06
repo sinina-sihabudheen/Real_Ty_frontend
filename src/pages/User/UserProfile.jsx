@@ -11,7 +11,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 
 
 
-const AgentProfile = () => {
+const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,7 +34,6 @@ const AgentProfile = () => {
       setDateOfBirth(new Date(user.date_of_birth));
     }
   }, [user]);
-
 
     const fileInputRef = useRef(null);
   
@@ -160,6 +159,7 @@ const handlePasswordChange = async (event) => {
                   </div>
                   <span className="material-icons text-gray-500">chevron_right</span>
                 </div>
+                {user.social_provider !== 'google' ? (
                 <div className="flex items-center justify-between bg-white p-4 rounded-md shadow-sm"
                   onClick={handleSecurityClick}>
                   <div className="flex items-center space-x-2">
@@ -167,7 +167,7 @@ const handlePasswordChange = async (event) => {
                     <span className="text-md text-gray-500 font-medium">Security</span>
                   </div>
                   <span className="material-icons text-gray-500">chevron_right</span>
-                </div>
+                </div>):null}
               </div>
             </div>   
             )}     
@@ -179,13 +179,13 @@ const handlePasswordChange = async (event) => {
                   alt="Profile" 
                   className="w-20 h-20 rounded-full" 
                 />
-               
+              
                 <div>
                   <h3 className="text-lg text-gray-600 font-semibold uppercase">{user.username}</h3>
                   <p className="text-gray-500">Email: {user.email}</p>
                   {/* <p className="text-gray-500">DOB: {user.date_of_birth}</p> */}
-                  <p className="text-gray-500 capitalize">Addresss: {user.address ? user.address : null}</p>
-                  <p className="text-gray-500">Contact Number: +91 {user.contact_number ? user.contact_number : null}</p>
+                  {user.address ? <p className="text-gray-500 capitalize">Addresss: {user.address} </p>: null}
+                   {user.contact_number ? <p className="text-gray-500">Contact Number: +91{user.contact_number} </p>: null}
                   {/* {user.is_seller   &&    
                   <div>           
                   <p className="text-gray-500">Agency Name: {user.agency_name }</p>
@@ -196,12 +196,12 @@ const handlePasswordChange = async (event) => {
                 {user.is_seller ? (
                   <div className='flex space-x-8'>
                       <button onClick={handleListedProperties} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Listed Properties</button>
-                      <button onClick={handleBuy} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">To Buy</button>
+                      <button onClick={handleBuy} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Buy</button>
                   </div>
                   ):(
-                  <div className='flex space-x-8'>
-                      <button onClick={handleBuy} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">To Buy</button>
-                      <button onClick={handleSell} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">To Sell</button>
+                  <div className='flex w-full space-x-8'>
+                      <button onClick={handleBuy} className="w-2/4 bg-gray-400 text-white py-2 rounded-md mb-2">Buy</button>
+                      <button onClick={handleSell} className="w-2/4 bg-gray-400 text-white py-2 rounded-md mb-2">Sell</button>
                   </div>
                     )}
 
@@ -357,4 +357,4 @@ const handlePasswordChange = async (event) => {
   );
 };
 
-export default AgentProfile;
+export default UserProfile;

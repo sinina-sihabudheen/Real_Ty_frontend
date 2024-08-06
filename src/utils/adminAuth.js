@@ -31,13 +31,13 @@ export const handleAdminLogin = async (email, password, dispatch, navigate) => {
     localStorage.setItem('adminUser', JSON.stringify(adminUser));
     localStorage.setItem('admin', true); 
 
-
     dispatch(adminLoginSuccess({ access, refresh, role, adminUser }));
     navigate('/admin/adminhomepage');  
     toast.success('Login Successful');
   } catch (error) {
     navigate('/admin/login');
     console.error(error);
+    localStorage.setItem('admin', 'false');
     toast.error('Login Failed: Please try again');
   }
 };

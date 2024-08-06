@@ -1,44 +1,4 @@
 
-// import axios from 'axios';
-
-// const api = axios.create({
-//   baseURL: 'http://localhost:8000', 
-//   headers: {
-//     Authorization: `Bearer ${localStorage.getItem('token')}`, 
-//   },
-//   withCredentials:true,
-  
-// });
-
-// api.interceptors.request.use(
-//   config => {
-//     const token = localStorage.getItem('access');
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   error => Promise.reject(error)
-// );
-
-
-
-// api.interceptors.response.use(
-//   response => response,
-//   error => {
-//     if (error.response) {
-//       console.error('Response error:', error.response);
-//       return Promise.reject(error.response); 
-//     } else if (error.request) {
-//       console.error('Request error:', error.request);
-//       return Promise.reject(error.request); 
-//     } else {
-//       console.error('Error:', error.message);
-//       return Promise.reject(error.message); 
-//     }
-//   }
-// );
-
 import axios from 'axios';
 
 const api = axios.create({
@@ -87,8 +47,11 @@ api.interceptors.response.use(
 
 
 
-export const loginUser = (email, password) => {
-  return api.post('/api/auth/login/', { email, password });
+export const loginUser = async (email, password) => {
+
+    const response = await api.post('/api/auth/login/', { email, password });
+    return response;
+ 
 };
 export const loginAdmin = (email, password) => {
   return api.post('/api/admin-login/', { email, password });
@@ -106,12 +69,7 @@ export const googleLoginUser = async (idToken) => {
 
 };
 
-    // if (window.opener) {
-    //   window.opener.postMessage('login-success', '*');
-    //   window.close();
-    // }
-
-// Register API function
+  
 export const registerUser = (data) => {
   return api.post('/api/register/', data);
 };
@@ -131,6 +89,10 @@ export const fetchRegions = () => {
 
 export const fetchUserData = () => {
   return api.get('/api/user/');
+};
+
+export const fetchSellerDetails = (sellerId) => {
+  return api.get(`/api/seller/${sellerId}/`);
 };
 
 
@@ -259,13 +221,29 @@ export const fetchLandsList = () => {
 };
 
 // Get the details of a specific land property
-export const getLandPropertyDetails = () => {
-  return api.get(`/api/lands/${propertyId}/`);
+export const getLandPropertyDetails = (propertyId) => {
+  console.log("api called ",propertyId);
+  const data = api.get(`/api/lands/${propertyId}/`);
+  return data
 };
 
 // Get the details of a specific residential property
-export const getResidentialPropertyDetails = async (propertyId) => {
+export const getResidentialPropertyDetails = (propertyId) => {
   return api.get(`/api/residentials/${propertyId}/`);  
+};
+
+
+export const checkSubscriptionStatus = (userId) => {
+  return api.get(`/payments/check-subscription/${userId}/`);
+};
+
+// Create subscription API function
+export const createSubscription = (subscriptionData) => {
+  return api.post('/payments/create-subscription/', subscriptionData, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 };
 
 export default api;
