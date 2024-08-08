@@ -12,7 +12,7 @@ const standardizeImage = (url, width, height) => {
 };
 
 export const ListedProperties = () => {
-  const { sellerId } = useParams();
+  // const { sellerId } = useParams();
   const [user, setUser] = useState(null);
   const [lands, setLands] = useState([]);
   const [villas, setVillas] = useState([]);
@@ -43,7 +43,7 @@ export const ListedProperties = () => {
     handleCheckSubscriptionStatus(seller.id, setIsSubscribed, 
       setSubscriptionExpired, setListingCount, setDaysLeft, 
       setSubscriptionType, setPaymentPlan);
-
+console.log(paymentPlan);
   }, [seller.id]);
 
   if (isLoading) {
@@ -54,7 +54,6 @@ export const ListedProperties = () => {
     return <div>{error}</div>;
   }
 
-  // Render the first image of the property, standardizing the size
   const renderFirstImage = (images) => {
     if (images.length > 0) {
       return (
@@ -67,7 +66,7 @@ export const ListedProperties = () => {
     }
     return null;
   };
-
+console.log("PAymentplan",paymentPlan);
   const handleVideoClick = (property) => {
     setSelectedProperty(property);
   };
@@ -130,7 +129,6 @@ export const ListedProperties = () => {
   return (
     <>
       <Navbar />
-      <h6>My List</h6>
         <div className="w-2/4 bg-gray-100 rounded-lg p-6 mx-auto">
           <div className='flex justify-between items-center'>
             <h2 className="text-xl text-gray-700 font-bold">My Profile</h2>
@@ -161,7 +159,7 @@ export const ListedProperties = () => {
                 <Link to="/property_type" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
                   <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>
                 </Link>
-                {paymentPlan==='basic' && (
+                {paymentPlan==='free' && (
                    
                    <Link to="/listing_package" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
                      <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">For Premium Account</button>

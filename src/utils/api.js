@@ -233,7 +233,7 @@ export const getResidentialPropertyDetails = (propertyId) => {
 };
 
 
-export const checkSubscriptionStatus = (userId) => {
+export const checkSubscriptionStatus = async (userId) => {
   return api.get(`/payments/check-subscription/${userId}/`);
 };
 
@@ -245,5 +245,21 @@ export const createSubscription = (subscriptionData) => {
     },
   });
 };
+
+// Cancel a subscription
+export const cancelSubscription = async () => {
+  const response = await api.post('/payments/cancel-subscription/');
+  return response.data;
+};
+
+
+
+// Retrieve Stripe session details
+export const getSessionDetails = async (sessionId) => {
+  const response = await api.get(`/payments/stripe/session/${sessionId}/`);
+  return response.data;
+};
+
+
 
 export default api;

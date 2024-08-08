@@ -389,56 +389,34 @@ export const handleUpdateResidentialProperty = async (propertyId, propertyData) 
 
 
 export const handleCheckSubscriptionStatus = async (
-  userId, setSubscriptionStatus, setSubscriptionExpired, 
-  setListingCount, setDaysLeft) => {
+  userId, setSubscriptionStatus, setSubscriptionExpired, setListingCount, setDaysLeft, 
+  setSubscriptionType, setPaymentPlan) => {
   try {
     const response = await checkSubscriptionStatus(userId);
     setSubscriptionStatus(response.data.isSubscribed);
     setSubscriptionExpired(response.data.subscriptionExpired);
     setListingCount(response.data.propertyCount);
     setDaysLeft(response.data.daysLeft);
-    // setSubscriptionType(response.data.subscriptionType);
-    // setPaymentPlan(response.data.paymentPlan);
-
-    console.log(response);
+    setSubscriptionType(response.data.subscriptionType);
+    setPaymentPlan(response.data.paymentPlan);
+console.log("payment plan222",response.data.paymentPlan);
+    console.log("RESPONSE of check subscription:",response);
     console.log("COUNT",response.data.propertyCount);
+    console.log();
   } catch (error) {
     console.error('Error checking subscription status of the user:', error);
   }
 };
 
-// // Handle create subscription
-// export const handleCreateSubscription = async (subscriptionData) => {
-//   try {
-//     const response = await createSubscription(subscriptionData);
-//     toast.success('Subscription created successfully.');
-//     return response.data;
-//   } catch (error) {
-//     console.error('Failed to create subscription:', error);
-//     if (error.response) {
-//       toast.error(`Error: ${error.response.data.message}`);
-//     } else if (error.request) {
-//       toast.error('No response from server.');
-//     } else {
-//       toast.error('An error occurred. Please try again.');
-//     }
-//     throw error; // Re-throw the error to handle it in the calling function if needed
-//   }
-// };
-
 export const handleCreateSubscription = async (subscriptionData) => {
   try {
    
-    // const response = await axios.post('/payments/create-subscription/', subscriptionData);
     const response = await createSubscription(subscriptionData);
-
     const { checkout_session_id } = response.data;
-    console.log(checkout_session_id);
-    console.log(response.data.checkout_session_id);
     // Redirect to Stripe Checkout
     const stripe = await loadStripe('pk_test_51PeAv3GYaADgjXW8SBDpSToR8TtuB29Hi5loSI4lQpi3zDc7zpZxrZiYxv6EDHiMffNmvsebBgpx0cCAyxLHiiDV00Xz1y0bpm'); // Your key is already provided in main.jsx
     const { error } = await stripe.redirectToCheckout({ sessionId: checkout_session_id });
-
+    
     if (error) {
       toast.error('Error redirecting to Checkout.');
       console.error('Error redirecting to Checkout:', error);

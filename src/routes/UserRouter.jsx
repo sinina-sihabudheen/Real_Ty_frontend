@@ -16,6 +16,8 @@ import SinglePropertyDetails from "../pages/User/SinglePropertyDetails";
 import SubscriptionPage from "../components/subscriptions/Stripe";
 import UserProfile from "../pages/User/UserProfile";
 import SellerProfile from "../pages/User/SellerProfile";
+import SuccessSubscription from "../pages/Seller/SuccessSubscription";
+import CancelSubscription from "../pages/Seller/CancelSubscription";
 
 function UserRouter() {
   return (
@@ -35,6 +37,8 @@ function UserRouter() {
         <Route path="/edit_property/:id/:category" element={<EditProperty />} />
         <Route path="/single_property/:id/:category" element={<SinglePropertyDetails />} />
         <Route path="/subscription" element={<SubscriptionPage />} />
+        <Route path="/success" element={<SuccessSubscription />} />
+        <Route path="/cancel" element={<CancelSubscription />} />
         <Route path="/sellerprofile/:sellerId" element={<SellerProfile />} />
 
 
