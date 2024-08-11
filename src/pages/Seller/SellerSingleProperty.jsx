@@ -10,7 +10,7 @@ const standardizeImage = (url, width, height) => {
   return url ? `${url}?w=${width}&h=${height}&fit=crop` : '';
 };
 
-const SinglePropertyDetails = () => {
+const SellerSingleProperty = () => {
   const { id, category } = useParams();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +41,17 @@ const SinglePropertyDetails = () => {
 
     fetchProperty();
   }, [id, category]);
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this property?')) {
+      try {
+        // await deleteProperty(id);
+        navigate('/listedproperties');
+      } catch (error) {
+        setError('Failed to delete property.');
+      }
+    }
+  };
 
   console.log("Property Data:", property);
   // console.log("Amenities Data:", property.amenities);
@@ -96,41 +107,20 @@ const SinglePropertyDetails = () => {
               </ul>
             </div>
           
-            <div className='border bg-slate-200 w-6/12 rounded-md'>
-              <h2 className="text-xl font-bold">Agent Details</h2>
-              <div className="flex items-center space-x-4 mt-2">
-                {property.seller && (
-                  <>
-                   <Link to={`/sellerprofile/${property.seller.id}`} >
-                    <img
-                      src={standardizeImage(property.seller.user.profile_image, 75, 75)}
-                      alt="Agent"
-                      className="w-16 h-16 rounded-full shadow-md"
-                    />
-                    </Link>
-                    <div>
-                      <h3 className="text-lg font-semibold">{property.seller.user.username}</h3>
-                      <p className="text-gray-500">Agency: {property.seller.agency_name}</p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <button className="p-2 rounded-full bg-blue-500 text-white"><i className="fas fa-envelope"></i></button>
-                        <button className="p-2 rounded-full bg-green-500 text-white"><i className="fas fa-phone"></i></button>
-                        <button className="p-2 rounded-full bg-gray-500 text-white"><i className="fas fa-whatsapp"></i></button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-            
+           
           </div>
           <div className="md:col-span-2">
-            <h2 className="text-xl font-bold">Amenities</h2>
-            
-                  
-                  <p> {property.amenities && property.amenities.length > 0 ? property.amenities.join(', ') : 'N/A'}</p>
-
+            <h2 className="text-xl font-bold">Amenities</h2>                 
+            <p> {property.amenities && property.amenities.length > 0 ? property.amenities.join(', ') : 'N/A'}</p>
           </div>
-
+          <div className="md:col-span-2 flex justify-between">
+            <Link to={`/edit_property/${id}/${category}`} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              Edit
+            </Link>
+            <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+              Delete
+            </button>
+          </div>
         </div>
       </div>
       <Footer />
@@ -138,4 +128,4 @@ const SinglePropertyDetails = () => {
   );
 };
 
-export default SinglePropertyDetails;
+export default SellerSingleProperty;

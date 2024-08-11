@@ -27,13 +27,11 @@ api.interceptors.response.use(
   error => {
     if (error.response) {
       console.error('Response error:', error.response);
-      // Handle unauthorized error by redirecting to login page
       if (error.response.status === 401) {
-        // Optionally clear the token from localStorage and redirect to login
         localStorage.removeItem('access');
-        window.location.href = '/login'; // Redirect to your login route
+        window.location.href = '/login'; 
       }
-      return Promise.reject(error.response.data); // Return the error response data
+      return Promise.reject(error.response.data); 
     } else if (error.request) {
       console.error('Request error:', error.request);
       return Promise.reject(error.request);
@@ -82,9 +80,6 @@ export const resendOtp = (email) => {
   return api.post('/api/resend-otp/', { email });
 };
 
-export const fetchRegions = () => {
-  return api.get('/api/regions/');
-};
 
 
 export const fetchUserData = () => {
@@ -153,9 +148,6 @@ export const createResidentialProperty = async (propertyData) => {
   return response.data;
 };
 
-export const fetchAmenities = () => {
-  return api.get('/api/amenity/');
-};
 
 // Update an existing land property
 export const updateLandProperty = async (propertyId, propertyData) => {
@@ -203,26 +195,25 @@ export const updateResidentialProperty = async (propertyId, propertyData) => {
 
 
 export const fetchSellerLands = () => {
-  return api.get('/api/seller-lands');
+  return api.get('/api/seller-lands/');
 };
 
 export const fetchSellerResidents = () => {
-  return api.get('api/seller-residents');
+  return api.get('api/seller-residents/');
 };
 
 
 export const fetchResidentsList = () => {
-  return api.get('api/residentslist');
+  return api.get('api/residentslist/');
 };
 
 
 export const fetchLandsList = () => {
-  return api.get('api/landslist');
+  return api.get('api/landslist/');
 };
 
 // Get the details of a specific land property
 export const getLandPropertyDetails = (propertyId) => {
-  console.log("api called ",propertyId);
   const data = api.get(`/api/lands/${propertyId}/`);
   return data
 };
@@ -258,6 +249,103 @@ export const cancelSubscription = async () => {
 export const getSessionDetails = async (sessionId) => {
   const response = await api.get(`/payments/stripe/session/${sessionId}/`);
   return response.data;
+};
+
+//For admin operations
+
+export const adminDashboard = async () => {
+  return await api.get('/api/admin-dashboard/')
+
+};
+
+export const fetchRegions = () => {
+  return api.get('/api/regions/');
+};
+
+
+export const addRegion = async ({data})=> {
+  const response = await api.post('/api/regions/add/',{data},
+  {
+    headers: {
+    'Content-Type': 'application/json',
+  },
+}
+  );
+  return response;
+};
+
+export const deleteRegion = async(regionId)=> {
+  const response = await api.delete(`/api/regions/${regionId}/delete/`);
+  return response;
+};
+
+
+export const fetchAmenities = () => {
+  return api.get('/api/amenity/');
+};
+
+export const addAmenity = async({name})=> {
+  const response = await api.post('/api/amenities/add/',{name},
+    {
+      headers: {
+        'Content-Type': 'application/json', 
+      },
+    }
+  );
+  return response;
+};
+
+export const deleteAmenity = async(amenityId)=> {
+  const response = await api.delete(`/api/amenities/${amenityId}/delete/`);
+  return response;
+};
+
+
+export const fetchCategory = () => {
+  return api.get('/api/category/');
+};
+
+export const addCategory = async({name}) => {
+  const response = await api.post('/api/categories/add/',{name},{
+    headers: {
+      'Content-Type': 'application/json', 
+    },
+  });
+  return response;
+};
+
+export const deleteCategory = async(categoryId) => {
+  const response = await api.delete(`/api/categories/${categoryId}/delete/`);
+  return response;
+};
+
+export const blockUser = async (userId) => {
+  const response = await api.patch(`/api/users/${userId}/block/`);
+  return response;
+};
+export const unblockUser = async (userId) => {
+  const response = await api.patch(`/api/users/${userId}/unblock/`);
+  return response;
+};
+
+export const blockSeller = async (sellerId) => {
+  const response = await api.patch(`/api/sellers/${sellerId}/block/`);
+  return response;
+};
+
+export const unblockSeller = async (sellerId) => {
+  const response = await api.patch(`/api/sellers/${sellerId}/unblock/`);
+  return response;
+};
+
+export const blockBuyer = async (buyerId) => {
+  const response = await api.patch(`/api/buyers/${buyerId}/block/`);
+  return response;
+};
+
+export const unblockBuyer = async (buyerId) => {
+  const response = await api.patch(`/api/buyers/${buyerId}/unblock/`);
+  return response;
 };
 
 

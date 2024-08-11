@@ -18,6 +18,7 @@ import UserProfile from "../pages/User/UserProfile";
 import SellerProfile from "../pages/User/SellerProfile";
 import SuccessSubscription from "../pages/Seller/SuccessSubscription";
 import CancelSubscription from "../pages/Seller/CancelSubscription";
+import SellerSingleProperty from "../pages/Seller/SellerSingleProperty";
 
 function UserRouter() {
   return (
@@ -40,6 +41,7 @@ function UserRouter() {
         <Route path="/success" element={<SuccessSubscription />} />
         <Route path="/cancel" element={<CancelSubscription />} />
         <Route path="/sellerprofile/:sellerId" element={<SellerProfile />} />
+        <Route path="/seller_singleproperty/:id/:category" element={<SellerSingleProperty />} />
 
 
       </Route>

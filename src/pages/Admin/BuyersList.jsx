@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 import { Link, useNavigate} from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { handleFetchBuyersData } from '../../utils/adminAuth';
+import { handleFetchBuyersData,handleUnblockBuyer,handleBlockBuyer } from '../../utils/adminAuth';
 import Sidebar from '../../components/admindash/SideBar';
 import AdminHeader from '../../components/admindash/AdminHeader';
 
@@ -27,6 +27,16 @@ const BuyersList = () => {
 
     fetchData();
 }, []);
+
+const blockBuyerHandler = async (buyerId) => {
+    await handleBlockBuyer(buyerId,setUsers);
+  };
+
+const unblockBuyerHandler = async (buyerId) => {
+    await handleUnblockBuyer(buyerId,setUsers);
+  };
+
+
   if (isLoading) {
       return <div>Loading...</div>;
       }
@@ -55,7 +65,7 @@ const BuyersList = () => {
                         <th className="border bg-gray-300 border-gray-400 shadow-md px-4 py-2">Address</th>
                         <th className="border bg-gray-300 border-gray-400 shadow-md px-4 py-2">Contact Number</th>
                         <th className="border border-gray-400 bg-gray-300 shadow-md px-4 py-2">Active</th>
-                        <th className="border border-gray-400 bg-gray-300 shadow-md px-4 py-2">View</th> 
+                        <th className="border border-gray-400 bg-gray-300 shadow-md px-4 py-2">Action</th> 
                 </tr>
               </thead>
               <tbody>
@@ -70,16 +80,28 @@ const BuyersList = () => {
                     <td className="px-4 py-2 border-gray-400  bg-gray-200 shadow-md border">
                             <span
                                 className={`px-2 py-1 rounded ${
-                                buyer.is_active ? 'text-green-800' : ' text-red-600 '
+                                buyer.user.is_active ? 'text-green-600' : ' text-red-600 '
                                 }`}
                             >
-                                {buyer.is_active ? 'Active' : 'Inactive'}
+                                {buyer.user.is_active ? 'Active' : 'Inactive'}
                             </span>
                     </td>
                     <td className="px-4 border-gray-400  bg-gray-200 shadow-md py-2 border">
-                            <button className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 rounded">
-                                View
+                        {buyer.user.is_active ? (
+                            <button
+                            onClick={() => blockBuyerHandler(buyer.id)}
+                            className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 rounded"
+                            >
+                            Block
                             </button>
+                        ) : (
+                            <button
+                            onClick={() => unblockBuyerHandler(buyer.id)}
+                            className="bg-green-400 hover:bg-green-600 text-white px-4 py-1 rounded"
+                            >
+                            Unblock
+                            </button>
+                        )}
                     </td>
                   </tr>
               

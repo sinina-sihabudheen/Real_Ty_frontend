@@ -32,7 +32,7 @@ const AdminHeader = () => {
         {/* <button className="bg-blue-500 text-white px-4 py-2 rounded">Filter Period</button> */}
       </div>
       <div className="flex items-center mr-10 space-x-4">
-        <span>Hello, {user.username}</span>
+        <span>Hello,{user.username}</span>
         <img src="/images/user.png" alt="Profile" className="h-10 w-10 rounded-full" />
       </div>
     </div>

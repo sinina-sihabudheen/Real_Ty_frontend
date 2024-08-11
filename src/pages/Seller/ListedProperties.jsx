@@ -107,7 +107,7 @@ console.log("PAymentplan",paymentPlan);
   const renderProperties = (properties) => {
     return properties.map((property) => (
       <div key={property.id} className="p-4 bg-white rounded shadow-md w-80">
-        <Link to={`/single_property/${property.id}/${property.property_type || 'Land'}`}>
+        <Link to={`/seller_singleproperty/${property.id}/${property.property_type || 'Land'}`}>
           {renderFirstImage(property.images)}
           <h3 className="mt-2 font-semibold">{Math.round(property.price)} Lakhs</h3>
           <h3 className="mt-2 font-semibold">{Math.round(property.size || property.area)} {property.property_type ? 'square feet' : 'cents'}</h3>

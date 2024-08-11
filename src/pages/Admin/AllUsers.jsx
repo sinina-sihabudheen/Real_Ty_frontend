@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 import { Link, useNavigate} from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { handleFetchUsersData } from '../../utils/adminAuth';
+import { handleFetchUsersData,handleBlockUser,handleUnblockUser } from '../../utils/adminAuth';
 import Sidebar from '../../components/admindash/SideBar';
 import AdminHeader from '../../components/admindash/AdminHeader';
 
@@ -26,6 +26,14 @@ const AllUsers = () => {
 
         fetchData();
     }, []);
+
+    const blockUserHandler = async (userId) => {
+        await handleBlockUser(userId, setUsers);
+      };
+
+    const unblockUserHandler = async (userId) => {
+        await handleUnblockUser(userId, setUsers);
+      };
 
     console.log("Users:",users);
     console.log("IsLoading:",isLoading);
@@ -68,29 +76,41 @@ const AllUsers = () => {
                         <td className="border border-gray-400  bg-gray-200 shadow-md px-4 py-2">{user.id}</td>
                         <td className="border border-gray-400  bg-gray-200 shadow-md px-4 py-2">{user.username}</td>
                         <td className="border border-gray-400  bg-gray-200 shadow-md px-4 py-2">{user.email}</td>
-                        {/* <td className="border px-4 py-2">                  
-                            
-                            <button className="bg-blue-500 text-white px-4 py-1 rounded" >
-                            Edit
-                            </button>
-                            <button className="bg-red-400 w-full hover:bg-red-300 text-white font-bold py-2 px-4 rounded" >
-                            Delete
-                            </button>                 
-                        
-                        </td> */}
+                       
                         <td className="px-4 py-2 border-gray-400  bg-gray-200 shadow-md border">
                             <span
                                 className={`px-2 py-1 rounded ${
-                                user.is_active ? 'bg-green-400 text-green-800' : 'bg-red-400 text-red-800 '
+                                user.is_active ? ' text-green-600' : ' text-red-600 '
                                 }`}
                             >
                                 {user.is_active ? 'Active' : 'Inactive'}
                             </span>
                         </td>
                         <td className="px-4 border-gray-400  bg-gray-200 shadow-md py-2 border">
-                            <button className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 rounded">
-                                View More
+                            {/* <button
+                                onClick={() => blockUserHandler(user.id)}
+                                disabled={!user.is_active}
+                                className={`${
+                                user.is_active ? 'bg-blue-400 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
+                                } text-white px-4 py-1 rounded`}
+                            >
+                            Block
+                        </button> */}
+                            {user.is_active ? (
+                            <button
+                            onClick={() => blockUserHandler(user.id)}
+                            className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 rounded"
+                            >
+                            Block
                             </button>
+                        ) : (
+                            <button
+                            onClick={() => unblockUserHandler(user.id)}
+                            className="bg-green-400 hover:bg-green-600 text-white px-4 py-1 rounded"
+                            >
+                            Unblock
+                            </button>
+                        )}
                         </td>
                     </tr>
                 
