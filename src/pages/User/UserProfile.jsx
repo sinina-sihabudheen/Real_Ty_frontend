@@ -186,12 +186,7 @@ const handlePasswordChange = async (event) => {
                   {/* <p className="text-gray-500">DOB: {user.date_of_birth}</p> */}
                   {user.address ? <p className="text-gray-500 capitalize">Addresss: {user.address} </p>: null}
                    {user.contact_number ? <p className="text-gray-500">Contact Number: +91{user.contact_number} </p>: null}
-                  {/* {user.is_seller   &&    
-                  <div>           
-                  <p className="text-gray-500">Agency Name: {user.agency_name }</p>
-                  <p className="text-gray-500">Regions Added: {user.region}</p>
-                  </div>
-                  } */}
+                  
                 </div>
                 {user.is_seller ? (
                   <div className='flex space-x-8'>
@@ -248,27 +243,7 @@ const handlePasswordChange = async (event) => {
                         className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
                     </div>
                
-                    {/* {user.is_seller   &&    
-                      <div>  
-                        <label className="block text-gray-400 mb-1">Agency Name</label>
-                        <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
-                          <input 
-                            type="text" 
-                            name="agency_name"
-                            defaultValue={user.agency_name} 
-                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
-                        </div>
-
-                        <label className="block text-gray-400 mb-1">Regions</label>
-                        <div className="mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">  
-                          <input 
-                            type="text" 
-                            name="regions"
-                            defaultValue={user.regions} 
-                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
-                        </div>
-                      </div>
-                    }        */}
+                    
 
                     <label className="block text-gray-400 mb-1">Profile Image</label>
                    

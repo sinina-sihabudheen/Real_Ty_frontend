@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { handleLandPropertyDetails, handleResidentialPropertyDetails } from '../../utils/auth';
+import { useNavigate, useParams } from 'react-router-dom';
+import { handleDeleteLandProperty, handleDeleteResidentialProperty, handleLandPropertyDetails, handleResidentialPropertyDetails } from '../../utils/auth';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,9 @@ const SellerSingleProperty = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentUser, setCurrentUser] = useState(null); 
+  const navigate = useNavigate()
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to handle modal visibility
+
 
 
   useEffect(() => {
@@ -42,16 +45,33 @@ const SellerSingleProperty = () => {
     fetchProperty();
   }, [id, category]);
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this property?')) {
-      try {
-        // await deleteProperty(id);
-        navigate('/listedproperties');
-      } catch (error) {
-        setError('Failed to delete property.');
+ 
+  const handleDelete = () => {
+    setIsModalOpen(true); 
+  };
+
+  const onConfirm = async () => {
+    setIsModalOpen(false); 
+
+    try {
+      if (category === 'Land') {
+        await handleDeleteLandProperty(id);
+      } else if (category === 'Apartment' || category === 'Villa') {
+        await handleDeleteResidentialProperty(id);
       }
+
+      toast.success('Property deleted successfully.');
+      navigate('/listedproperties'); 
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      toast.error('Failed to delete property.');
     }
   };
+
+  const onCancel = () => {
+    setIsModalOpen(false); 
+  };
+
 
   console.log("Property Data:", property);
 
@@ -65,11 +85,11 @@ const SellerSingleProperty = () => {
       <div className="max-w-7xl mx-auto p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          
-           <div className="md:col-span-2">
+           <div className="md:col-span-2 ">
             <img
               src={standardizeImage(property.images[0]?.image, 800, 400)}
               alt="Property"
-              className="w-75 h-65 object-cover rounded-lg shadow-md"
+              className="w-72  object-cover rounded-lg shadow-md"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -121,6 +141,29 @@ const SellerSingleProperty = () => {
           </div>
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-lg font-semibold mb-4">Are you sure you want to delete this property?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={onCancel}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onConfirm}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </>
   );

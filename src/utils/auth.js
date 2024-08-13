@@ -8,7 +8,9 @@ import { loginUser, googleLoginUser,
   fetchSellerResidents, updateResidentialProperty, 
   updateLandProperty, createSubscription,
   checkSubscriptionStatus,
-  fetchSellerDetails} from './api';
+  fetchSellerDetails,
+  deleteLandProperty,
+  deleteResidentialProperty} from './api';
 import { loginSuccess } from '../redux/authSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
@@ -388,6 +390,30 @@ export const handleUpdateResidentialProperty = async (propertyId, propertyData) 
   }
 };
 
+
+
+export const handleDeleteLandProperty = async (regionId) => {
+  try {
+    const response = await deleteLandProperty(regionId);
+    toast.success('Deletion successful');
+    return response;
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    toast.error('Property deleting error..');
+  }
+};
+
+
+export const handleDeleteResidentialProperty = async (regionId) => {
+  try {
+    const response = await deleteResidentialProperty(regionId);
+    toast.success('Deletion successful');
+    return response;
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    toast.error('Property deleting error..');
+  }
+};
 
 export const handleCheckSubscriptionStatus = async (
   userId, setSubscriptionStatus, setSubscriptionExpired, setListingCount, setDaysLeft, 

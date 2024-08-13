@@ -209,6 +209,16 @@ export const getResidentialPropertyDetails = (propertyId) => {
   return api.get(`/api/residentials/${propertyId}/`);  
 };
 
+// Get the details of a specific land property
+export const deleteLandProperty = (propertyId) => {
+  return response = api.delete(`/api/lands/delete/${propertyId}/`);
+};
+
+// Get the details of a specific residential property
+export const deleteResidentialProperty = (propertyId) => {
+  return api.delete(`/api/residentials/delete/${propertyId}/`);  
+};
+
 
 export const checkSubscriptionStatus = async (userId) => {
   return api.get(`/payments/check-subscription/${userId}/`);
