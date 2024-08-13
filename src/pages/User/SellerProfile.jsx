@@ -38,29 +38,18 @@ const SellerProfile = () => {
         }
     }, [sellerId]);
 
-    // useEffect(() => {
-    //     handleFetchSellerLands(setLands);
-    //     handleFetchSellerResidents((residents) => {
-    //       setVillas(residents.filter(r => r.property_type === 'Villa'));
-    //       setApartments(residents.filter(r => r.property_type === 'Apartment'));
-    //     });
-    //   }, []);
+  
 
     useEffect(() => {
-        handleFetchSellerLands(setLands)
-            .then(response => {
-                console.log("RESPONSE OF LANDS", response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching seller lands:", error);
-            });
-
+        
+        handleFetchSellerLands(setLands);
         handleFetchSellerResidents((residents) => {
-            console.log("RESPONSE OF RESIDENTS", residents.data);
-            setVillas(residents.data.filter(r => r.property_type === 'Villa'));
-            setApartments(residents.data.filter(r => r.property_type === 'Apartment'));
-        });
+          setVillas(residents.filter(r => r.property_type === 'Villa'));
+          setApartments(residents.filter(r => r.property_type === 'Apartment'));
+    });
     }, []);
+    
+  
 
       const renderFirstImage = (images) => {
         if (images.length > 0) {
@@ -80,6 +69,7 @@ const SellerProfile = () => {
           <div key={property.id} className="p-4 bg-white rounded shadow-md w-80">
             <Link to={`/single_property/${property.id}/${property.property_type || 'Land'}`}>
               {renderFirstImage(property.images)}
+              <h3 className="mt-2 font-semibold">{property.category}</h3>
               <h3 className="mt-2 font-semibold">{Math.round(property.price)} Lakhs</h3>
               <h3 className="mt-2 font-semibold">{Math.round(property.size || property.area)} {property.property_type ? 'square feet' : 'cents'}</h3>
               <p>{property.location}</p>
@@ -115,7 +105,7 @@ const SellerProfile = () => {
                 <div>
                   <h3 className="text-lg text-gray-600 font-semibold uppercase">{seller.username}</h3>
                   <p className="text-gray-500">Email: {seller.user.email}</p>
-                  <p className="text-gray-500">DOB: {seller.user.date_of_birth}</p>
+                  {/* <p className="text-gray-500">DOB: {seller.user.date_of_birth}</p> */}
                   {seller.address ? <p className="text-gray-500 capitalize">Addresss: {seller.user.address} </p>: null}
                    {seller.contact_number ? <p className="text-gray-500">Contact Number: {seller.user.contact_number} </p>: null}       
                   <p className="text-gray-500">Agency Name: {seller.agency_name }</p>

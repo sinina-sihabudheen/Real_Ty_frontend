@@ -54,8 +54,6 @@ const SellerSingleProperty = () => {
   };
 
   console.log("Property Data:", property);
-  // console.log("Amenities Data:", property.amenities);
-
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;

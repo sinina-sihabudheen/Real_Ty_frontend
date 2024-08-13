@@ -107,10 +107,6 @@ const PropertyForm = () => {
 
     formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
     formData.images.forEach(image => propertyData.append('new_images', image));
-    
-    // if (formData.images.length > 0) {
-    //   Array.from(formData.images).forEach(image => propertyData.append('new_images', image));
-    // }
 
     if (formData.video) {
       propertyData.append('video', formData.video);
@@ -545,7 +541,7 @@ const PropertyForm = () => {
     return <p>Loading...</p>;
   }
 
-  if (!isSubscribed || subscriptionExpired || listingCount>=5) {
+  if ((!isSubscribed && listingCount>=5) || subscriptionExpired ) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="mb-4">

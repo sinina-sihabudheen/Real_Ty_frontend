@@ -315,10 +315,11 @@ export const handleFetchSellerLands = async (setLands) => {
 export const handleFetchSellerResidents = async (setResidents) => {
   try {
     const response = await fetchSellerResidents();
+    console.log(("DATA RESIDENTS",response.data));
     setResidents(response.data);
   } catch (error) {
     console.error('Error fetching seller residents :', error);
-  }
+}
 };
 
 export const handleLandPropertyDetails = async (propertyId) => {

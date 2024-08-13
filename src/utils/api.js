@@ -1,5 +1,6 @@
 
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000',
@@ -149,47 +150,32 @@ export const createResidentialProperty = async (propertyData) => {
 };
 
 
-// Update an existing land property
+
 export const updateLandProperty = async (propertyId, propertyData) => {
   try {
-    const formData = new FormData();
-    for (const key in propertyData) {
-      if (propertyData[key] !== undefined && propertyData[key] !== null) {
-        formData.append(key, propertyData[key]);
-      }
-    }
-
-    const response = await api.put(`/api/lands/${propertyId}/`, formData, {
+    const response = await api.patch(`/api/lands/update/${propertyId}/`, propertyData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-      }
+      },
     });
     return response.data;
   } catch (error) {
-    console.error('Failed to update land property:', error);
-    throw error; 
+    toast.error('Failed to update land property:', error);
+    throw error;
   }
 };
 
-// Update an existing residential property
 export const updateResidentialProperty = async (propertyId, propertyData) => {
   try {
-    const formData = new FormData();
-    for (const key in propertyData) {
-      if (propertyData[key] !== undefined && propertyData[key] !== null) {
-        formData.append(key, propertyData[key]);
-      }
-    }
-
-    const response = await api.put(`/api/residentials/${propertyId}/`, formData, {
+    const response = await api.patch(`/api/residentials/update/${propertyId}/`, propertyData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-      }
+      },
     });
     return response.data;
   } catch (error) {
-    console.error('Failed to update residential property:', error);
-    throw error; 
+    toast.error('Failed to update residential property:', error);
+    throw error;
   }
 };
 

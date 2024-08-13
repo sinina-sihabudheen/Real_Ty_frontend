@@ -15,7 +15,7 @@ const EditProperty = () => {
     area: '',
     amenities: [],
     location: '',
-    images: null,
+    images: [],
     video: null,
     numRooms: '',
     numBathrooms: '',
@@ -26,6 +26,7 @@ const EditProperty = () => {
   const [amenitiesOptions, setAmenitiesOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [formErrors, setFormErrors] = useState({}); 
 
   useEffect(() => {
     handleFetchAmenity(setAmenitiesOptions);
@@ -48,13 +49,22 @@ const EditProperty = () => {
     fetchPropertyDetails();
   }, [id, category]);
 
+ 
+
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    setFormData({
-      ...formData,
-      [name]: files ? files[0] : value,
-    });
-  };
+    const { name, files } = e.target;
+    if (name === 'images') {
+        setFormData({
+            ...formData,
+            images: files 
+        });
+    } else {
+        setFormData({
+            ...formData,
+            [name]: files ? files[0] : e.target.value,
+        });
+    }
+};
 
   const handleSelectChange = (selectedOptions) => {
     setFormData({
@@ -70,15 +80,19 @@ const EditProperty = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setFormErrors({}); 
   
     const propertyData = new FormData();
 
-    propertyData.append('category', category || '');
-    propertyData.append('price', formData.price || '');
-    propertyData.append('description', formData.description || '');
-    propertyData.append('area', formData.area || '');
-    formData.amenities.forEach(amenity => propertyData.append('amenities', amenity.value));
-    propertyData.append('location', formData.location || '');
+    if (category) propertyData.append('category', category || '');
+    if (formData.price) propertyData.append('price', formData.price || '');
+    if (formData.description) propertyData.append('description', formData.description || '');
+    propertyData.append('property_type', category || '');  
+
+    if (formData.area) propertyData.append('area', formData.area || '');
+    if (formData.amenities) formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
+
+    if (formData.location) propertyData.append('location', formData.location || '');
   
     if (formData.images) {
         propertyData.append('images', formData.images);
@@ -87,10 +101,10 @@ const EditProperty = () => {
         propertyData.append('video', formData.video);
     }
     if (category !== 'Land') {
-        propertyData.append('num_rooms', formData.numRooms || '');
-        propertyData.append('num_bathrooms', formData.numBathrooms || '');
-        propertyData.append('size', formData.size || '');
-        propertyData.append('land_area', formData.landArea || '');
+      if (formData.numRooms) propertyData.append('num_rooms', parseInt(formData.numRooms) || '');
+      if (formData.numBathrooms) propertyData.append('num_bathrooms', parseInt(formData.numBathrooms) || '');
+      if (formData.size) propertyData.append('size', formData.size || '');
+      if (formData.landArea) propertyData.append('land_area', formData.landArea || '');
     }
     propertyData.append('seller', user.id || '');
 
@@ -98,21 +112,25 @@ const EditProperty = () => {
     for (let pair of propertyData.entries()) {
         console.log(pair[0] + ': ' + pair[1]);
     }
-
+ 
     try {
-        if (category === 'Land') {
-            await updateLandProperty(id, propertyData);
-        } else if (category === 'Apartment' || category === 'Villa') {
-            await updateResidentialProperty(id, propertyData);
-        }
-        alert('Property updated successfully!');
-        navigate('/listedproperties');
-    } catch (error) {
-        console.error('Failed to update property:', error);
-        setError('Failed to update property');
-    } finally {
-        setLoading(false);
-    }
+      let updateResponse;
+      if (category === 'Land') {
+         updateResponse = await updateLandProperty(id, propertyData);
+      } else if (category === 'Apartment' || category === 'Villa') {
+         updateResponse = await updateResidentialProperty(id, propertyData);
+      }
+
+      if (updateResponse) {
+          navigate('/listedproperties');
+      }
+  } catch (error) {
+      console.error('Failed to update property:', error);
+      setError('Failed to update property');
+   
+  } finally {
+      setLoading(false);
+  }
 };
 
 
@@ -121,202 +139,249 @@ const EditProperty = () => {
       case 'Land':
         return (
           <>
-            <input 
-              type="number" 
-              name="price" 
-              value= {Math.round(formData.price)}
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Expected Price in Lakhs" />
-            <textarea 
-              name="description" v
-              alue={formData.description} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Description in short"></textarea>
-            <input 
-              type="text" 
-              name="area" 
-              value={Math.round(formData.area)} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Area in Cents" />
-            <Select
-              name="amenities"
-              value={formData.amenities}
-              onChange={handleSelectChange}
-              options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-              isMulti
-              className="w-full mb-4"
-              placeholder="Select Amenities"
-            />
-            <input 
-              type="text" 
-              name="location" 
-              value={formData.location} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Location" />
-            <input 
-              type="file" 
-              name="images" 
-              onChange={handleInputChange} 
-              accept="image/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload image" />
-            <input 
-              type="file" 
-              name="video" 
-              onChange={handleInputChange} 
-              accept="video/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload video" />
-          </>
-        );
-      case 'Apartment':
-        return (
-          <>
-            <input 
-              type="number" 
-              name="price" 
-              value={Math.round(formData.price)} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Price" />
-            <input 
-              type="text" 
-              name="location" 
-              value={formData.location} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Location" />
-            <input 
-              type="number" 
-              name="numRooms" 
-              value={formData.numRooms} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Number of Rooms" />
-            <input 
-              type="number" 
-              name="numBathrooms" 
-              value={formData.numBathrooms} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Number of Bathrooms" />
-            <input 
-              type="text" 
-              name="size" 
-              value={Math.round(formData.size)} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Size in Square Feet" />
-            <textarea 
-              name="description" 
-              value={formData.description} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Description in short"></textarea>
-            <Select
-              name="amenities"
-              value={formData.amenities}
-              onChange={handleSelectChange}
-              options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-              isMulti
-              className="w-full mb-4"
-              placeholder="Select Amenities"
-            />
-            <input 
-              type="file" 
-              name="images" 
-              onChange={handleInputChange} 
-              accept="image/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload image" />
-            <input 
-              type="file" 
-              name="video" 
-              onChange={handleInputChange} 
-              accept="video/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload video" />
-          </>
-        );
-      case 'Villa':
-        return (
-          <>
-            <input 
-              type="number" 
-              name="price" 
-              value={Math.round(formData.price)} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Price" />
-            <input 
-              type="text" 
-              name="location" 
-              value={formData.location} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Location" />
-            <input 
-              type="number" 
-              name="numRooms" 
-              value={formData.numRooms} 
-              onChange={handleInputChange} 
-              lassName="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Number of Rooms" />
-            <input 
-              type="number" 
-              name="numBathrooms" 
-              value={formData.numBathrooms} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Number of Bathrooms" />
-            <input 
-              type="text" 
-              name="area" 
-              value={Math.round(formData.area)} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Area in Cents" />
-            <input 
-              type="text" 
-              name="size" 
-              value={Math.round(formData.size)} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Size in Square Feet" />
-            <textarea 
-              name="description" 
-              value={formData.description} 
-              onChange={handleInputChange} 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Description in short"></textarea>
-            <Select
-              name="amenities"
-              value={formData.amenities}
-              onChange={handleSelectChange}
-              options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-              isMulti
-              className="w-full mb-4"
-              placeholder="Select Amenities"
-            />
-            <input 
-              type="file" 
-              name="images" 
-              onChange={handleInputChange} 
-              accept="image/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload image" />
-            <input 
-              type="file" 
-              name="video" 
-              onChange={handleInputChange} 
-              accept="video/*" 
-              className="w-full px-4 py-2 border border-gray-300 rounded" 
-              placeholder="Upload video" />
-          </>
+          <label htmlFor="price" className="block text-gray-700">Price
+          <input 
+            type="number" 
+            id="price"
+            name="price" 
+            value={Math.round(formData.price)} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Expected Price in Lakhs" />
+          </label>
+          <label htmlFor="description" className="block text-gray-700">Description
+          <textarea 
+            id="description"
+            name="description" 
+            value={formData.description} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Description in short"></textarea>
+          </label>
+          <label htmlFor="area" className="block text-gray-700">Area
+          <input 
+            type="text" 
+            id="area"
+            name="area" 
+            value={Math.round(formData.area)} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Area in Cents" />
+          </label>
+          <label htmlFor="amenities" className="block text-gray-700">Amenities
+          <Select
+            name="amenities"
+            value={formData.amenities}
+            onChange={handleSelectChange}
+            options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
+            isMulti
+            className="w-full mb-4"
+            placeholder="Select Amenities"
+          />
+          </label>
+          <label htmlFor="location" className="block text-gray-700">Location
+          <input 
+            type="text" 
+            id="location"
+            name="location" 
+            value={formData.location} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Location" />
+          </label>
+          <label htmlFor="images" className="block text-gray-700">Images
+          <input 
+            type="file" 
+            id="images"
+            name="images" 
+            onChange={handleInputChange} 
+            accept="image/*" 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Upload image" />
+          </label>
+          <label htmlFor="video" className="block text-gray-700">Video
+          <input 
+            type="file" 
+            id="video"
+            name="video" 
+            onChange={handleInputChange} 
+            accept="video/*" 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Upload video" />
+          </label>
+        </>
+      );
+    case 'Apartment':
+      return (
+        <>
+          <label htmlFor="price" className="block text-gray-700">Price
+          <input 
+            type="number" 
+            id="price"
+            name="price" 
+            value={Math.round(formData.price)} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Price" />
+          </label>
+          <label htmlFor="location" className="block text-gray-700">Location
+          <input 
+            type="text" 
+            id="location"
+            name="location" 
+            value={formData.location} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Location" />
+          </label>
+          <label htmlFor="numRooms" className="block text-gray-700">Number of Rooms
+          <input 
+            type="number" 
+            id="numRooms"
+            name="numRooms" 
+            value={formData.numRooms} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Number of Rooms" />
+          </label>
+          <label htmlFor="numBathrooms" className="block text-gray-700">Number of Bathrooms
+          <input 
+            type="number" 
+            id="numBathrooms"
+            name="numBathrooms" 
+            value={formData.numBathrooms} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Number of Bathrooms" />
+          </label>
+          <label htmlFor="size" className="block text-gray-700">Size
+          <input 
+            type="text" 
+            id="size"
+            name="size" 
+            value={formData.size} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Size (in sq ft)" />
+          </label>
+          <label htmlFor="amenities" className="block text-gray-700">Amenities
+          <Select
+            name="amenities"
+            value={formData.amenities}
+            onChange={handleSelectChange}
+            options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
+            isMulti
+            className="w-full mb-4"
+            placeholder="Select Amenities"
+          />
+          </label>
+          <label htmlFor="images" className="block text-gray-700">Images
+          <input 
+            type="file" 
+            id="images"
+            name="images" 
+            onChange={handleInputChange} 
+            accept="image/*" 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Upload image" />
+          </label>
+          <label htmlFor="video" className="block text-gray-700">Video
+          <input 
+            type="file" 
+            id="video"
+            name="video" 
+            onChange={handleInputChange} 
+            accept="video/*" 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Upload video" />
+          </label>
+        </>
+      );
+    case 'Villa':
+      return (
+        <>
+          <label htmlFor="price" className="block text-gray-700">Price
+          <input 
+            type="number" 
+            id="price"
+            name="price" 
+            value={Math.round(formData.price)} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Price" />
+          </label>
+          <label htmlFor="location" className="block text-gray-700">Location
+          <input 
+            type="text" 
+            id="location"
+            name="location" 
+            value={formData.location} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Location" />
+          </label>
+          <label htmlFor="numRooms" className="block text-gray-700">Number of Rooms
+          <input 
+            type="number" 
+            id="numRooms"
+            name="numRooms" 
+            value={formData.numRooms} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Number of Rooms" />
+          </label>
+          <label htmlFor="numBathrooms" className="block text-gray-700">Number of Bathrooms
+          <input 
+            type="number" 
+            id="numBathrooms"
+            name="numBathrooms" 
+            value={formData.numBathrooms} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Number of Bathrooms" />
+          </label>
+          <label htmlFor="size" className="block text-gray-700">Size
+          <input 
+            type="text" 
+            id="size"
+            name="size" 
+            value={formData.size} 
+            onChange={handleInputChange} 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Size (in sq ft)" />
+          </label>
+          <label htmlFor="amenities" className="block text-gray-700">Amenities
+          <Select
+            name="amenities"
+            value={formData.amenities}
+            onChange={handleSelectChange}
+            options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
+            isMulti
+            className="w-full mb-4"
+            placeholder="Select Amenities"
+          />
+          </label>
+          <label htmlFor="images" className="block text-gray-700">Images
+          <input 
+            type="file" 
+            id="images"
+            name="images" 
+            onChange={handleInputChange} 
+            accept="image/*" 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Upload image" />
+          </label>
+          <label htmlFor="video" className="block text-gray-700">Video
+          <input 
+            type="file" 
+            id="video"
+            name="video" 
+            onChange={handleInputChange} 
+            accept="video/*" 
+            className="w-full px-4 py-2 border border-gray-300 rounded" 
+            placeholder="Upload video" />
+          </label>
+        </>
         );
       default:
         return null;
@@ -328,13 +393,20 @@ const EditProperty = () => {
        <div className="mb-4">
         <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
       </div>
-      <h1 className="text-xl font-bold mb-4">Edit Property Here</h1>
-      {error && <p className="text-red-500">{error}</p>}
+      <h1 className="text-xl font-bold mb-4">Edit your {category} Property details</h1>
+      {error && <p className="text-red-600">{error}</p>}
       <form onSubmit={handleSubmit} className='w-full max-w-md space-y-4'>
         {renderFormFields()}
+        {formErrors && Object.keys(formErrors).length > 0 && (
+          <div className="error-messages">
+            {Object.entries(formErrors).map(([field, message]) => (
+              <p key={field}>{message}</p>
+            ))}
+          </div>
+        )}
         <button
           type="submit"
-          className="px-4 py-2 bg-red-500 text-white rounded"
+          className="px-4 py-2 bg-blue-400 hover:bg-blue-600 text-white rounded"
           disabled={loading}
         >
           {loading ? 'Updating...' : 'Update Property'}
@@ -342,7 +414,7 @@ const EditProperty = () => {
         <button 
             type="button" 
             onClick={handleCancel} 
-            className="bg-gray-400 text-white px-4 py-2 rounded-md">Cancel</button>
+            className="bg-red-400 hover:bg-red-600 text-white px-4 py-2 rounded-md">Cancel</button>
       </form>
     </div>
   );

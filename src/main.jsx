@@ -9,6 +9,8 @@ import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { Toaster } from "sonner";
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 
 const stripePromise = loadStripe('pk_test_51PeAv3GYaADgjXW8SBDpSToR8TtuB29Hi5loSI4lQpi3zDc7zpZxrZiYxv6EDHiMffNmvsebBgpx0cCAyxLHiiDV00Xz1y0bpm'); 
