@@ -43,8 +43,7 @@ const AdminHomePage = () => {
                 total_apartments={dashboardData.total_apartments}
                 total_villas={dashboardData.total_villas}
                 total_users ={dashboardData.total_users}
-                total_sellers={dashboardData.total_sellers}
-                total_buyers={dashboardData.total_buyers}
+                
               />
             </div>
             

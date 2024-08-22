@@ -430,6 +430,7 @@ const SinglePropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [mainImage, setMainImage] = useState("");
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -443,7 +444,7 @@ const SinglePropertyDetails = () => {
           }
           setProperty(data);
           if (data.images.length > 0) {
-            setMainImage(data.images[0].image); // Set the initial main image
+            setMainImage(data.images[0].image);
           }
         }
       } catch (error) {
@@ -460,6 +461,15 @@ const SinglePropertyDetails = () => {
     setMainImage(image);
   };
 
+  const openVideoModal = () => {
+        setIsVideoModalOpen(true);
+      };
+    
+  const closeVideoModal = () => {
+        setIsVideoModalOpen(false);
+      };
+    
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   if (!property) return <p>No property data available.</p>;
@@ -469,10 +479,9 @@ const SinglePropertyDetails = () => {
   return (
     <>
       <Navbar />
-      <div className="py-10 max-w-7xl mx-auto">
+      <div className={`py-10 max-w-7xl mx-auto ${isVideoModalOpen ? "blur-lg" : "" }`}>
         <div className="bg-white w-full px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Image Section */}
             <div className="flex flex-col items-center">
               {mainImage ? (
                 <img
@@ -496,7 +505,17 @@ const SinglePropertyDetails = () => {
                     />
                   ))
                 ) : (
-                  <p className="text-gray-500">No images available</p>
+                  <p className="text-gray-600">No images available</p>
+                )}
+              </div>
+              <div className="flex space-x-2">
+                {property.video && (
+                  <button
+                    className="border-gray-600 bg-slate-200  w-44 h-10  text-gray-500 rounded"
+                    onClick={openVideoModal}
+                  >
+                    play Video
+                  </button>
                 )}
               </div>
             </div>
@@ -524,15 +543,15 @@ const SinglePropertyDetails = () => {
 
               <div className="mb-4">
                 <h2 className="text-xl font-bold mb-2">Property Details</h2>
-                <ul className="list-disc list-inside text-gray-700">
+                <ul className="list-disc list-inside text-gray-700 capitalize">
                   <li>Type: {property.category}</li>
                   <li>Description: {property.description}</li>
                 </ul>
               </div>
 
-              <div className="mb-4">
-                <h2 className="text-xl font-bold mb-2">Agent Details</h2>
-                <div className="flex items-center space-x-4">
+              <div className="mb-4 bg-slate-200 shadow-lg">
+                <h2 className="text-xl ml-5 font-bold mb-2">Agent Details</h2>
+                <div className="flex ml-5 mt-5 items-center space-x-4">
                   {property.seller && (
                     <>
                       <Link to={`/sellerprofile/${property.seller.id}`}>
@@ -547,10 +566,10 @@ const SinglePropertyDetails = () => {
                         />
                       </Link>
                       <div>
-                        <h3 className="text-lg font-semibold">
+                        <h3 className="text-lg font-semibold capitalize">
                           {property.seller.user.username}
                         </h3>
-                        <p className="text-gray-500">
+                        <p className="text-gray-500 capitalize">
                           Agency: {property.seller.agency_name}
                         </p>
                         <div className="flex items-center space-x-4 mt-2">
@@ -575,8 +594,8 @@ const SinglePropertyDetails = () => {
                   Amenities - Available facilities nearby
                 </h2>
                 <p>
-                  {property.amenities && property.amenities.length > 0
-                    ? property.amenities.join(", ")
+                  {property.amenities_names && property.amenities_names.length > 0
+                    ? property.amenities_names.join(", ")
                     : "N/A"}
                 </p>
               </div>
@@ -584,6 +603,23 @@ const SinglePropertyDetails = () => {
           </div>
         </div>
       </div>
+      {/* Video Modal */}
+      {isVideoModalOpen && property.video && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="relative bg-white p-4 rounded-lg max-w-lg w-full">
+            <button
+              className="absolute bg-transparent hover:bg-red-200 shadow-md rounded h-10 w-10 top-2 text-3xl right-2 text-black-800 z-50"
+              onClick={closeVideoModal}
+            >
+              &times;
+            </button>
+            <video controls className="w-full h-auto">
+              <source src={property.video} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      )}
       <Footer />
     </>
   );

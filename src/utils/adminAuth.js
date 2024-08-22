@@ -1,12 +1,11 @@
 
 import { loginAdmin, fetchUserData, 
   fetchResidentsList, fetchLandsList, 
-  fetchSellersData,blockSeller,unblockSeller,
   fetchUsersData,blockUser,unblockUser,
-  fetchBuyersData, blockBuyer,unblockBuyer,
   fetchRegions,addRegion,deleteRegion,
   fetchAmenities,addAmenity,deleteAmenity,
-  fetchCategory,addCategory,deleteCategory
+  fetchCategory,addCategory,deleteCategory,
+  subscriptionList
   } from './api';
 import { adminLoginSuccess } from '../redux/adminAuthSlice';
 import {jwtDecode} from 'jwt-decode';
@@ -41,10 +40,11 @@ export const handleAdminLogin = async (email, password, dispatch, navigate) => {
     navigate('/admin/adminhomepage');  
     toast.success('Login Successful');
   } catch (error) {
-    navigate('/admin/login');
-    console.error(error);
-    localStorage.setItem('admin', 'false');
-    toast.error('Login Failed: Please try again');
+    console.log(error);
+      if (error){
+        toast.error(`Login Failed: ${error.message}`);
+      }
+      console.error('ERROR', error);
   }
 };
 
@@ -78,29 +78,6 @@ export const handleFetchUsersData = async (setUser, setIsLoading, setError) => {
   }
 };
 
-export const handleFetchSellersData = async (setUser, setIsLoading, setError) => {
-  try {
-    const response = await fetchSellersData();
-    console.log('Sellers data:', response.data); // Log the data received
-
-    setUser(response.data);
-    setIsLoading(false);
-  } catch (error) {
-    setError('Error fetching user data');
-    setIsLoading(false);
-  }
-};
-
-export const handleFetchBuyersData = async (setUser, setIsLoading, setError) => {
-  try {
-    const response = await fetchBuyersData();
-    setUser(response.data);
-    setIsLoading(false);
-  } catch (error) {
-    setError('Error fetching user data');
-    setIsLoading(false);
-  }
-};
 
 export const handleFetchLandsList = async (setLands, setIsLoading, setError) => {
   try {
@@ -117,12 +94,9 @@ export const handleFetchLandsList = async (setLands, setIsLoading, setError) => 
 export const handleFetchResidentsList = async (setProperties) => {
   try {
     const response = await fetchResidentsList();
-    // console.log('residents data:', response.data);
     setProperties(response.data);
-    // setIsLoading(false);
   } catch (error) {
-    // setError('Error fetching user data');
-    // setIsLoading(false);
+    
     console.error('Error fetching seller residents :', error);
 
   }
@@ -260,69 +234,14 @@ export const handleUnblockUser = async (userId, setUsers) => {
   }
 };
 
-export const handleBlockSeller = async (sellerId, setUsers) => {
-  try {
-      const response = await blockSeller(sellerId);
-      toast.success('Seller blocked successfully');
-      setUsers(prevUsers =>
-          prevUsers.map(user =>
-              user.id === sellerId ? { ...user, user: { ...user.user, is_active: false } } : user
-          )
-      );
-  } catch (error) {
-      toast.error('Error blocking seller');
-      console.error('Error blocking seller:', error);
-  }
-};
 
-export const handleUnblockSeller = async (sellerId, setUsers) => {
+export const handleFetchSubscriptionList = async (setSubscriptions) => {
   try {
-      const response = await unblockSeller(sellerId);
-      toast.success('Seller unblocked successfully');
-      setUsers(prevUsers =>
-          prevUsers.map(user =>
-              user.id === sellerId ? { ...user, user: { ...user.user, is_active: true } } : user
-          )
-      );
+    console.log("ENETERED INTO SUBSCRIPTION LIST......");
+    const response = await subscriptionList();
+    console.log("RESPONSE   ", response);
+    setSubscriptions(response.data);
   } catch (error) {
-      toast.error('Error unblocking seller');
-      console.error('Error unblocking seller:', error);
-  }
-};
-
-export const handleBlockBuyer = async (buyerId,setUsers) => {
-  try {
-      const response = await blockBuyer(buyerId);
-      if (response.status === 200) {
-          toast.success("Buyer blocked successfully");
-          setUsers(prevUsers =>
-            prevUsers.map(user =>
-                user.id === buyerId ? { ...user, user: { ...user.user, is_active: true } } : user
-            )
-        );
-          return response.data;
-      }
-
-  } catch (error) {
-      console.error("Error blocking buyer:", error);
-      toast.error("Failed to block buyer");
-  }
-};
-
-export const handleUnblockBuyer = async (buyerId,setUsers) => {
-  try {
-      const response = await unblockBuyer(buyerId);
-      if (response.status === 200) {
-          toast.success("Buyer unblocked successfully");
-          setUsers(prevUsers =>
-            prevUsers.map(user =>
-                user.id === buyerId ? { ...user, user: { ...user.user, is_active: true } } : user
-            )
-        );
-          return response.data;
-      }
-  } catch (error) {
-      console.error("Error unblocking buyer:", error);
-      toast.error("Failed to unblock buyer");
+    console.error('Error fetching regions:', error);
   }
 };

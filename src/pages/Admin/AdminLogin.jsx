@@ -20,6 +20,7 @@ const Login = () => {
         e.preventDefault();
         handleAdminLogin(email, password, dispatch, navigate)
           .catch(error => {
+            navigate('/admin/login');
             toast.error('Login Failed: Please try again');
             console.error('Login error:', error);
           });

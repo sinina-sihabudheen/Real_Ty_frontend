@@ -1,6 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { handleFetchSellerLands, handleFetchSellerResidents, handleFetchUserData, handleCheckSubscriptionStatus } from '../../utils/auth';
+import { handleFetchSellerLands, 
+  handleFetchSellerResidents, 
+  handleFetchUserData,   
+  handleCheckSubscriptionStatus, 
+  handleDeleteLandProperty, 
+  handleDeleteResidentialProperty } from '../../utils/auth';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -12,7 +17,6 @@ const standardizeImage = (url, width, height) => {
 };
 
 export const ListedProperties = () => {
-  // const { sellerId } = useParams();
   const [user, setUser] = useState(null);
   const [lands, setLands] = useState([]);
   const [villas, setVillas] = useState([]);
@@ -22,6 +26,7 @@ export const ListedProperties = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const seller = useSelector(state => state.auth.user); 
 
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
@@ -29,6 +34,8 @@ export const ListedProperties = () => {
   const [daysLeft, setDaysLeft] = useState(0);
   const [subscriptionType, setSubscriptionType] = useState(null);
   const [paymentPlan, setPaymentPlan] = useState('free');
+  const [subscriptionId, setSubscriptionId] = useState(null);
+
 
   useEffect(() => {
     handleFetchUserData(setUser, setIsLoading, setError);
@@ -40,7 +47,7 @@ export const ListedProperties = () => {
   }, []);
 
   useEffect(() => {
-    handleCheckSubscriptionStatus(seller.id, setIsSubscribed, 
+    handleCheckSubscriptionStatus(seller.id, setSubscriptionId, setIsSubscribed, 
       setSubscriptionExpired, setListingCount, setDaysLeft, 
       setSubscriptionType, setPaymentPlan);
 console.log(paymentPlan);
@@ -66,31 +73,61 @@ console.log(paymentPlan);
     }
     return null;
   };
-console.log("PAymentplan",paymentPlan);
-  const handleVideoClick = (property) => {
+console.log("PAymentplan",paymentPlan,subscriptionExpired);
+const handleVideoClick = (property) => {
     setSelectedProperty(property);
   };
 
   const handleImagesClick = (property) => {
     setSelectedProperty(property);
   };
+  const handleDelete = () => {
+    setIsModalOpen(true); 
+  };
+  const onCancel = () => {
+    setIsModalOpen(false); 
+  };
+  const onConfirm = async () => {
+    setIsModalOpen(false); 
+
+    try {
+      if (category === 'Land') {
+        await handleDeleteLandProperty(id);
+      } else if (category === 'Apartment' || category === 'Villa') {
+        await handleDeleteResidentialProperty(id);
+      }
+      navigate('/listedproperties'); 
+      toast.success('Property deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      toast.error('Failed to delete property.');
+    }
+  };
 
   const renderVideoButton = (property) => {
-    return property.video ? (
+    // return property.video ? (
+    //   <button
+    //     onClick={() => handleVideoClick(property)}
+    //     className="text-slate-500 w-full rounded bg-white-600 shadow-md hover:bg-gray-100 mt-2 block"
+    //   >
+    //     Video Added
+    //   </button>
+    // ) : (
+    //   <button
+    //     onClick={() => handleVideoClick(property)}
+    //     className="text-slate-500 w-full rounded bg-white-600 shadow-md hover:bg-gray-100 mt-2 block"
+    //   >
+    //     + Video
+    //   </button>
+    // );
+    return property.video  (
       <button
         onClick={() => handleVideoClick(property)}
         className="text-slate-500 w-full rounded bg-white-600 shadow-md hover:bg-gray-100 mt-2 block"
       >
         Video Added
       </button>
-    ) : (
-      <button
-        onClick={() => handleVideoClick(property)}
-        className="text-slate-500 w-full rounded bg-white-600 shadow-md hover:bg-gray-100 mt-2 block"
-      >
-        + Video
-      </button>
-    );
+    ) 
   };
 
   const renderImagesButton = (property) => {
@@ -109,18 +146,26 @@ console.log("PAymentplan",paymentPlan);
       <div key={property.id} className="p-4 bg-white rounded shadow-md w-80">
         <Link to={`/seller_singleproperty/${property.id}/${property.property_type || 'Land'}`}>
           {renderFirstImage(property.images)}
-          <h3 className="mt-2 font-semibold">{Math.round(property.price)} Lakhs</h3>
-          <h3 className="mt-2 font-semibold">{Math.round(property.size || property.area)} {property.property_type ? 'square feet' : 'cents'}</h3>
-          <p>{property.location}</p>
+          <h3 className="mt-2 font-semibold"> {property.category}</h3>
+          <h3 className="mt-2 font-semibold">Price: ₹{Math.round(property.price)} Lakhs</h3>
+          {/* <h3 className="mt-2 font-semibold">{Math.round(property.size || property.area)} {property.property_type ? 'square feet' : 'cents'}</h3> */}
+          <h3 className="mt-2 font-semibold">{property.property_type ? 'Size: ' : 'Area: '}{Math.round(property.size || property.area)} {property.property_type ? 'sqft' : 'cents'}</h3>
+
+          <p>Location: {property.location}</p>
         </Link>
-        <div className='flex space-x-2'>
+        {/* <div className='flex space-x-2'>
           {renderVideoButton(property)}
           {renderImagesButton(property)}
-        </div>
+        </div> */}
         <div className='py-2'>
-          <Link to={`/edit_property/${property.id}/${property.category}`} className="text-gray-500 w-full rounded bg-gray-200 shadow-md hover:bg-slate-300 hover:text-slate-700 mt-2 block text-center">
+          <Link to={`/edit_property/${property.id}/${property.category}`} className="text-white-300 w-full rounded hover:bg-gray-200 shadow-md bg-blue-400 hover:text-slate-700 mt-2 block text-center">
             Edit
           </Link>
+        </div>
+        <div className='py-2'>
+          <button onClick={handleDelete} className="text-white-300 w-full rounded hover:bg-gray-200 shadow-md bg-red-400 hover:text-gray-500 mt-2 block text-center">
+              Delete
+          </button>
         </div>
       </div>
     ));
@@ -134,8 +179,8 @@ console.log("PAymentplan",paymentPlan);
             <h2 className="text-xl text-gray-700 font-bold">My Profile</h2>
             <div className='flex space-x-1'>
               <p className='text-lg text-gray-500'>Subscription Status:</p>
-              <h1 className='text-blue-600 text-xl capitalize'>{paymentPlan}</h1>
-              {/* <p>{listingCount} items can add</p> */}
+              <h1 className='text-blue-600 text-xl capitalize'>{paymentPlan}{subscriptionExpired}</h1>
+              {/* <p>{daysLeft} days to end</p> */}
 
             </div>
           </div>
@@ -155,15 +200,68 @@ console.log("PAymentplan",paymentPlan);
                 <p className="text-gray-500 capitalize">Address: {user.address}</p>
                 <p className="text-gray-500">Contact Number: +91 {user.contact_number ? user.contact_number : null}</p>
               </div>
-              <div className="flex space-x-8">
-                <Link to="/property_type" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
-                  <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>
-                </Link>
-                {paymentPlan==='free' && (
-                   
+              <div className="flex space-x-4">
+                {(paymentPlan === 'premium' && !subscriptionExpired) ||
+                (paymentPlan === 'basic' && !subscriptionExpired && listingCount < 5) ? (
+                  <Link to="/property_type" className="text-gray-500 hover:text-gray-300 text-sm font-medium">
+                    <button className="bg-gray-400 text-white py-2 px-4 rounded-md">
+                      Add Property
+                    </button>
+                  </Link>
+                ) : (
+                  <span>
+                    {subscriptionExpired 
+                      ? "Your subscription has expired. Please renew to add properties." 
+                      : "Listing limit reached. Please upgrade your plan to add more properties."
+                    }
+                  </span>
+                )}
+
+                {paymentPlan === 'basic' && (
+                  <Link to="/listing_package" className="text-gray-500 hover:text-gray-300 text-sm font-medium">
+                    <button className="bg-gray-400 text-white py-2 px-4 rounded-md">
+                      For Premium Account
+                    </button>
+                  </Link>
+                )}
+
+                {paymentPlan === 'premium' && subscriptionExpired && (
+                  <Link to="/subscription" className="text-gray-500 hover:text-gray-300 text-sm font-medium">
+                    <button className="bg-gray-400 text-white py-2 px-4 rounded-md">
+                      Go To Payment
+                    </button>
+                  </Link>
+                )}
+
+                {paymentPlan === 'premium' && !subscriptionExpired && (
+                  <Link to={`/invoice/${subscriptionId}`} className="text-gray-500 hover:text-gray-300 text-sm font-medium">
+                    <button className="bg-gray-400 text-white py-2 px-4 rounded-md">
+                      Payment History
+                    </button>
+                  </Link>
+                )}
+              </div>
+
+              {/* <div className="flex space-x-8">
+                
+                {(paymentPlan === 'premium' && !subscriptionExpired) ||
+                  (paymentPlan === 'basic' && !subscriptionExpired && listingCount < 5) ? (
+                    <div>
+                    
+                    <Link to="/property_type" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
+                      <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>
+                    </Link>
+                    </div>
+                    
+                  ) : (
+                    <div><span>{subscriptionExpired ? "Your subscription has expired. Please renew to add properties." : "Listing limit reached. Please upgrade your plan to add more properties."}</span></div>
+                  )}
+                {paymentPlan==='basic' && (
+                  <div>
+                   <span>You can add {5-listingCount} properties for one month.</span>
                    <Link to="/listing_package" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
                      <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">For Premium Account</button>
-                   </Link>
+                   </Link></div>
                 )}
                 {paymentPlan==='premium' && subscriptionExpired && (
                    
@@ -171,47 +269,57 @@ console.log("PAymentplan",paymentPlan);
                      <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Go To Payment</button>
                    </Link>
                 )}
-              </div>            
+                {paymentPlan==='premium' && !subscriptionExpired && (
+                   
+                  <Link to={`/invoice/${subscriptionId}`} className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
+                      <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Payment History</button>
+                  </Link>
+                )}
+              </div>             */}
             </div>
         </div>
+        { !(lands.length==0 && villas.length==0 && apartments.length==0) ? (
+              <div className="w-3/4 p-4 mx-auto flex space-x-2">
+                {lands.length > 0 && (
+                  <>
+                    {/* <h2 className="font-bold mb-4">Listed Lands</h2> */}
+                    <section className="mb-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        {renderProperties(lands)}
+                      </div>
+                    </section>
+                  </>
+                )}
 
-      <div className="w-3/4 p-4 mx-auto">
-        {lands.length > 0 && (
-          <>
-            <h2 className="font-bold mb-4">Listed Lands</h2>
-            <section className="mb-6">
-              <div className="grid grid-cols-3 gap-4">
-                {renderProperties(lands)}
+                {villas.length > 0 && (
+                  <>
+                    {/* <h2 className="font-bold mb-4">Listed Villas</h2> */}
+                    <section className="mb-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        {renderProperties(villas)}
+                      </div>
+                    </section>
+                  </>
+                )}
+
+                {apartments.length > 0 && (
+                  <>
+                    {/* <h2 className="font-bold mb-4">Listed Apartments</h2> */}
+                    <section className="mb-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        {renderProperties(apartments)}
+                      </div>
+                    </section>
+                  </>
+                )}
+
+              
               </div>
-            </section>
-          </>
+        ):(
+        <div className="w-3/4 p-4 mx-auto flex space-x-2"><h3>No Properties Added</h3></div>
         )}
 
-        {villas.length > 0 && (
-          <>
-            <h2 className="font-bold mb-4">Listed Villas</h2>
-            <section className="mb-6">
-              <div className="grid grid-cols-3 gap-4">
-                {renderProperties(villas)}
-              </div>
-            </section>
-          </>
-        )}
-
-        {apartments.length > 0 && (
-          <>
-            <h2 className="font-bold mb-4">Listed Apartments</h2>
-            <section className="mb-6">
-              <div className="grid grid-cols-3 gap-4">
-                {renderProperties(apartments)}
-              </div>
-            </section>
-          </>
-        )}
-
-       
-      </div>
-      {selectedProperty && (
+      {/* {selectedProperty && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-4 rounded shadow-md w-3/4">
             {selectedProperty.video && (
@@ -246,6 +354,27 @@ console.log("PAymentplan",paymentPlan);
             <button onClick={() => setSelectedProperty(null)} className="mt-4 bg-gray-500 text-white py-2 px-4 rounded">
               Close
             </button>
+          </div>
+        </div>
+      )} */}
+       {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-lg font-semibold mb-4">Are you sure you want to delete this property?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={onCancel}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onConfirm}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}

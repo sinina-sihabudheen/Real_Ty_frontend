@@ -87,10 +87,6 @@ export const fetchUserData = () => {
   return api.get('/api/user/');
 };
 
-export const fetchSellerDetails = (sellerId) => {
-  return api.get(`/api/seller/${sellerId}/`);
-};
-
 
 export const updateUser = (formData) => {
   return api.put('/api/update-user/', formData);
@@ -101,9 +97,6 @@ export const passwordChange = (data) => {
   return api.post('/api/change-password/', data);
 };
 
-export const updateUserRole = (data) => {
-  return api.put('/api/update-role/', data)
-};
 
 export const forgotPassword = (data) => {
   return api.post('/api/forgot_password/', data)
@@ -117,16 +110,12 @@ export const fetchUsersData = () => {
   return api.get('/api/users_list/');
 };
 
-export const fetchSellersData = () => {
-  return api.get('/api/sellers_list/');
-};
 
-export const fetchBuyersData = () => {
-  return api.get('/api/buyers_list/');
-};
 
 // Create land property
 export const createLandProperty = async (propertyData) => {
+  console.log("Entered into create lands");
+
   const response = await api.post('/api/register-lands/', propertyData,
   {
     headers: {
@@ -139,6 +128,7 @@ export const createLandProperty = async (propertyData) => {
 
 // Create residential property
 export const createResidentialProperty = async (propertyData) => {
+  console.log("Entered into create residentials");
   const response = await api.post('/api/register-residentials/', propertyData,
     {
       headers: {
@@ -324,25 +314,15 @@ export const unblockUser = async (userId) => {
   return response;
 };
 
-export const blockSeller = async (sellerId) => {
-  const response = await api.patch(`/api/sellers/${sellerId}/block/`);
+export const paymentInvoice = async (subscriptionId) => {
+  const response = await api.get(`/payments/invoice/${subscriptionId}/`);
   return response;
-};
+}
+export const subscriptionList = async () => {
+  const response = await api.get('/api/premium-users/');
+  return response;
+}
 
-export const unblockSeller = async (sellerId) => {
-  const response = await api.patch(`/api/sellers/${sellerId}/unblock/`);
-  return response;
-};
-
-export const blockBuyer = async (buyerId) => {
-  const response = await api.patch(`/api/buyers/${buyerId}/block/`);
-  return response;
-};
-
-export const unblockBuyer = async (buyerId) => {
-  const response = await api.patch(`/api/buyers/${buyerId}/unblock/`);
-  return response;
-};
 
 
 

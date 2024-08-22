@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { handleFetchUserData, changeUserPassword, updateUserProfile, handleUpdateRole} from '../../utils/auth';
+import { handleFetchUserData, changeUserPassword, updateUserProfile} from '../../utils/auth';
 import { toast } from 'sonner';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import DatePicker from 'react-datepicker';
@@ -97,7 +97,7 @@ const handlePasswordChange = async (event) => {
   };
    
   const handleSell = () => {
-    navigate('/sellerregister')
+    navigate('/property_type')
   };
 
   const handleListedProperties = () => {
@@ -105,20 +105,9 @@ const handlePasswordChange = async (event) => {
   };
  
   const handleBuy = async () => {
-    if (!user.is_buyer) {
-      try {
-        const updatedUser = await handleUpdateRole({ is_buyer: true });
-        setUser(updatedUser);
-        toast.success('Seller role added to your account..');
-        navigate('/propertylist');
-      } catch (error) {
-        console.error('Error updating user role:', error); 
-        toast.error('Error adding seller role. Please try again.');
-
-      }
-    } else {
+    
       navigate('/propertylist');
-    }
+  
   };
 
   if (isLoading) {
@@ -138,15 +127,7 @@ const handlePasswordChange = async (event) => {
         <div className='flex space-x-5'>
             {!profileEdit && !security && (
             <div className="w-full max-w-sm mx-auto bg-gray-300 rounded-lg p-4">
-              {user.is_seller && user.is_buyer ? (
-                <div>
-                  <button className="w-6/12 bg-gray-400 text-white py-1 rounded-md" >Roles: seller/buyer</button>
-                </div>
-              ) : user.is_seller ? (
-              <div><button className="w-3/12 bg-gray-400 text-white py-1 rounded-md">Role:Seller</button></div>
-              ) : (
-              <div><button className="w-3/12 bg-gray-400 text-white py-1 rounded-md">Role:Buyer</button></div>
-              )}
+             
               
               <h3 className="text-xl font-bold text-gray-700 text-center mb-4 ">Profile Settings</h3>
               <h5 className="text-gray-500 text-center">Update your profile details here.</h5>
@@ -183,22 +164,19 @@ const handlePasswordChange = async (event) => {
                 <div>
                   <h3 className="text-lg text-gray-600 font-semibold uppercase">{user.username}</h3>
                   <p className="text-gray-500">Email: {user.email}</p>
-                  {/* <p className="text-gray-500">DOB: {user.date_of_birth}</p> */}
                   {user.address ? <p className="text-gray-500 capitalize">Addresss: {user.address} </p>: null}
                    {user.contact_number ? <p className="text-gray-500">Contact Number: +91{user.contact_number} </p>: null}
                   
                 </div>
-                {user.is_seller ? (
-                  <div className='flex space-x-8'>
-                      <button onClick={handleListedProperties} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Listed Properties</button>
-                      <button onClick={handleBuy} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Buy</button>
-                  </div>
-                  ):(
+                
+                 
+               
                   <div className='flex w-full space-x-8'>
-                      <button onClick={handleBuy} className="w-2/4 bg-gray-400 text-white py-2 rounded-md mb-2">Buy</button>
-                      <button onClick={handleSell} className="w-2/4 bg-gray-400 text-white py-2 rounded-md mb-2">Sell</button>
+                      {/* <button onClick={handleSell} className="w-2/4 bg-gray-400 text-white py-2 rounded-md mb-2">Sell</button> */}
+                      <button onClick={handleListedProperties} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Listed Properties</button>
+
                   </div>
-                    )}
+                  
 
               </div>
           </div>
@@ -243,8 +221,6 @@ const handlePasswordChange = async (event) => {
                         className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400" />                      
                     </div>
                
-                    
-
                     <label className="block text-gray-400 mb-1">Profile Image</label>
                    
                     <div className="file-upload-container mb-4 w-6/12 flex items-center border rounded-md px-4 py-2">

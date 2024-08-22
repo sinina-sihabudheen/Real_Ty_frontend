@@ -54,9 +54,14 @@ const EditProperty = () => {
   const handleInputChange = (e) => {
     const { name, files } = e.target;
     if (name === 'images') {
+        // setFormData({
+        //     ...formData,
+        //     images: files 
+        // });
+        const filesArray = Array.from(files);
         setFormData({
             ...formData,
-            images: files 
+            images: filesArray
         });
     } else {
         setFormData({
@@ -65,6 +70,7 @@ const EditProperty = () => {
         });
     }
 };
+
 
   const handleSelectChange = (selectedOptions) => {
     setFormData({
@@ -90,15 +96,25 @@ const EditProperty = () => {
     propertyData.append('property_type', category || '');  
 
     if (formData.area) propertyData.append('area', formData.area || '');
-    if (formData.amenities) formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
-
+    // if (formData.amenities) { formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); }
+    
     if (formData.location) propertyData.append('location', formData.location || '');
   
-    if (formData.images) {
-        propertyData.append('images', formData.images);
-    }
+    // if (formData.images) {
+    //     propertyData.append('images', formData.images);
+    // }
+    // if (formData.video) {
+    //     propertyData.append('video', formData.video);
+    // }
+    formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value));
+    propertyData.append('location', formData.location || '');
+
+    formData.images.forEach(image => {
+      propertyData.append('new_images', image);
+    });
+
     if (formData.video) {
-        propertyData.append('video', formData.video);
+      propertyData.append('video', formData.video);
     }
     if (category !== 'Land') {
       if (formData.numRooms) propertyData.append('num_rooms', parseInt(formData.numRooms) || '');
@@ -196,6 +212,7 @@ const EditProperty = () => {
             name="images" 
             onChange={handleInputChange} 
             accept="image/*" 
+            multiple
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Upload image" />
           </label>
@@ -282,6 +299,7 @@ const EditProperty = () => {
             name="images" 
             onChange={handleInputChange} 
             accept="image/*" 
+            multiple
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Upload image" />
           </label>
@@ -366,10 +384,12 @@ const EditProperty = () => {
             type="file" 
             id="images"
             name="images" 
+            multiple
             onChange={handleInputChange} 
             accept="image/*" 
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Upload image" />
+            
           </label>
           <label htmlFor="video" className="block text-gray-700">Video
           <input 
@@ -411,10 +431,11 @@ const EditProperty = () => {
         >
           {loading ? 'Updating...' : 'Update Property'}
         </button>
-        <button 
+        {/* <button 
             type="button" 
             onClick={handleCancel} 
-            className="bg-red-400 hover:bg-red-600 text-white px-4 py-2 rounded-md">Cancel</button>
+            className="bg-red-400 hover:bg-red-600 text-white px-4 py-2 rounded-md">Cancel
+        </button> */}
       </form>
     </div>
   );

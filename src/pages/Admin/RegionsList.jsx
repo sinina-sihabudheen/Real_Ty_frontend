@@ -53,7 +53,7 @@ const RegionsList = () => {
   return (
     <div className="flex">
       <Sidebar />
-      <div className='grid'>
+      <div className='w-full py-8'>
         <AdminHeader />
         <div className="w-3/4 bg-white">
           <h2 className='text-gray-600 font-semibold text-xl'>All Regions</h2>
@@ -114,7 +114,7 @@ const RegionsList = () => {
                     <td className="border flex space-x-4 bg-gray-200 border-gray-300 shadow-md px-4 py-2">
                       <button
                         onClick={() => setDeleteRegionId(region.id)}
-                        className="bg-red-400 w-full hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                        className="bg-red-400 w-full hover:bg-red-600 text-white font-bold py-2 px-4  rounded"
                       >
                         Delete
                       </button>

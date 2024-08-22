@@ -27,27 +27,11 @@ const PropertyForm = () => {
   const [amenitiesOptions, setAmenitiesOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
-  const [listingCount, setListingCount] = useState(0); 
-  const [daysLeft, setDaysLeft] = useState(0);
-  const [subscriptionType, setSubscriptionType] = useState(null);
-  const [paymentPlan, setPaymentPlan] = useState('free');
-
-
 
   useEffect(() => {
     handleFetchAmenity(setAmenitiesOptions);
   }, []);
 
-  useEffect(() => {
-    handleCheckSubscriptionStatus(user.id, setIsSubscribed, 
-      setSubscriptionExpired, setListingCount, setDaysLeft, 
-      setSubscriptionType, setPaymentPlan);
-
-  }, [user.id]);
-
-  console.log("SUBSCRIBED",isSubscribed);
 
   const handleInputChange = (e) => {
     const { name, files } = e.target;
@@ -83,16 +67,14 @@ const PropertyForm = () => {
       amenities: selectedOptions,
     });
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    
-
     const propertyData = new FormData();
-   
+
     propertyData.append('category', category);  
     propertyData.append('area', formData.area || '');  
     propertyData.append('property_type', category || '');  
@@ -106,12 +88,16 @@ const PropertyForm = () => {
     propertyData.append('seller', user.id || '');   
 
     formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
+
     formData.images.forEach(image => propertyData.append('new_images', image));
 
     if (formData.video) {
       propertyData.append('video', formData.video);
     }
-    
+
+    for (let pair of propertyData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
     try {
     
       if (category === 'Land') {
@@ -180,6 +166,7 @@ const PropertyForm = () => {
                 className="w-full mb-4"
                 placeholder="Select Amenities"
               />
+             
             </label>
             <label className="block">
               <span className="text-gray-700">Land Location</span>
@@ -541,22 +528,7 @@ const PropertyForm = () => {
     return <p>Loading...</p>;
   }
 
-  if ((!isSubscribed && listingCount>=5) || subscriptionExpired ) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="mb-4">
-        <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
-      </div>
-      <h1 className="text-xl font-bold mb-4">Subscription Status</h1>
-      <p>Your subscription has expired or you are not subscribed. Please subscribe to continue listing properties.</p>
-      <p>Listing count: {listingCount}</p>
-      <p>Days Left: {daysLeft}</p>
-
-
-      <a href="/listing_package" className="text-blue-500">Subscribe now</a>
-    </div>
-  );
-}
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="mb-4">
@@ -567,7 +539,6 @@ const PropertyForm = () => {
         {renderFormFields()}
         {error && <p className="text-red-500">{error}</p>}
         <div className="flex justify-between">
-          {/* <button type="button" className="px-4 py-2 bg-red-500 text-white rounded">CANCEL</button> */}
           <button type="submit" className="px-4 py-2 bg-red-500 text-white rounded" disabled={loading}>
             {loading ? 'Submitting...' : 'Submit'}
           </button>

@@ -45,7 +45,7 @@ const ResidentialsList = () => {
                         <th className="border bg-gray-300 border-gray-400 px-4 shadow-md py-2">Size (sqft)</th> 
                         {propertyType === 'Villa' && <th className="border bg-gray-300 border-gray-400 px-4 shadow-md py-2">Land Area</th>} {/* Conditional header */}
                         <th className="border bg-gray-300 border-gray-400 px-4 shadow-md py-2">Location</th>
-                        <th className="border border-gray-400 bg-gray-300 shadow-md px-4 py-2">View</th>
+                        {/* <th className="border border-gray-400 bg-gray-300 shadow-md px-4 py-2">View</th> */}
                     </tr>
                 </thead>
                 <tbody>
@@ -53,16 +53,16 @@ const ResidentialsList = () => {
                         <tr key={index}>
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{index + 1}</td>
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{property.id}</td>
-                            <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{property.seller.user.username}</td>
+                            <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{property.seller.username}</td>
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{Math.round(property.price)}</td>
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{Math.round(property.size)}</td> 
                             {propertyType === 'Villa' && <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{Math.round(property.land_area)}</td>} {/* Conditional field */}
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{property.location}</td>
-                            <td className="px-4 border-gray-400 bg-gray-200 shadow-md py-2 border">
+                            {/* <td className="px-4 border-gray-400 bg-gray-200 shadow-md py-2 border">
                                 <button className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 rounded">
                                     View
                                 </button>
-                            </td>
+                            </td> */}
                         </tr>
                     ))}
                 </tbody>
@@ -81,7 +81,7 @@ const ResidentialsList = () => {
     return (
         <div className="flex">
             <Sidebar />
-            <div className="grid">
+            <div className="w-full py-8">
                 <AdminHeader />
                 <div className="w-3/4 bg-white">                 
                     <h2 className='text-gray-600 font-semibold text-xl'>{propertyType}s List</h2>

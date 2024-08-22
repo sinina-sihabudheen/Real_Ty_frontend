@@ -25,7 +25,7 @@ const Sidebar = () => {
     };
 
   return (
-    <div className="w-60 bg-white border border-gray-200 shadow-md p-4">
+    <div className="w-60 h-screen bg-white border border-gray-200 shadow-md p-4">
         <div className="mb-6">
             <img src="/images/REAL-TY.png" alt="Logo" className="h-4/12 w-4/12 mx-auto" />
         </div>
@@ -37,15 +37,10 @@ const Sidebar = () => {
             <p className="text-gray-500">
                 <Link to="/admin/users" className="text-gray-500 hover:text-blue-500">All Users</Link>
             </p>
-            <p className="text-gray-500">
-                <Link to="/admin/sellers" className="text-gray-500 hover:text-blue-700">Sellers</Link>
-            </p>
-            <p className="text-gray-500">
-                <Link to="/admin/buyers" className="text-gray-500 hover:text-blue-700">Buyers</Link>
-            </p>
-            <p className="text-gray-500">
+           
+            {/* <p className="text-gray-500">
                 <Link to="/admin/regions" className="text-gray-500 hover:text-blue-700">Regions</Link>
-            </p>
+            </p> */}
             <p className="text-gray-500">
                 <Link to="/admin/category" className="text-gray-500 hover:text-blue-700">Category</Link>
             </p>
@@ -53,8 +48,12 @@ const Sidebar = () => {
                 <Link to="/admin/amenity" className="text-gray-500 hover:text-blue-700">Amenity</Link>
             </p>
             <p className="text-gray-500">
+                <Link to="/admin/subscriptionList" className="text-gray-500 hover:text-blue-700">Subscriptions</Link>
+            </p>
+            <p className="text-gray-500">
                 <button onClick={handleLogout} className="text-gray-500 hover:text-blue-700">Logout</button>
             </p>
+           
             {/* <p className="text-gray-500">
                 <Link to="" className="text-gray-500 hover:text-blue-500">Ads</Link>
             </p>       */}

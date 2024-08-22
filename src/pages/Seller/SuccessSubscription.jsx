@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {  useLocation, useNavigate } from "react-router-dom";
 import { getSessionDetails } from "../../utils/api";
 import { FcOk } from "react-icons/fc";
-import Navbar from "../../components/Navbar";
 
 const SuccessSubscription = () => {
   const [session, setSession] = useState(null);
@@ -25,6 +24,7 @@ const SuccessSubscription = () => {
         });
     }
   }, [location]);
+
   const handleButtonClick=()=>{
 navigate('/listedproperties')
   };
@@ -42,7 +42,6 @@ navigate('/listedproperties')
 
   return (
     <>
-      {/* <Navbar /> */}
 
       <div className="flex w-full h-screen justify-center gap-10  flex-col">
         <div className=" w-full absolute top-10">

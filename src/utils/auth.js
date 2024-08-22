@@ -3,12 +3,11 @@ import { loginUser, googleLoginUser,
   registerUser, verifyOtp, resendOtp, 
   fetchRegions, fetchUserData, resetPassword,
   passwordChange, fetchAmenities, getResidentialPropertyDetails,
-  updateUser, updateUserRole, forgotPassword, 
+  updateUser, forgotPassword, 
   fetchSellerLands, getLandPropertyDetails,
   fetchSellerResidents, updateResidentialProperty, 
   updateLandProperty, createSubscription,
   checkSubscriptionStatus,
-  fetchSellerDetails,
   deleteLandProperty,
   deleteResidentialProperty} from './api';
 import { loginSuccess } from '../redux/authSlice';
@@ -225,23 +224,6 @@ export const handleFetchUserData = async (setUser, setIsLoading, setError) => {
   }
 };
 
-// Fetch Seller Data Handler
-export const handleFetchSellerDetails = async (sellerId) => {
-  try {
-    const response = await fetchSellerDetails(sellerId);
-    // setSeller(response.data);
-    console.log("Response of seller data",response);
-    return response
-    // setIsLoading(false);
-  } catch (error) {
-    // setError('Error fetching user data');
-    // setIsLoading(false);
-    toast.error("ERROR FETCHING SELLER DETAILS");
-    throw error;
-
-  }
-};
-
 
 export const changeUserPassword = async (data) => {
   const response = await passwordChange(data, {
@@ -261,15 +243,6 @@ export const updateUserProfile = async (formData) => {
   return response.data;
 };
 
-
-export const handleUpdateRole = async (formData) => {
-  const response = await updateUserRole(formData, {
-      headers: {
-          'Content-Type': 'application/json',
-      },
-  });
-  return response.data;
-};
 
   export const handleResetPassword = async (postData, setOtpSent, setOtpExpired) => {
     try {
@@ -416,7 +389,7 @@ export const handleDeleteResidentialProperty = async (regionId) => {
 };
 
 export const handleCheckSubscriptionStatus = async (
-  userId, setSubscriptionStatus, setSubscriptionExpired, setListingCount, setDaysLeft, 
+  userId, setSubscriptionId, setSubscriptionStatus, setSubscriptionExpired, setListingCount, setDaysLeft, 
   setSubscriptionType, setPaymentPlan) => {
   try {
     const response = await checkSubscriptionStatus(userId);
@@ -426,10 +399,12 @@ export const handleCheckSubscriptionStatus = async (
     setDaysLeft(response.data.daysLeft);
     setSubscriptionType(response.data.subscriptionType);
     setPaymentPlan(response.data.paymentPlan);
-console.log("payment plan222",response.data.paymentPlan);
+    setSubscriptionId(response.data.subscriptionId);
+
+    console.log("payment plan222",response.data.paymentPlan);
     console.log("RESPONSE of check subscription:",response);
-    console.log("COUNT",response.data.propertyCount);
-    console.log();
+    console.log("COUNT",response.data.daysLeft);
+    // console.log("SUBSCRIPTION EXPIRED",response.data.subscriptionExpired);
   } catch (error) {
     console.error('Error checking subscription status of the user:', error);
   }

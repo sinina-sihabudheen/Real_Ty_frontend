@@ -51,7 +51,7 @@ const AllUsers = () => {
       
         <div className="flex">
             <Sidebar />
-        <div className='grid'>
+        <div className='w-full py-8'>
         <AdminHeader />
        
         <div className="container mx-auto">
@@ -86,27 +86,19 @@ const AllUsers = () => {
                                 {user.is_active ? 'Active' : 'Inactive'}
                             </span>
                         </td>
-                        <td className="px-4 border-gray-400  bg-gray-200 shadow-md py-2 border">
-                            {/* <button
-                                onClick={() => blockUserHandler(user.id)}
-                                disabled={!user.is_active}
-                                className={`${
-                                user.is_active ? 'bg-blue-400 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
-                                } text-white px-4 py-1 rounded`}
-                            >
-                            Block
-                        </button> */}
+                        <td className="px-4 border-gray-400  bg-gray-200 shadow-md py-2  border">
+                           
                             {user.is_active ? (
                             <button
                             onClick={() => blockUserHandler(user.id)}
-                            className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 rounded"
+                            className="bg-blue-400 hover:bg-blue-600 text-white px-4 py-1 ml-20 rounded"
                             >
                             Block
                             </button>
                         ) : (
                             <button
                             onClick={() => unblockUserHandler(user.id)}
-                            className="bg-green-400 hover:bg-green-600 text-white px-4 py-1 rounded"
+                            className="bg-green-400 hover:bg-green-600 text-white px-4 py-1 ml-20 rounded"
                             >
                             Unblock
                             </button>

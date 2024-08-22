@@ -54,7 +54,7 @@ const Filter = ({ onFilterChange }) => {
         </div>
       </div>
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <h3 className="font-medium mb-2">Region</h3>
         <div>
           {['Malappuram', 'Kannur', 'Kozhikode'].map(region => (
@@ -69,7 +69,7 @@ const Filter = ({ onFilterChange }) => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

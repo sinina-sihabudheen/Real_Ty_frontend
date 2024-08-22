@@ -22,12 +22,12 @@ const AdminHeader = () => {
 
 
   return (
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex justify-between items-center mb-6 w-full">
       <div className="flex w-full ml-10 items-center space-x-4">
         <input
           type="text"
           placeholder="Search here"
-          className="p-2 border border-gray-300 rounded"
+          className="p-2 border w-8/12 border-gray-300 rounded"
         />
         {/* <button className="bg-blue-500 text-white px-4 py-2 rounded">Filter Period</button> */}
       </div>

@@ -54,7 +54,7 @@ ChartJS.register(
   LinearScale
 );
 
-const DashBoardChart = ({ totalListings, total_land_properties, total_apartments, total_villas, total_users, total_sellers, total_buyers }) => {
+const DashBoardChart = ({ totalListings, total_land_properties, total_apartments, total_villas, total_users }) => {
   const [bgColor, setBgColor] = useState('#ffffff');
 
   useEffect(() => {
@@ -80,12 +80,12 @@ const DashBoardChart = ({ totalListings, total_land_properties, total_apartments
   };
 
   const barData = {
-    labels: ['Users', 'Sellers', 'Buyers'],
+    labels: ['Users'],
     datasets: [
       {
         label: 'Count',
-        data: [total_users, total_sellers, total_buyers],
-        backgroundColor: ['#42A5F5', '#66BB6A', '#FFCA28'],
+        data: [total_users],
+        backgroundColor: ['#42A5F5'],
       },
     ],
   };

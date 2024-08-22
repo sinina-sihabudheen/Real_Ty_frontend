@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { handleFetchSellerDetails,handleFetchSellerLands, handleFetchSellerResidents} from '../../utils/auth';
+import { handleFetchSellerLands, handleFetchSellerResidents} from '../../utils/auth';
 import { toast } from 'sonner';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import 'react-datepicker/dist/react-datepicker.css';
@@ -15,7 +15,7 @@ const standardizeImage = (url, width, height) => {
   };
 
 const SellerProfile = () => {
-    const { sellerId } = useParams();
+    const { userId } = useParams();
     const [seller, setSeller] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -24,8 +24,8 @@ const SellerProfile = () => {
     const [apartments, setApartments] = useState([]);
 
     useEffect(() => {
-        if (sellerId) {
-            handleFetchSellerDetails(sellerId)
+        if (userId) {
+            handleFetchUserDetails(userId)
             .then(response => {
                 console.log("RESPONSE OF SELLER DETAILS",response.data); 
                 setSeller(response.data);
@@ -36,7 +36,7 @@ const SellerProfile = () => {
                     setIsLoading(false);
                 });
         }
-    }, [sellerId]);
+    }, [userId]);
 
   
 

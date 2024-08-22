@@ -51,7 +51,7 @@ const PropertyLists = () => {
                         <tr key={index}>
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{index + 1}</td>
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{property.id}</td>
-                            <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{property.seller.user.username}</td>
+                            <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{property.seller.username}</td>
 
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{Math.round(property.price)}</td>
                             <td className="border px-4 bg-gray-200 border-gray-400 shadow-md py-2">{Math.round(property.area)}</td>
@@ -79,7 +79,7 @@ const PropertyLists = () => {
     return (
         <div className="flex">
             <Sidebar />
-            <div className="grid">
+            <div className="w-full py-8">
                 <AdminHeader />
                 <div className="w-3/4 bg-white">
                     <h2>Property Lists</h2>

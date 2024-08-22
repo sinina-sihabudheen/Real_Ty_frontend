@@ -21,7 +21,6 @@ const Login = () => {
 
   
   const handleGAuth = async (credentialResponse)=>{
-    // const response = await googleLoginUser(token);
     try{
         console.log('Credential response:', credentialResponse);
         const response = await handleGoogleLogin(credentialResponse, dispatch, navigate);
