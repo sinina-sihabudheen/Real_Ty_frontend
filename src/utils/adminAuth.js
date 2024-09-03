@@ -82,7 +82,6 @@ export const handleFetchUsersData = async (setUser, setIsLoading, setError) => {
 export const handleFetchLandsList = async (setLands, setIsLoading, setError) => {
   try {
     const response = await fetchLandsList();
-    console.log('lands data:', response.data);
     setLands(response.data);
     setIsLoading(false);
   } catch (error) {
@@ -237,10 +236,9 @@ export const handleUnblockUser = async (userId, setUsers) => {
 
 export const handleFetchSubscriptionList = async (setSubscriptions) => {
   try {
-    console.log("ENETERED INTO SUBSCRIPTION LIST......");
     const response = await subscriptionList();
-    console.log("RESPONSE   ", response);
     setSubscriptions(response.data);
+    console.log("RESPONSE",response);
   } catch (error) {
     console.error('Error fetching regions:', error);
   }

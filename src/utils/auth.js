@@ -9,7 +9,10 @@ import { loginUser, googleLoginUser,
   updateLandProperty, createSubscription,
   checkSubscriptionStatus,
   deleteLandProperty,
-  deleteResidentialProperty} from './api';
+  deleteResidentialProperty,
+  fetchSellerProfile,
+  fetchSellerProfileLands,
+  fetchSellerProfileResidents} from './api';
 import { loginSuccess } from '../redux/authSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
@@ -126,8 +129,7 @@ export const handleRegister = async (postData, setOtpSent, setOtpExpired, setErr
       const errors = error.errors || {};
       setErrors(errors);
       for (const [field, messages] of Object.entries(errors)) {
-        // toast.error(`${field}: ${messages.join(' ')}`);
-          // Ensure messages is an array
+       
           if (Array.isArray(messages)) {
             toast.error(`${field}: ${messages.join(' ')}`);
           } else {
@@ -224,6 +226,36 @@ export const handleFetchUserData = async (setUser, setIsLoading, setError) => {
   }
 };
 
+
+export const handleFetchSellerProfile = async (userId) => {
+  try {
+    const response = await fetchSellerProfile(userId);
+    return response
+  } catch (error) {
+    toast.error(error.message);
+    throw error; 
+  }
+};
+export const handleFetchSellerProfileLands = async (userId,setLands) => {
+  try {
+    const response = await fetchSellerProfileLands(userId);
+    setLands(response.data)
+    // return response
+  } catch (error) {
+    toast.error(error.message);
+    throw error; 
+  }
+};
+export const handleFetchSellerProfileResidents = async (userId,setResidents) => {
+  try {
+    const response = await fetchSellerProfileResidents(userId);
+    setResidents(response.data)
+    // return response
+  } catch (error) {
+    toast.error(error.message);
+    throw error; 
+  }
+};
 
 export const changeUserPassword = async (data) => {
   const response = await passwordChange(data, {
@@ -400,11 +432,7 @@ export const handleCheckSubscriptionStatus = async (
     setSubscriptionType(response.data.subscriptionType);
     setPaymentPlan(response.data.paymentPlan);
     setSubscriptionId(response.data.subscriptionId);
-
-    console.log("payment plan222",response.data.paymentPlan);
-    console.log("RESPONSE of check subscription:",response);
-    console.log("COUNT",response.data.daysLeft);
-    // console.log("SUBSCRIPTION EXPIRED",response.data.subscriptionExpired);
+   
   } catch (error) {
     console.error('Error checking subscription status of the user:', error);
   }

@@ -20,6 +20,7 @@ const NewUsers = () => {
 
         fetchData();
     }, []);
+    console.log("USERS",users);
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -34,13 +35,15 @@ const NewUsers = () => {
             <h2 className='text-l font-bold text-orange-600 mb-4'>New Users</h2>
             <div className="flex flex-wrap gap-4">
                 {users.map((user) => (
-                <div key={user.id} className="flex flex-col items-center bg-white p-4 rounded-md shadow-md border border-gray-200">
+                <div key={user.id} className="flex flex-col items-center bg-white p-4 rounded-md shadow-md border w-40 h-40 border-gray-200">
                     <img 
                     src={user.profile_image ? user.profile_image : '/images/user.png'}
                     alt="Profile"
                     className="w-24 h-24 rounded-full mb-2"
                     />
-                    <p className="text-sm font-medium">{user.username}</p>
+                    <p className="text-sm font-medium capitalize">{user.username}</p>
+                    <p className="text-sm font-medium capitalize text-yellow-500">{user.subscription_status} user</p>
+
                 </div>
                 ))}
             </div>

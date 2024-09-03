@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { handleFetchSellerLands, handleFetchSellerResidents} from '../../utils/auth';
+import { handleFetchSellerProfileLands, handleFetchSellerProfile, handleFetchSellerProfileResidents} from '../../utils/auth';
 import { toast } from 'sonner';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import 'react-datepicker/dist/react-datepicker.css';
@@ -20,35 +20,36 @@ const SellerProfile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [lands, setLands] = useState([]);
+    const [residents, setResidents] = useState([])
     const [villas, setVillas] = useState([]);
     const [apartments, setApartments] = useState([]);
 
+   
     useEffect(() => {
-        if (userId) {
-            handleFetchUserDetails(userId)
-            .then(response => {
-                console.log("RESPONSE OF SELLER DETAILS",response.data); 
-                setSeller(response.data);
-                setIsLoading(false);
-            })
-                .catch(err => {
-                    setError('Failed to fetch seller details.');
-                    setIsLoading(false);
-                });
-        }
-    }, [userId]);
+      const fetchData = async () => {
+          try {
+            setIsLoading(true);
+            const sellerResponse = await handleFetchSellerProfile(userId);
+            setSeller(sellerResponse.data);
 
-  
+            await handleFetchSellerProfileLands(userId,setLands);
+            await handleFetchSellerProfileResidents(userId,setResidents)
 
-    useEffect(() => {
-        
-        handleFetchSellerLands(setLands);
-        handleFetchSellerResidents((residents) => {
-          setVillas(residents.filter(r => r.property_type === 'Villa'));
-          setApartments(residents.filter(r => r.property_type === 'Apartment'));
-    });
-    }, []);
-    
+            const filteredResidents = Array.isArray(residents) ? residents : [];
+            setVillas(filteredResidents.filter(r => r.property_type === 'Villa'));
+            setApartments(filteredResidents.filter(r => r.property_type === 'Apartment'));
+
+            setIsLoading(false);
+          } catch (err) {
+              setError(err.message);
+              setIsLoading(false);
+          }
+      };
+
+      if (userId) {
+          fetchData();
+      }
+  }, [userId]);
   
 
       const renderFirstImage = (images) => {
@@ -73,7 +74,7 @@ const SellerProfile = () => {
               <h3 className="mt-2 font-semibold">{Math.round(property.price)} Lakhs</h3>
               <h3 className="mt-2 font-semibold">{Math.round(property.size || property.area)} {property.property_type ? 'square feet' : 'cents'}</h3>
               <p>{property.location}</p>
-            </Link>            
+            </Link>       
           </div>
         ));
       };
@@ -97,19 +98,18 @@ const SellerProfile = () => {
               <h2 className="text-xl text-gray-700 font-bold">Seller Profile</h2>
               <div className="mt-4 flex items-center space-x-4">
                 <img 
-                  src={seller.user.profile_image? seller.user.profile_image : '/images/user.png'}                  
+                  src={seller.profile_image? seller.profile_image : '/images/user.png'}                  
                   alt="Profile" 
                   className="w-20 h-20 rounded-full" 
                 />
               
                 <div>
                   <h3 className="text-lg text-gray-600 font-semibold uppercase">{seller.username}</h3>
-                  <p className="text-gray-500">Email: {seller.user.email}</p>
+                  <p className="text-gray-500">Email: {seller.email}</p>
                   {/* <p className="text-gray-500">DOB: {seller.user.date_of_birth}</p> */}
-                  {seller.address ? <p className="text-gray-500 capitalize">Addresss: {seller.user.address} </p>: null}
-                   {seller.contact_number ? <p className="text-gray-500">Contact Number: {seller.user.contact_number} </p>: null}       
+                  {seller.address ? <p className="text-gray-500 capitalize">Addresss: {seller.address} </p>: null}
+                   {seller.contact_number ? <p className="text-gray-500">Contact Number: {seller.contact_number} </p>: null}       
                   <p className="text-gray-500">Agency Name: {seller.agency_name }</p>
-                  {/* <p className="text-gray-500">Regions Added: {seller.region}</p> */}
                 </div>
               </div>
           </div>

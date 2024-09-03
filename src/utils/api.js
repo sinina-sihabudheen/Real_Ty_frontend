@@ -87,6 +87,18 @@ export const fetchUserData = () => {
   return api.get('/api/user/');
 };
 
+export const fetchSellerProfile = async (userId) => {
+  return await api.get(`/api/sellerProfile/${userId}/`);
+};
+
+export const fetchSellerProfileLands = async (userId) => {
+  return await api.get(`/api/seller-profile-lands/${userId}/`);
+};
+
+export const fetchSellerProfileResidents = async (userId) => {
+  return await api.get(`/api/seller-profile-residents/${userId}/`);
+};
+
 
 export const updateUser = (formData) => {
   return api.put('/api/update-user/', formData);
@@ -324,6 +336,6 @@ export const subscriptionList = async () => {
 }
 
 
-
-
 export default api;
+
+

@@ -50,7 +50,7 @@ export const ListedProperties = () => {
     handleCheckSubscriptionStatus(seller.id, setSubscriptionId, setIsSubscribed, 
       setSubscriptionExpired, setListingCount, setDaysLeft, 
       setSubscriptionType, setPaymentPlan);
-console.log(paymentPlan);
+// console.log(paymentPlan);
   }, [seller.id]);
 
   if (isLoading) {
@@ -73,7 +73,7 @@ console.log(paymentPlan);
     }
     return null;
   };
-console.log("PAymentplan",paymentPlan,subscriptionExpired);
+// console.log("PAymentplan",paymentPlan,subscriptionExpired);
 const handleVideoClick = (property) => {
     setSelectedProperty(property);
   };
@@ -148,26 +148,29 @@ const handleVideoClick = (property) => {
           {renderFirstImage(property.images)}
           <h3 className="mt-2 font-semibold"> {property.category}</h3>
           <h3 className="mt-2 font-semibold">Price: ₹{Math.round(property.price)} Lakhs</h3>
-          {/* <h3 className="mt-2 font-semibold">{Math.round(property.size || property.area)} {property.property_type ? 'square feet' : 'cents'}</h3> */}
-          <h3 className="mt-2 font-semibold">{property.property_type ? 'Size: ' : 'Area: '}{Math.round(property.size || property.area)} {property.property_type ? 'sqft' : 'cents'}</h3>
-
+          <h3 className="mt-2 font-semibold">
+            {property.property_type ? 'Size: ' : 'Area: '}
+            {Math.round(property.size || property.area)}
+            {property.property_type ? 'sqft' : 'cents'}
+          </h3>
           <p>Location: {property.location}</p>
         </Link>
         {/* <div className='flex space-x-2'>
           {renderVideoButton(property)}
           {renderImagesButton(property)}
         </div> */}
-        <div className='py-2'>
+        <div className='py-2 w-32 ml-20'>
           <Link to={`/edit_property/${property.id}/${property.category}`} className="text-white-300 w-full rounded hover:bg-gray-200 shadow-md bg-blue-400 hover:text-slate-700 mt-2 block text-center">
             Edit
           </Link>
         </div>
-        <div className='py-2'>
+        {/* <div className='py-2 w-32'>
           <button onClick={handleDelete} className="text-white-300 w-full rounded hover:bg-gray-200 shadow-md bg-red-400 hover:text-gray-500 mt-2 block text-center">
               Delete
           </button>
+        </div> */}
         </div>
-      </div>
+      
     ));
   };
 
@@ -242,44 +245,11 @@ const handleVideoClick = (property) => {
                 )}
               </div>
 
-              {/* <div className="flex space-x-8">
-                
-                {(paymentPlan === 'premium' && !subscriptionExpired) ||
-                  (paymentPlan === 'basic' && !subscriptionExpired && listingCount < 5) ? (
-                    <div>
-                    
-                    <Link to="/property_type" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
-                      <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Add Property</button>
-                    </Link>
-                    </div>
-                    
-                  ) : (
-                    <div><span>{subscriptionExpired ? "Your subscription has expired. Please renew to add properties." : "Listing limit reached. Please upgrade your plan to add more properties."}</span></div>
-                  )}
-                {paymentPlan==='basic' && (
-                  <div>
-                   <span>You can add {5-listingCount} properties for one month.</span>
-                   <Link to="/listing_package" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
-                     <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">For Premium Account</button>
-                   </Link></div>
-                )}
-                {paymentPlan==='premium' && subscriptionExpired && (
-                   
-                   <Link to="/subscription" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
-                     <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Go To Payment</button>
-                   </Link>
-                )}
-                {paymentPlan==='premium' && !subscriptionExpired && (
-                   
-                  <Link to={`/invoice/${subscriptionId}`} className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
-                      <button className="w-full bg-gray-400 text-white py-2 rounded-md mb-2">Payment History</button>
-                  </Link>
-                )}
-              </div>             */}
+             
             </div>
         </div>
         { !(lands.length==0 && villas.length==0 && apartments.length==0) ? (
-              <div className="w-3/4 p-4 mx-auto flex space-x-2">
+              <div className="w-3/4 p-3 mx-auto flex space-x-2">
                 {lands.length > 0 && (
                   <>
                     {/* <h2 className="font-bold mb-4">Listed Lands</h2> */}

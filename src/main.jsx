@@ -9,6 +9,7 @@ import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { Toaster } from "sonner";
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import 'leaflet/dist/leaflet.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 

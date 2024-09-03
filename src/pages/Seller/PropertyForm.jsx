@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { useSelector } from 'react-redux';
 import { createLandProperty, createResidentialProperty } from '../../utils/api';
-import { handleFetchAmenity, handleCheckSubscriptionStatus } from '../../utils/auth'; 
+import { handleFetchAmenity } from '../../utils/auth'; 
+import LeafletMap from '../../components/Map/LeafletMap';
 
 const PropertyForm = () => {
   const location = useLocation();
@@ -16,6 +17,8 @@ const PropertyForm = () => {
     area: '',
     amenities: [],
     location: '',
+    latitude: 51.505,
+    longitude: -0.09,
     images: [],
     video: null,
     numRooms: '',
@@ -48,6 +51,17 @@ const PropertyForm = () => {
     }
   };
 
+  const handleLocationChange = ({ name, latitude, longitude }) => {
+    console.log('Location selected:', name, latitude, longitude);
+
+    setFormData({
+      ...formData,
+      location: name,
+      latitude: latitude,
+      longitude: longitude,
+    });
+  };
+
   const handleDeleteImage = (index) => {
     const newImages = [...formData.images];
     newImages.splice(index, 1);
@@ -75,6 +89,7 @@ const PropertyForm = () => {
     setError('');
     const propertyData = new FormData();
 
+    
     propertyData.append('category', category);  
     propertyData.append('area', formData.area || '');  
     propertyData.append('property_type', category || '');  
@@ -83,11 +98,14 @@ const PropertyForm = () => {
     propertyData.append('num_bathrooms', formData.numBathrooms || '');  
     propertyData.append('price', formData.price || '');
     propertyData.append('location', formData.location || '');
+    propertyData.append('latitude', formData.latitude || '');
+    propertyData.append('longitude', formData.longitude || '');
+    
     propertyData.append('size', formData.size || '');
     propertyData.append('land_area', formData.landArea || '');
     propertyData.append('seller', user.id || '');   
 
-    formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); 
+    formData.amenities.forEach(amenity => propertyData.append('amenities', amenity.value)); 
 
     formData.images.forEach(image => propertyData.append('new_images', image));
 
@@ -168,15 +186,10 @@ const PropertyForm = () => {
               />
              
             </label>
+            
             <label className="block">
-              <span className="text-gray-700">Land Location</span>
-              <input 
-                type="text" 
-                name="location" 
-                value={formData.location} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Location" />
+              <span className="text-gray-700">Property Location</span>
+              <LeafletMap onLocationChange={handleLocationChange} />
             </label>
 
             <label className="block">
@@ -251,15 +264,10 @@ const PropertyForm = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded" 
                 placeholder="Price" />
             </label>
+            
             <label className="block">
-              <span className="text-gray-700">Location</span>  
-              <input 
-                type="text" 
-                name="location" 
-                value={formData.location} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Location" />
+              <span className="text-gray-700">Property Location</span>
+              <LeafletMap  onLocationChange={handleLocationChange} />
             </label>
             <label className="block">
               <span className="text-gray-700">Number of rooms</span>  
@@ -386,15 +394,10 @@ const PropertyForm = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded" 
                 placeholder="Price" />
             </label>
+            
             <label className="block">
-              <span className="text-gray-700">Location</span> 
-              <input 
-                type="text" 
-                name="location" 
-                value={formData.location} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Location" />
+              <span className="text-gray-700">Property Location</span>
+              <LeafletMap  onLocationChange={handleLocationChange} />
             </label>
             <label className="block">
               <span className="text-gray-700">Number of rooms</span> 
@@ -555,3 +558,4 @@ const PropertyForm = () => {
 };
 
 export default PropertyForm;
+

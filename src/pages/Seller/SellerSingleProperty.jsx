@@ -105,7 +105,6 @@ const SellerSingleProperty = () => {
           <div className="flex flex-col items-center">
               {mainImage ? (
               <img
-                // src={standardizeImage(property.images[0]?.image, 800, 400)}
                 src={standardizeImage(mainImage, 300, 300)}
                 alt={`Property main image`}
                 className="w-full h-96 object-cover rounded-lg shadow-md mb-4"
@@ -115,9 +114,6 @@ const SellerSingleProperty = () => {
             )}
           
             <div className="flex gap-4 py-4 justify-center overflow-x-auto">
-
-              {/* {property.images && property.images.length > 0 ? (
-                property.images.map((image, index) => ( */}
               {displayedImages.length > 0 ? (
                   displayedImages.map((image, index) => (
                   <img
@@ -143,43 +139,56 @@ const SellerSingleProperty = () => {
                 )}
               </div>
           </div>
-          {/* <div className="md:col-span-2"> */}
           <div>
             <h1 className="text-3xl font-bold mb-4">{property.category}</h1>
             <p className="text-xl font-semibold text-gray-700">Price: ₹{Math.round(property.price)} Lakhs</p>
             <div className="flex items-center space-x-2 mb-4">
+              {property.category!=='Villa' && 
+              <div>
+                <span className="text-gray-500">
+                  {property.num_rooms} bedrooms
+                </span>
+                <span className="text-gray-500">
+                  {property.num_bathrooms} bathrooms
+                </span>
+              
+              </div>
+              }
+             
               <span className="text-gray-500">
-                {property.num_rooms} bedrooms
-              </span>
-              <span className="text-gray-500">
-                {property.num_bathrooms} bathrooms
-              </span>
-              <span className="text-gray-500">
-                {property.property_type ? 'Size ' : 'Area '}
-                {Math.round(property.size || property.area)} 
-                {property.property_type ? 'sqft' : 'cents'}
+                {property.category === 'Villa' ? (
+                  <>
+                    Area: {Math.round(property.land_area)} cents
+                    <br />
+                    Size: {Math.round(property.size)} sqft
+                  </>
+                ) : property.category === 'Apartment' ? (
+                  <>
+                    Size: {Math.round(property.size)} sqft
+                  </>
+                ) : (
+                  <>
+                    Area: {Math.round(property.area)} cents
+                  </>
+                )}
               </span>
             </div>
-            <p className="text-gray-500">Place: {property.location}</p>
+            <p className="text-gray-500">Location: {property.location}</p>
           </div>
-          {/* <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4"> */}
-            <div className='mb-4'>
+          <div className='mb-4'>
               <h2 className="text-xl font-bold">Property Details</h2>
               <ul className="list-disc list-inside text-gray-700 capitalize">
                 <li>Type: {property.category}</li>
                 <li>Description: {property.description}</li>
               </ul>
-            </div>
-          
-           
-          {/* </div> */}
+          </div>
           <div>
                 <h2 className="text-xl font-bold mb-2">
                   Amenities - Available facilities nearby
                 </h2>
                 <p>
-                  {property.amenities_names && property.amenities_names.length > 0
-                    ? property.amenities_names.join(", ")
+                  {property.amenities && property.amenities.length > 0
+                    ? property.amenities.join(", ")
                     : "N/A"}
                 </p>
           </div>

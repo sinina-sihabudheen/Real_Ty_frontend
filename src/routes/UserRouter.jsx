@@ -19,6 +19,7 @@ import SuccessSubscription from "../pages/Seller/SuccessSubscription";
 import CancelSubscription from "../pages/Seller/CancelSubscription";
 import SellerSingleProperty from "../pages/Seller/SellerSingleProperty";
 import Invoice from "../pages/Seller/Invoice";
+import ChatComponent from "../pages/User/ChatComponent";
 
 function UserRouter() {
   return (
@@ -39,11 +40,12 @@ function UserRouter() {
         <Route path="/subscription" element={<SubscriptionPage />} />
         <Route path="/success" element={<SuccessSubscription />} />
         <Route path="/cancel" element={<CancelSubscription />} />
-        <Route path="/sellerprofile/:sellerId" element={<SellerProfile />} />
+        <Route path="/sellerprofile/:userId" element={<SellerProfile />} />
         <Route path="/seller_singleproperty/:id/:category" element={<SellerSingleProperty />} />
         <Route path="/invoice/:subscriptionId" element={<Invoice />} />
-
+        <Route path="/chat/:sellerId/:propertyId" element={<ChatComponent />} />
       </Route>
+      
     </Routes>
   );
 }

@@ -1,44 +1,3 @@
-// import React, {useEffect} from 'react';
-// import { Pie } from 'react-chartjs-2';
-// import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-// import { useState } from 'react';
-
-// ChartJS.register(ArcElement, Tooltip, Legend);
-
-// const DashBoardChart = ({ totalListings, total_land_properties, total_apartments, total_villas }) => {
-//   const [bgColor, setBgColor] = useState('#ffffff'); 
-
-//   useEffect(() => {
-//     const generateRandomLightColor = () => {
-//       const randomColor = `#${((Math.random() * 0x7f + 0x80) << 16 | (Math.random() * 0x7f + 0x80) << 8 | (Math.random() * 0x7f + 0x80)).toString(16).padStart(6, '0')}`;
-//       setBgColor(randomColor);
-//     };
-
-//     const colorChangeInterval = setInterval(generateRandomLightColor, 5000);
-//     return () => clearInterval(colorChangeInterval);
-//   }, []);
-
-//   const data = {
-//     labels: ['Total Listings', 'total_land_properties', 'total_apartments', 'total_villas'],
-//     datasets: [
-//       {
-//         label: '# of Votes',
-//         data: [totalListings, total_land_properties, total_apartments, total_villas],
-//         backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#00FF00'],
-//         hoverBackgroundColor: bgColor,
-//       },
-//     ],
-//   };
-
-//   return (
-//     <div className="w-8/12 p-4 bg-white shadow rounded">
-//       <h3 className="text-lg font-bold mb-4">Dashboard Overview</h3>
-//       <Pie data={data} />
-//     </div>
-//   );
-// };
-
-// export default DashBoardChart;
 
 
 import React, { useEffect, useState } from 'react';
@@ -54,7 +13,7 @@ ChartJS.register(
   LinearScale
 );
 
-const DashBoardChart = ({ totalListings, total_land_properties, total_apartments, total_villas, total_users }) => {
+const DashBoardChart = ({ totalListings, total_land_properties, total_apartments, total_villas, total_users, subscription_growth }) => {
   const [bgColor, setBgColor] = useState('#ffffff');
 
   useEffect(() => {
@@ -84,7 +43,7 @@ const DashBoardChart = ({ totalListings, total_land_properties, total_apartments
     datasets: [
       {
         label: 'Count',
-        data: [total_users],
+        data: [total_users,subscription_growth],
         backgroundColor: ['#42A5F5'],
       },
     ],

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Select from 'react-select';
 import { useSelector } from 'react-redux';
 import { getLandPropertyDetails, getResidentialPropertyDetails, updateLandProperty, updateResidentialProperty } from '../../utils/api';
 import { handleFetchAmenity } from '../../utils/auth';
@@ -13,7 +12,6 @@ const EditProperty = () => {
     price: '',
     description: '',
     area: '',
-    amenities: [],
     location: '',
     images: [],
     video: null,
@@ -23,13 +21,12 @@ const EditProperty = () => {
     landArea: '',
   });
 
-  const [amenitiesOptions, setAmenitiesOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formErrors, setFormErrors] = useState({}); 
 
   useEffect(() => {
-    handleFetchAmenity(setAmenitiesOptions);
+    // handleFetchAmenity(setAmenitiesOptions);
 
     const fetchPropertyDetails = async () => {
       try {
@@ -51,37 +48,36 @@ const EditProperty = () => {
 
  
 
-  const handleInputChange = (e) => {
-    const { name, files } = e.target;
-    if (name === 'images') {
-        // setFormData({
-        //     ...formData,
-        //     images: files 
-        // });
-        const filesArray = Array.from(files);
-        setFormData({
-            ...formData,
-            images: filesArray
-        });
-    } else {
-        setFormData({
-            ...formData,
-            [name]: files ? files[0] : e.target.value,
-        });
-    }
-};
+//   const handleInputChange = (e) => {
+//     const { name, files } = e.target;
+//     if (name === 'images') {
+//         const filesArray = Array.from(files);
+//         setFormData({
+//             ...formData,
+//             images: filesArray
+//         });
+//     } else {
+//         setFormData({
+//             ...formData,
+//             [name]: files ? files[0] : e.target.value,
+//         });
+//     }
+// };
 
-
-  const handleSelectChange = (selectedOptions) => {
+const handleInputChange = (e) => {
+  const { name, files } = e.target;
+  if (name === 'images') {
     setFormData({
       ...formData,
-      amenities: selectedOptions,
+      images: [...formData.images, ...files]
     });
-  };
-  const handleCancel = () => {
-    navigate('/agentprofile') 
-    };
-
+  } else {
+    setFormData({
+      ...formData,
+      [name]: files ? files[0] : e.target.value,
+    });
+  }
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -96,22 +92,13 @@ const EditProperty = () => {
     propertyData.append('property_type', category || '');  
 
     if (formData.area) propertyData.append('area', formData.area || '');
-    // if (formData.amenities) { formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value)); }
     
     if (formData.location) propertyData.append('location', formData.location || '');
-  
-    // if (formData.images) {
-    //     propertyData.append('images', formData.images);
-    // }
-    // if (formData.video) {
-    //     propertyData.append('video', formData.video);
-    // }
-    formData.amenities.forEach(amenity => propertyData.append('amenities[]', amenity.value));
+
     propertyData.append('location', formData.location || '');
 
-    formData.images.forEach(image => {
-      propertyData.append('new_images', image);
-    });
+    formData.images.forEach(image => propertyData.append('new_images', image));
+    
 
     if (formData.video) {
       propertyData.append('video', formData.video);
@@ -124,7 +111,6 @@ const EditProperty = () => {
     }
     propertyData.append('seller', user.id || '');
 
-    // Log FormData to check content
     for (let pair of propertyData.entries()) {
         console.log(pair[0] + ': ' + pair[1]);
     }
@@ -184,17 +170,7 @@ const EditProperty = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Area in Cents" />
           </label>
-          <label htmlFor="amenities" className="block text-gray-700">Amenities
-          <Select
-            name="amenities"
-            value={formData.amenities}
-            onChange={handleSelectChange}
-            options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-            isMulti
-            className="w-full mb-4"
-            placeholder="Select Amenities"
-          />
-          </label>
+          
           <label htmlFor="location" className="block text-gray-700">Location
           <input 
             type="text" 
@@ -205,17 +181,17 @@ const EditProperty = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Location" />
           </label>
-          <label htmlFor="images" className="block text-gray-700">Images
-          <input 
-            type="file" 
-            id="images"
-            name="images" 
-            onChange={handleInputChange} 
-            accept="image/*" 
-            multiple
-            className="w-full px-4 py-2 border border-gray-300 rounded" 
-            placeholder="Upload image" />
-          </label>
+          <label htmlFor="video" className="block text-gray-700">Images
+              <input 
+                type="file" 
+                name="images" 
+                onChange={handleInputChange} 
+                accept="image/*" 
+                className="w-full px-4 py-2 border border-gray-300 rounded" 
+                placeholder="Upload image" 
+                multiple
+              />
+            </label>
           <label htmlFor="video" className="block text-gray-700">Video
           <input 
             type="file" 
@@ -281,28 +257,18 @@ const EditProperty = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Size (in sq ft)" />
           </label>
-          <label htmlFor="amenities" className="block text-gray-700">Amenities
-          <Select
-            name="amenities"
-            value={formData.amenities}
-            onChange={handleSelectChange}
-            options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-            isMulti
-            className="w-full mb-4"
-            placeholder="Select Amenities"
-          />
-          </label>
-          <label htmlFor="images" className="block text-gray-700">Images
-          <input 
-            type="file" 
-            id="images"
-            name="images" 
-            onChange={handleInputChange} 
-            accept="image/*" 
-            multiple
-            className="w-full px-4 py-2 border border-gray-300 rounded" 
-            placeholder="Upload image" />
-          </label>
+          
+          <label htmlFor="video" className="block text-gray-700">Images
+              <input 
+                type="file" 
+                name="images" 
+                onChange={handleInputChange} 
+                accept="image/*" 
+                className="w-full px-4 py-2 border border-gray-300 rounded" 
+                placeholder="Upload image" 
+                multiple
+              />
+            </label>
           <label htmlFor="video" className="block text-gray-700">Video
           <input 
             type="file" 
@@ -368,29 +334,18 @@ const EditProperty = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Size (in sq ft)" />
           </label>
-          <label htmlFor="amenities" className="block text-gray-700">Amenities
-          <Select
-            name="amenities"
-            value={formData.amenities}
-            onChange={handleSelectChange}
-            options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-            isMulti
-            className="w-full mb-4"
-            placeholder="Select Amenities"
-          />
-          </label>
-          <label htmlFor="images" className="block text-gray-700">Images
-          <input 
-            type="file" 
-            id="images"
-            name="images" 
-            multiple
-            onChange={handleInputChange} 
-            accept="image/*" 
-            className="w-full px-4 py-2 border border-gray-300 rounded" 
-            placeholder="Upload image" />
-            
-          </label>
+          
+          <label htmlFor="video" className="block text-gray-700">Images
+              <input 
+                type="file" 
+                name="images" 
+                onChange={handleInputChange} 
+                accept="image/*" 
+                className="w-full px-4 py-2 border border-gray-300 rounded" 
+                placeholder="Upload image" 
+                multiple
+              />
+            </label>
           <label htmlFor="video" className="block text-gray-700">Video
           <input 
             type="file" 
@@ -431,14 +386,10 @@ const EditProperty = () => {
         >
           {loading ? 'Updating...' : 'Update Property'}
         </button>
-        {/* <button 
-            type="button" 
-            onClick={handleCancel} 
-            className="bg-red-400 hover:bg-red-600 text-white px-4 py-2 rounded-md">Cancel
-        </button> */}
+      
       </form>
     </div>
   );
 };
-
+ 
 export default EditProperty;
