@@ -209,7 +209,7 @@ const CategoryList = () => {
         <div className="flex">
             <Sidebar />
             <div className="w-full py-8">
-                <AdminHeader />
+                <AdminHeader isPropertyType={true}/>
 
                 {/* Main content wrapper */}
                 <div className="relative">

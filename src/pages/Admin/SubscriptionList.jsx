@@ -32,7 +32,7 @@ const SubscriptionList = () => {
     <div className="flex">
       <Sidebar />
       <div className='w-full py-8'>
-        <AdminHeader />
+        <AdminHeader isPropertyType={true}/>
         <div className="w-3/4 bg-white">
           <h2 className='text-xl font-bold mb-4'>All Subscriptions</h2>
           <div className="p-4">

@@ -5,11 +5,12 @@ import { loginAdmin, fetchUserData,
   fetchRegions,addRegion,deleteRegion,
   fetchAmenities,addAmenity,deleteAmenity,
   fetchCategory,addCategory,deleteCategory,
-  subscriptionList
+  subscriptionList,revenueReport
   } from './api';
 import { adminLoginSuccess } from '../redux/adminAuthSlice';
 import {jwtDecode} from 'jwt-decode';
 import { toast } from 'sonner';
+import { ReducerType } from '@reduxjs/toolkit';
 
 export const handleAdminLogin = async (email, password, dispatch, navigate) => {
   try {
@@ -67,7 +68,7 @@ export const handleFetchUsersData = async (setUser, setIsLoading, setError) => {
 
     console.log('Fetch Users Data Response:', response);
 
-    setUser(response.data);
+    setUser(response.data.results);
     setIsLoading(false);
   } catch (error) {
 
@@ -82,7 +83,7 @@ export const handleFetchUsersData = async (setUser, setIsLoading, setError) => {
 export const handleFetchLandsList = async (setLands, setIsLoading, setError) => {
   try {
     const response = await fetchLandsList();
-    setLands(response.data);
+    setLands(response.data.results);
     setIsLoading(false);
   } catch (error) {
     setError('Error fetching user data');
@@ -93,7 +94,8 @@ export const handleFetchLandsList = async (setLands, setIsLoading, setError) => 
 export const handleFetchResidentsList = async (setProperties) => {
   try {
     const response = await fetchResidentsList();
-    setProperties(response.data);
+
+    setProperties(response.data.results);
   } catch (error) {
     
     console.error('Error fetching seller residents :', error);
@@ -105,7 +107,7 @@ export const handleFetchResidentsList = async (setProperties) => {
 export const handleFetchAmenity = async (setAmenities) => {
   try {
     const response = await fetchAmenities();
-    setAmenities(response.data);
+    setAmenities(response.data.results);
   } catch (error) {
     console.error('Error fetching regions:', error);
   }
@@ -138,7 +140,7 @@ export const handleAmenityDelete = async (amenityId) => {
 export const handleFetchCategory = async (setCategory) => {
   try {
     const response = await fetchCategory();
-    setCategory(response.data);
+    setCategory(response.data.results);
   } catch (error) {
     console.error('Error fetching regions:', error);
   }
@@ -237,8 +239,19 @@ export const handleUnblockUser = async (userId, setUsers) => {
 export const handleFetchSubscriptionList = async (setSubscriptions) => {
   try {
     const response = await subscriptionList();
-    setSubscriptions(response.data);
+    setSubscriptions(response.data.results);
     console.log("RESPONSE",response);
+  } catch (error) {
+    console.error('Error fetching regions:', error);
+  }
+};
+export const handleRevenueReport = async (setRevenue, setTotalRevenue) => {
+  try {
+    const response = await revenueReport();
+    setRevenue(response.data.payments.results);
+    setTotalRevenue(response.data.total_revenue)
+    console.log("RESPONSE",response);
+    // return response
   } catch (error) {
     console.error('Error fetching regions:', error);
   }

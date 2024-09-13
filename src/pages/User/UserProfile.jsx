@@ -9,8 +9,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-
-
 const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,10 +102,8 @@ const handlePasswordChange = async (event) => {
     navigate('/listedproperties')
   };
  
-  const handleBuy = async () => {
-    
+  const handleBuy = async () => {  
       navigate('/propertylist');
-  
   };
 
   if (isLoading) {
@@ -119,16 +115,14 @@ const handlePasswordChange = async (event) => {
   }
 
   return (
-    <>
+    <div className='h-screen'>
     <Navbar />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {user ? (
         <div>
         <div className='flex space-x-5'>
             {!profileEdit && !security && (
-            <div className="w-full max-w-sm mx-auto bg-gray-300 rounded-lg p-4">
-             
-              
+            <div className="w-full max-w-sm mx-auto bg-gray-300 rounded-lg p-4">              
               <h3 className="text-xl font-bold text-gray-700 text-center mb-4 ">Profile Settings</h3>
               <h5 className="text-gray-500 text-center">Update your profile details here.</h5>
               <div className="space-y-2">
@@ -159,25 +153,17 @@ const handlePasswordChange = async (event) => {
                   src={user.profile_image? user.profile_image : '/images/user.png'}                  
                   alt="Profile" 
                   className="w-20 h-20 rounded-full" 
-                />
-              
+                />              
                 <div>
                   <h3 className="text-lg text-gray-600 font-semibold uppercase">{user.username}</h3>
                   <p className="text-gray-500">Email: {user.email}</p>
                   {user.address ? <p className="text-gray-500 capitalize">Addresss: {user.address} </p>: null}
                    {user.contact_number ? <p className="text-gray-500">Contact Number: +91{user.contact_number} </p>: null}
-                  
-                </div>
-                
-                 
-               
+                </div>               
                   <div className='flex w-full space-x-8'>
                       {/* <button onClick={handleSell} className="w-2/4 bg-gray-400 text-white py-2 rounded-md mb-2">Sell</button> */}
                       <button onClick={handleListedProperties} className="w-full  bg-gray-400 text-white py-2 rounded-md mb-2">Listed Properties</button>
-
                   </div>
-                  
-
               </div>
           </div>
        </div>
@@ -296,8 +282,10 @@ const handlePasswordChange = async (event) => {
         <div>No user data available</div>
       )}
     </div>
-    <Footer />
-    </>
+    <div className='w-full absolute bottom-0'>
+      <Footer />
+    </div>
+    </div>
   );
 };
 

@@ -258,6 +258,7 @@ export const adminDashboard = async () => {
 
 export const fetchRegions = () => {
   return api.get('/api/regions/');
+  
 };
 
 
@@ -332,6 +333,10 @@ export const paymentInvoice = async (subscriptionId) => {
 }
 export const subscriptionList = async () => {
   const response = await api.get('/api/premium-users/');
+  return response;
+}
+export const revenueReport = async () => {
+  const response = await api.get('/payments/revenue/');
   return response;
 }
 

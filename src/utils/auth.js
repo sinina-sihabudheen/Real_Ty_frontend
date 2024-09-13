@@ -197,7 +197,7 @@ export const handleGoogleRegister = async (credentialResponse, navigate) => {
 export const handleFetchRegions = async (setRegions) => {
   try {
     const response = await fetchRegions();
-    setRegions(response.data);
+    setRegions(response.data.results);
   } catch (error) {
     console.error('Error fetching regions:', error);
   }
@@ -207,7 +207,8 @@ export const handleFetchRegions = async (setRegions) => {
 export const handleFetchAmenity = async (setAmenities) => {
   try {
     const response = await fetchAmenities();
-    setAmenities(response.data);
+   console.log("Ameni",response.data.results);
+    setAmenities(response.data.results);
   } catch (error) {
     console.error('Error fetching regions:', error);
   }
@@ -313,7 +314,8 @@ export const updateUserProfile = async (formData) => {
 export const handleFetchSellerLands = async (setLands) => {
   try {
     const response = await fetchSellerLands();
-    setLands(response.data);
+    console.log("SELLERS lands",response);
+    setLands(response.data.results);
   } catch (error) {
     console.error('Error fetching seller lands :', error);
   }
@@ -322,8 +324,8 @@ export const handleFetchSellerLands = async (setLands) => {
 export const handleFetchSellerResidents = async (setResidents) => {
   try {
     const response = await fetchSellerResidents();
-    console.log(("DATA RESIDENTS",response.data));
-    setResidents(response.data);
+    console.log("AUTH SELLERS RESIDENTS",response.data.results);
+    setResidents(response.data.results);
   } catch (error) {
     console.error('Error fetching seller residents :', error);
 }

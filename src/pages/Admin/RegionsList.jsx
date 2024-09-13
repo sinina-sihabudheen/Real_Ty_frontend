@@ -54,7 +54,7 @@ const RegionsList = () => {
     <div className="flex">
       <Sidebar />
       <div className='w-full py-8'>
-        <AdminHeader />
+        <AdminHeader isPropertyType={true}/>
         <div className="w-3/4 bg-white">
           <h2 className='text-gray-600 font-semibold text-xl'>All Regions</h2>
           <button

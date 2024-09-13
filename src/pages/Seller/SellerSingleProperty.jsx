@@ -5,7 +5,14 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Link } from 'react-router-dom';
 import { DiNancy } from 'react-icons/di';
+import { FaBed, FaBath, FaMapMarkerAlt } from 'react-icons/fa';
 
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 const standardizeImage = (url, width, height) => {
   return url ? `${url}?w=${width}&h=${height}&fit=crop` : '';
@@ -21,6 +28,12 @@ const SellerSingleProperty = () => {
   const [mainImage, setMainImage] = useState("");
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
+  delete L.Icon.Default.prototype._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+  });
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -72,6 +85,11 @@ const SellerSingleProperty = () => {
       console.error('Error deleting property:', error);
       toast.error('Failed to delete property.');
     }
+  };  
+  const getLocationName = (location) => {    
+    const locationParts = location.split(','); 
+    const mainLocation = locationParts.slice(0, 2).join(','); 
+    return mainLocation;
   };
 
   const onCancel = () => {
@@ -85,8 +103,6 @@ const SellerSingleProperty = () => {
   const closeVideoModal = () => {
       setIsVideoModalOpen(false);
     };
-
-
 
   console.log("Property Data:", property);
 
@@ -141,39 +157,63 @@ const SellerSingleProperty = () => {
           </div>
           <div>
             <h1 className="text-3xl font-bold mb-4">{property.category}</h1>
-            <p className="text-xl font-semibold text-gray-700">Price: ₹{Math.round(property.price)} Lakhs</p>
-            <div className="flex items-center space-x-2 mb-4">
-              {property.category!=='Villa' && 
-              <div>
+            <p className="text-xl font-semibold text-gray-700">Price: ₹{Math.round(property.price)} Lakhs</p><br />
+            
+            {(property.category==='Villa' || property.category==='Apartment') &&
+                <div className="flex items-center  space-x-4">
+                    <span className=" flex items-center">
+                      <FaBed size={20} color="black" />
+                      <span className="ml-2 font-bold text-gray-600">{property.num_rooms} bedrooms</span>
+                    </span>
+                    <span className=" flex items-center">
+                      <FaBath size={20} color="black" />
+                      <span className="ml-2 font-bold text-gray-600">{property.num_bathrooms} bathrooms</span>
+                    </span>
+                </div>
+              }
+              <div className="flex items-center space-x-2 mb-4"> 
                 <span className="text-gray-500">
-                  {property.num_rooms} bedrooms
+                  {property.property_type ? "Size " : "Area "}
+                  {Math.round(property.size || property.area)}{" "}
+                  {property.property_type ? "sqft" : "cents"}
                 </span>
-                <span className="text-gray-500">
-                  {property.num_bathrooms} bathrooms
+              </div>
+              {property.category==='Villa' && 
+              <div className="flex items-center space-x-2 mb-4"> 
+                <span className="text-gray-500">                  
+                 Land Area: {Math.round(property.land_area)} Cent              
                 </span>
-              
               </div>
               }
-             
-              <span className="text-gray-500">
-                {property.category === 'Villa' ? (
-                  <>
-                    Area: {Math.round(property.land_area)} cents
-                    <br />
-                    Size: {Math.round(property.size)} sqft
-                  </>
-                ) : property.category === 'Apartment' ? (
-                  <>
-                    Size: {Math.round(property.size)} sqft
-                  </>
-                ) : (
-                  <>
-                    Area: {Math.round(property.area)} cents
-                  </>
-                )}
+            <div className="flex items-center space-x-4">
+              <span className=" flex items-center text-gray-600 font-semibold">
+                <FaMapMarkerAlt size={20} color="black" /> Location: {getLocationName(property.location)}
               </span>
             </div>
-            <p className="text-gray-500">Location: {property.location}</p>
+              {property.latitude && property.longitude && (
+                <div className="map-container" style={{ display: 'flex' }}>
+                  <MapContainer
+                    center={[property.latitude, property.longitude]}
+                    zoom={13}
+                    style={{
+                      height: '200px',  
+                      width: '80%',    
+                      marginTop: '1rem',
+                      borderRadius: '8px', 
+                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', 
+                    }}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={[property.latitude, property.longitude]}>
+                      <Popup>{property.location}</Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+              )}
+
           </div>
           <div className='mb-4'>
               <h2 className="text-xl font-bold">Property Details</h2>

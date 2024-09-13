@@ -51,6 +51,9 @@ const Sidebar = () => {
                 <Link to="/admin/subscriptionList" className="text-gray-500 hover:text-blue-700">Subscriptions</Link>
             </p>
             <p className="text-gray-500">
+                <Link to="/admin/salesreport" className="text-gray-500 hover:text-blue-700">Revenue Report</Link>
+            </p>
+            <p className="text-gray-500">
                 <button onClick={handleLogout} className="text-gray-500 hover:text-blue-700">Logout</button>
             </p>
            

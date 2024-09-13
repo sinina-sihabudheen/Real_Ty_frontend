@@ -10,16 +10,14 @@ const PropertyCategory = () => {
       <div className="flex">
         <Sidebar />
         <div className='w-full py-8'>
-          <AdminHeader />
-    
+          <AdminHeader isPropertyType={true}/>
+         
           <div className="flex flex-col items-center justify-center h-screen">
             <h2 className="text-2xl font-bold mb-6">Property Categories</h2>
             <div className="flex flex-col space-y-8">
               <div>
               <Link to="/admin/residentialslist/${Villa}/Villa" className="text-gray-700 hover:text-blue-500">
-                  {/* <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold h-10 w-full text-xl rounded shadow-md">
-                  Villas
-                  </button> */}
+                 
                 
                   <img src="/images/villalogo.jpeg" alt="Villa" className="w-12 h-12" />
                   <span className="mt-2">Villas</span>
@@ -28,18 +26,14 @@ const PropertyCategory = () => {
               </div>
               <div>
               <Link to="/admin/residentialslist/${Apartment}/Apartment" className="text-gray-700 hover:text-blue-500">
-                  {/* <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 text-xl rounded shadow-md">
-                  Apartments
-                  </button> */}
+                  
                   <img src="/images/apartmentlogo.webp" alt="Apartment" className="w-12 h-12" />
                   <span className="mt-2">Apartment</span>
               </Link>
               </div>
               <div>
               <Link to="/admin/landslist/${Land}" className="text-gray-700 hover:text-blue-500">
-                  {/* <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold h-10 w-full text-xl rounded shadow-md">
-                  Lands
-                  </button> */}
+                  
                   <img src="/images/landlogo.png" alt="Land" className="w-12 h-12" />
                   <span className="mt-2">Land Property</span>
               </Link>
@@ -47,6 +41,7 @@ const PropertyCategory = () => {
             </div>
           </div>
         </div>
+      
       </div>
     </>
   );

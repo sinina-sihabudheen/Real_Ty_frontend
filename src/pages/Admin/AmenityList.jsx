@@ -234,7 +234,7 @@ const AmenityList = () => {
         <div className="flex">
             <Sidebar />
             <div className="w-full py-8">
-                <AdminHeader />
+                <AdminHeader isPropertyType={true}/>
 
                 <div className="relative w-3/4 bg-white">
                     {/* Main content */}

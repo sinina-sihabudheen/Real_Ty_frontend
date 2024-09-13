@@ -2,7 +2,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  isAuthenticated: !!localStorage.getItem('access'), // Check if access token exists
+  isAuthenticated: !!localStorage.getItem('access'), 
   user: JSON.parse(localStorage.getItem('user')) || null,
   role: localStorage.getItem('role') || null,
   access: localStorage.getItem('access') || null,

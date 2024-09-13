@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { useSelector } from 'react-redux';
+import { useForm, Controller } from 'react-hook-form';
 import { createLandProperty, createResidentialProperty } from '../../utils/api';
 import { handleFetchAmenity } from '../../utils/auth'; 
 import LeafletMap from '../../components/Map/LeafletMap';
@@ -10,23 +11,10 @@ const PropertyForm = () => {
   const location = useLocation();
   const { category } = location.state || {};
   const user = useSelector(state => state.auth.user); 
-  const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    price: '',
-    description: '',
-    area: '',
-    amenities: [],
-    location: '',
-    latitude: 51.505,
-    longitude: -0.09,
-    images: [],
-    video: null,
-    numRooms: '',
-    numBathrooms: '',
-    size: '',
-    landArea: '',
-  });
+  const navigate = useNavigate();
+const [selectedImages, setSelectedImages] = useState([]); // Manage selected images
 
+  const { control, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm();
   const [amenitiesOptions, setAmenitiesOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,99 +23,63 @@ const PropertyForm = () => {
     handleFetchAmenity(setAmenitiesOptions);
   }, []);
 
-
-  const handleInputChange = (e) => {
-    const { name, files } = e.target;
-    if (name === 'images') {
-      setFormData({
-        ...formData,
-        images: [...formData.images, ...files]
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: files ? files[0] : e.target.value,
-      });
-    }
-  };
-
   const handleLocationChange = ({ name, latitude, longitude }) => {
-    console.log('Location selected:', name, latitude, longitude);
-
-    setFormData({
-      ...formData,
-      location: name,
-      latitude: latitude,
-      longitude: longitude,
-    });
-  };
-
-  const handleDeleteImage = (index) => {
-    const newImages = [...formData.images];
-    newImages.splice(index, 1);
-    setFormData({ ...formData, images: newImages });
-  };
-
-  const handleDeleteVideo = () => {
-    setFormData({ ...formData, video: null });
-  };
-
-  const handleCancel = () => {
-  navigate('/agentprofile') 
-  };
-  const handleSelectChange = (selectedOptions) => {
-    setFormData({
-      ...formData,
-      amenities: selectedOptions,
-    });
+    setValue('location', name);
+    setValue('latitude', latitude);
+    setValue('longitude', longitude);
   };
   
+  const removeImage = (index) => {
+    setSelectedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+  };
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setSelectedImages((prevImages) => [...prevImages, ...files]); // Add new files to state
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    const propertyData = new FormData();
+const onSubmit = async (data) => {
+    let propertyData = new FormData();
 
-    
-    propertyData.append('category', category);  
-    propertyData.append('area', formData.area || '');  
-    propertyData.append('property_type', category || '');  
-    propertyData.append('description', formData.description || '');  
-    propertyData.append('num_rooms', formData.numRooms || '');  
-    propertyData.append('num_bathrooms', formData.numBathrooms || '');  
-    propertyData.append('price', formData.price || '');
-    propertyData.append('location', formData.location || '');
-    propertyData.append('latitude', formData.latitude || '');
-    propertyData.append('longitude', formData.longitude || '');
-    
-    propertyData.append('size', formData.size || '');
-    propertyData.append('land_area', formData.landArea || '');
-    propertyData.append('seller', user.id || '');   
+    propertyData.append('category', category);
+    propertyData.append('area', data.area || '');
+    propertyData.append('property_type', category);
+    propertyData.append('description', data.description);
+    propertyData.append('price', data.price);
+    propertyData.append('location', data.location);
+    propertyData.append('latitude', data.latitude);
+    propertyData.append('longitude', data.longitude);
+    propertyData.append('seller', user.id);
+    propertyData.append('size', data.size || '');  
+    propertyData.append('land_area', data.land_area || '');  
+    propertyData.append('num_bathrooms', data.bathrooms || '');  
+    propertyData.append('num_rooms', data.bedrooms || '');  
 
-    formData.amenities.forEach(amenity => propertyData.append('amenities', amenity.value)); 
+    data.amenities.forEach((amenity) => {
+        propertyData.append('amenities', amenity.value);  
+    });
 
-    formData.images.forEach(image => propertyData.append('new_images', image));
+    // const images = watch('images');
+    // images.forEach(image => propertyData.append('new_images', image));
+    selectedImages.forEach(image => {
+      propertyData.append('new_images', image); // Appending images
+    });
 
-    if (formData.video) {
-      propertyData.append('video', formData.video);
+    if (data.video && data.video.length > 0) {
+        const videoFile = data.video[0];
+        propertyData.append('video', videoFile);  
     }
 
     for (let pair of propertyData.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
+            console.log(pair[0] + ': ' + pair[1]);
+          }
     try {
-    
       if (category === 'Land') {
-        console.log("DATA ",propertyData);
-
         await createLandProperty(propertyData);
       } else if (category === 'Apartment' || category === 'Villa') {
-        console.log("DATA ",propertyData);
-        await createResidentialProperty(propertyData)
+        await createResidentialProperty(propertyData);
       }
       alert('Property created successfully!');
-      navigate('/listedproperties')
+      navigate('/listedproperties');
     } catch (error) {
       console.error('Failed to create property:', error);
       setError('Failed to create property');
@@ -141,421 +93,553 @@ const PropertyForm = () => {
       case 'Land':
         return (
           <>
-            
-            <label className="block">
-              <span className="text-gray-700">Price in Lakhs</span>
-              <input 
-                type="number" 
-                name="price" 
-                value={formData.price} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Expected Price in Lakhs" />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Description</span>
-              <textarea 
-                name="description" 
-                value={formData.description} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Description in short">
-              </textarea>
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Land Area in cents</span>
-              <input 
-                type="text" 
-                name="area" 
-                value={formData.area} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Area in Cents" />
-            </label>
-
-            <label className="block">
-              <span className="text-gray-700">Select Amenities</span>
-              <Select
-                name="amenities"
-                value={formData.amenities}
-                onChange={handleSelectChange}
-                options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-                isMulti
-                className="w-full mb-4"
-                placeholder="Select Amenities"
-              />
-             
-            </label>
-            
+            <Controller
+              name="price"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Price in Lakhs</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Expected Price in Lakhs"
+                  />
+                  {errors.price && <p className="text-red-500">{errors.price.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Price is required' }}
+            />
+            <Controller
+              name="description"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Description</span>
+                  <textarea
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Description in short"
+                  />
+                  {errors.description && <p className="text-red-500">{errors.description.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Description is required' }}
+            />
+            <Controller
+              name="area"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Land Area in cents</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Area in Cents"
+                  />
+                  {errors.area && <p className="text-red-500">{errors.area.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Area is required' }}
+            />
+            <Controller
+              name="amenities"
+              control={control}
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
+                <label className="block">
+                  <span className="text-gray-700">Select Amenities</span>
+                  <Select
+                    isMulti
+                    value={value}
+                    onChange={onChange}
+                    options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
+                    className="w-full mb-4"
+                    placeholder="Select Amenities"
+                  />
+                  {errors.amenities && <p className="text-red-500">{errors.amenities.message}</p>}
+                </label>
+              )}
+              // rules={{ required: 'At least one amenity must be selected' }}
+            />
             <label className="block">
               <span className="text-gray-700">Property Location</span>
-              <LeafletMap onLocationChange={handleLocationChange} />
+              <LeafletMap onSelectLocation={handleLocationChange} />
             </label>
+           
+            <Controller
+              name="images"
+              control={control}
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <label className="block">
+                    <span className="text-gray-700">Add Images (can add multiple images)</span>
+                    <input
+                      type="file"
+                      onChange={(e) => handleImageChange(e)}
+                      accept="image/*"
+                      className="w-full px-4 py-2 border border-gray-300 rounded"
+                      placeholder="Upload image"
+                      multiple
+                    />
+                    {errors.images && <p className="text-red-500">{errors.images.message}</p>}
+                  </label>
 
-            <label className="block">
-              <span className="text-gray-700">Add Images(can add multiple images)</span>
-              <input 
-                type="file" 
-                name="images" 
-                onChange={handleInputChange} 
-                accept="image/*" 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Upload image" 
-                multiple
-                required 
-              />
-            </label> 
-            <label className="block">
-              <span className="text-gray-700">Add video(can add 1 video)</span>          
-              <input 
-                type="file" 
-                name="video" 
-                onChange={handleInputChange} 
-                accept="video/*" 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Upload video" 
-              />
-            </label>
-            {formData.images && formData.images.map((image, index) => (
-              <div key={index} className="relative inline-block mr-2">
-                <img src={URL.createObjectURL(image)} 
-                  alt={`preview ${index}`} 
-                  className="w-16 h-16 object-cover" />
-                <button
-                  type="button"
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
-                  onClick={() => handleDeleteImage(index)}
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-            {formData.video && (
-              <div className="relative inline-block mt-4">
-                <video
-                  width="320"
-                  height="240"
-                  controls
-                >
-                  <source src={URL.createObjectURL(formData.video)} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-                <button
-                  type="button"
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
-                  onClick={handleDeleteVideo}
-                >
-                  &times;
-                </button>
-              </div>
-            )}
+                  {/* Display Thumbnails */}
+                  <div className="image-preview grid grid-cols-3 gap-4">
+                    {selectedImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Selected ${index}`}
+                          className="h-20 w-20 object-cover border rounded"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full"
+                          onClick={() => removeImage(index)}
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            />
+
+            <Controller
+              name="video"
+              control={control}
+              defaultValue={null}
+              render={({ field: { onChange, value } }) => (
+                <label className="block">
+                  <span className="text-gray-700">Add Video (can add 1 video)</span>
+                  <input
+                    type="file"
+                    onChange={(e) => onChange(e.target.files[0])}
+                    accept="video/*"
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Upload video"
+                  />
+                  {errors.video && <p className="text-red-500">{errors.video.message}</p>}
+                </label>
+              )}
+            />
           </>
         );
       case 'Apartment':
         return (
           <>
-          <label className="block">
-              <span className="text-gray-700">Price in Lakhs</span>  
-              <input 
-                type="number" 
-                name="price" 
-                value={formData.price} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Price" />
-            </label>
-            
+            <Controller
+              name="price"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Price in Lakhs</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Expected Price in Lakhs"
+                  />
+                  {errors.price && <p className="text-red-500">{errors.price.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Price is required' }}
+            />
+            <Controller
+              name="description"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Description</span>
+                  <textarea
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Description in short"
+                  />
+                  {errors.description && <p className="text-red-500">{errors.description.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Description is required' }}
+            />
+            <Controller
+              name="bedrooms"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Number of Bedrooms</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Number of Bedrooms"
+                  />
+                  {errors.bedrooms && <p className="text-red-500">{errors.bedrooms.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Number of bedrooms is required' }}
+            />
+            <Controller
+              name="bathrooms"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Number of Bathrooms</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Number of Bathrooms"
+                  />
+                  {errors.bathrooms && <p className="text-red-500">{errors.bathrooms.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Number of bathrooms is required' }}
+            />
+            <Controller
+              name="size"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Size in Square Feet</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Size in Square Feet"
+                  />
+                  {errors.size && <p className="text-red-500">{errors.size.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Size is required' }}
+            />
+            <Controller
+              name="amenities"
+              control={control}
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
+                <label className="block">
+                  <span className="text-gray-700">Select Amenities</span>
+                  <Select
+                    isMulti
+                    value={value}
+                    onChange={onChange}
+                    options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
+                    className="w-full mb-4"
+                    placeholder="Select Amenities"
+                  />
+                  {errors.amenities && <p className="text-red-500">{errors.amenities.message}</p>}
+                </label>
+              )}
+              // rules={{ required: 'At least one amenity must be selected' }}
+            />
             <label className="block">
               <span className="text-gray-700">Property Location</span>
-              <LeafletMap  onLocationChange={handleLocationChange} />
+              <LeafletMap onSelectLocation={handleLocationChange} />
             </label>
-            <label className="block">
-              <span className="text-gray-700">Number of rooms</span>  
-              <input 
-                type="number" 
-                name="numRooms" 
-                value={formData.numRooms} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Number of Rooms" />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Number of bathrooms</span>  
-              <input 
-                type="number" 
-                name="numBathrooms" 
-                value={formData.numBathrooms} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Number of Bathrooms" />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Size in square feet</span>  
-              <input 
-                type="text" 
-                name="size" 
-                value={formData.size} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                laceholder="Size in Square Feet" />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Description</span>  
-              <textarea 
-                name="description" 
-                value={formData.description} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Description in short">
-              </textarea>
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Select Amenities</span>  
-              <Select
-                name="amenities"
-                value={formData.amenities}
-                onChange={handleSelectChange}
-                options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-                isMulti
-                className="w-full mb-4"
-                placeholder="Select Amenities"
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Add images(can add multiple images)</span>  
-              <input 
-                type="file" 
-                name="images" 
-                onChange={handleInputChange} 
-                accept="image/*" 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Upload image" 
-                multiple
-                required
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Add video(can add 1 video)</span>  
-              <input 
-                type="file" 
-                name="video" 
-                onChange={handleInputChange} 
-                accept="video/*" 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Upload video" 
-              />
-            </label>
-            {formData.images && formData.images.map((image, index) => (
-              <div key={index} className="relative inline-block mr-2">
-                <img src={URL.createObjectURL(image)} 
-                  alt={`preview ${index}`} 
-                  className="w-16 h-16 object-cover" />
-                <button
-                  type="button"
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
-                  onClick={() => handleDeleteImage(index)}
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-            {formData.video && (
-              <div className="relative inline-block mt-4">
-                <video
-                  width="320"
-                  height="240"
-                  controls
-                >
-                  <source src={URL.createObjectURL(formData.video)} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-                <button
-                  type="button"
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
-                  onClick={handleDeleteVideo}
-                >
-                  &times;
-                </button>
-              </div>
-            )}
            
+            <Controller
+              name="images"
+              control={control}
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <label className="block">
+                    <span className="text-gray-700">Add Images (can add multiple images)</span>
+                    <input
+                      type="file"
+                      onChange={(e) => handleImageChange(e)}
+                      accept="image/*"
+                      className="w-full px-4 py-2 border border-gray-300 rounded"
+                      placeholder="Upload image"
+                      multiple
+                    />
+                    {errors.images && <p className="text-red-500">{errors.images.message}</p>}
+                  </label>
+
+                  {/* Display Thumbnails */}
+                  <div className="image-preview grid grid-cols-3 gap-4">
+                    {selectedImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Selected ${index}`}
+                          className="h-20 w-20 object-cover border rounded"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full"
+                          onClick={() => removeImage(index)}
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            />
+
+            <Controller
+              name="video"
+              control={control}
+              defaultValue={null}
+              render={({ field: { onChange, value } }) => (
+                <label className="block">
+                  <span className="text-gray-700">Add Video (can add 1 video)</span>
+                  <input
+                    type="file"
+                    onChange={(e) => onChange(e.target.files[0])}
+                    accept="video/*"
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Upload video"
+                  />
+                  {errors.video && <p className="text-red-500">{errors.video.message}</p>}
+                </label>
+              )}
+            />
           </>
         );
       case 'Villa':
         return (
           <>
-          <label className="block">
-              <span className="text-gray-700">Price in lakhs</span> 
-              <input 
-                type="number" 
-                name="price" 
-                value={formData.price} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Price" />
-            </label>
-            
+            <Controller
+              name="price"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Price in Lakhs</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Expected Price in Lakhs"
+                  />
+                  {errors.price && <p className="text-red-500">{errors.price.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Price is required' }}
+            />
+            <Controller
+              name="description"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Description</span>
+                  <textarea
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Description in short"
+                  />
+                  {errors.description && <p className="text-red-500">{errors.description.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Description is required' }}
+            />
+            <Controller
+              name="bedrooms"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Number of Bedrooms</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Number of Bedrooms"
+                  />
+                  {errors.bedrooms && <p className="text-red-500">{errors.bedrooms.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Number of bedrooms is required' }}
+            />
+            <Controller
+              name="bathrooms"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Number of Bathrooms</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Number of Bathrooms"
+                  />
+                  {errors.bathrooms && <p className="text-red-500">{errors.bathrooms.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Number of bathrooms is required' }}
+            />
+             <Controller
+              name="size"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Size in Square Feet</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Size in Square Feet"
+                  />
+                  {errors.size && <p className="text-red-500">{errors.size.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Size is required' }}
+            />
+            <Controller
+              name="land_area"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <label className="block">
+                  <span className="text-gray-700">Land area in Cents</span>
+                  <input
+                    type="number"
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Area in Square Feet"
+                  />
+                  {errors.land_area && <p className="text-red-500">{errors.land_area.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'Land area is required' }}
+            />
+            <Controller
+              name="amenities"
+              control={control}
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
+                <label className="block">
+                  <span className="text-gray-700">Select Amenities</span>
+                  <Select
+                    isMulti
+                    value={value}
+                    onChange={onChange}
+                    options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
+                    className="w-full mb-4"
+                    placeholder="Select Amenities"
+                  />
+                  {errors.amenities && <p className="text-red-500">{errors.amenities.message}</p>}
+                </label>
+              )}
+              rules={{ required: 'At least one amenity must be selected' }}
+            />
             <label className="block">
               <span className="text-gray-700">Property Location</span>
-              <LeafletMap  onLocationChange={handleLocationChange} />
+              <LeafletMap onSelectLocation={handleLocationChange} />
             </label>
-            <label className="block">
-              <span className="text-gray-700">Number of rooms</span> 
-              <input 
-                type="number" 
-                name="numRooms" 
-                value={formData.numRooms} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Number of Rooms" />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Number of bathrooms</span> 
-              <input 
-                type="number" 
-                name="numBathrooms" 
-                value={formData.numBathrooms} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Number of Bathrooms" />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Size in square feet</span> 
-              <input 
-                type="text" 
-                name="size" 
-                value={formData.size} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Size in Square Feet" />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Description</span> 
-              <textarea 
-                name="description" 
-                value={formData.description} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Description in short">
+            
+            <Controller
+              name="images"
+              control={control}
+              defaultValue={[]}
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <label className="block">
+                    <span className="text-gray-700">Add Images (can add multiple images)</span>
+                    <input
+                      type="file"
+                      onChange={(e) => handleImageChange(e)}
+                      accept="image/*"
+                      className="w-full px-4 py-2 border border-gray-300 rounded"
+                      placeholder="Upload image"
+                      multiple
+                    />
+                    {errors.images && <p className="text-red-500">{errors.images.message}</p>}
+                  </label>
 
-              </textarea>
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Select Amenities</span> 
-              <Select
-                name="amenities"
-                value={formData.amenities}
-                onChange={handleSelectChange}
-                options={amenitiesOptions.map(amenity => ({ value: amenity.id, label: amenity.name }))}
-                isMulti
-                className="w-full mb-4"
-                placeholder="Select Amenities"
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Land Area in cents</span> 
-              <input 
-                type="text" 
-                name="landArea" value={formData.landArea} 
-                onChange={handleInputChange} 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Land Area" 
-                required/>
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Add images(can add multiple images)</span> 
-              <input 
-                type="file" 
-                name="images" 
-                onChange={handleInputChange} 
-                accept="image/*" 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Upload image" 
-                multiple
-                required
-              />
-            </label>
-            <label className="block">
-              <span className="text-gray-700">Add video(can add 1 video)</span> 
-              <input 
-                type="file" 
-                name="video" 
-                onChange={handleInputChange} 
-                accept="video/*" 
-                className="w-full px-4 py-2 border border-gray-300 rounded" 
-                placeholder="Upload video" 
-              />
-            </label>
-            {formData.images && formData.images.map((image, index) => (
-              <div key={index} className="relative inline-block mr-2">
-                <img src={URL.createObjectURL(image)} 
-                  alt={`preview ${index}`} 
-                  className="w-16 h-16 object-cover" />
-                <button
-                  type="button"
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
-                  onClick={() => handleDeleteImage(index)}
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-            {formData.video && (
-              <div className="relative inline-block mt-4">
-                <video
-                  width="320"
-                  height="240"
-                  controls
-                >
-                  <source src={URL.createObjectURL(formData.video)} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-                <button
-                  type="button"
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1"
-                  onClick={handleDeleteVideo}
-                >
-                  &times;
-                </button>
-              </div>
-            )}
-           
+                  {/* Display Thumbnails */}
+                  <div className="image-preview grid grid-cols-3 gap-4">
+                    {selectedImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Selected ${index}`}
+                          className="h-20 w-20 object-cover border rounded"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full"
+                          onClick={() => removeImage(index)}
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            />
+
+            <Controller
+              name="video"
+              control={control}
+              defaultValue={null}
+              render={({ field: { onChange, value } }) => (
+                <label className="block">
+                  <span className="text-gray-700">Add Video (can add 1 video)</span>
+                  <input
+                    type="file"
+                    onChange={(e) => onChange(e.target.files[0])}
+                    accept="video/*"
+                    className="w-full px-4 py-2 border border-gray-300 rounded"
+                    placeholder="Upload video"
+                  />
+                  {errors.video && <p className="text-red-500">{errors.video.message}</p>}
+                </label>
+              )}
+            />
           </>
         );
-     
       default:
         return null;
     }
   };
-  if (loading) {
-    return <p>Loading...</p>;
-  }
 
-  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="mb-4">
-        <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
-      </div>
-      <h1 className="text-xl font-bold mb-4">Enter the {category} details here</h1>
-      <form className="w-full max-w-md space-y-4" onSubmit={handleSubmit}>
-        {renderFormFields()}
-        {error && <p className="text-red-500">{error}</p>}
-        <div className="flex justify-between">
-          <button type="submit" className="px-4 py-2 bg-red-500 text-white rounded" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit'}
-          </button>
-          <button 
-            type="button" 
-            onClick={handleCancel} 
-            className="bg-gray-400 text-white px-4 py-2 rounded-md">Cancel</button>
-
-        </div>
-      </form>
-      
+       <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
+    </div>
+    <h1 className="text-xl font-bold mb-4">Enter the {category} details here</h1>
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md space-y-4" encType="multipart/form-data">
+      {renderFormFields()}
+      <button
+        type="submit"
+        disabled={loading}
+        className="px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        {loading ? 'Submitting...' : 'Submit'}
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate('/agentprofile')}
+        className="px-4 py-2 bg-gray-500 text-white rounded"
+      >
+        Cancel
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
+    </form>
     </div>
   );
 };
 
 export default PropertyForm;
-

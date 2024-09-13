@@ -19,7 +19,8 @@ const Home = () => {
     <>
       <Navbar />
       
-      <div className="relative">
+      {/* <div className="relative">  */}
+      <div>
         <div>
           <img
             className="w-full h-[300px] object-cover"

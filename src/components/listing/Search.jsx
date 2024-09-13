@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 const Search = ({ onSearch }) => {
@@ -14,7 +12,7 @@ const Search = ({ onSearch }) => {
         <img
           src="/public/images/searchbg.jpg"
           alt="background"
-          className="absolute inset-0 object-cover w-full h-full"
+          className="object-cover w-full h-full z-10"
         />
         <div className="absolute inset-0 flex items-center justify-center bg-opacity-50">
 

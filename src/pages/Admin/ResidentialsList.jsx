@@ -82,7 +82,7 @@ const ResidentialsList = () => {
         <div className="flex">
             <Sidebar />
             <div className="w-full py-8">
-                <AdminHeader />
+                <AdminHeader isPropertyType={true}/>
                 <div className="w-3/4 bg-white">                 
                     <h2 className='text-gray-600 font-semibold text-xl'>{propertyType}s List</h2>
                     {propertyType === 'Villa' ? renderProperties(villas) : renderProperties(apartments)}

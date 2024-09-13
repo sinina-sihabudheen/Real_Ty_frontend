@@ -6,6 +6,16 @@ import {
 } from "../../utils/auth";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { DiNancy } from 'react-icons/di';
+import { FaBed, FaBath, FaMapMarkerAlt } from 'react-icons/fa';
+
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { useSelector } from "react-redux";
 
 const standardizeImage = (url, width, height) => {
   return url ? `${url}?w=${width}&h=${height}&fit=crop` : "";
@@ -18,7 +28,17 @@ const SinglePropertyDetails = () => {
   const [error, setError] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const currentUser = useSelector(state => state.auth.user); 
+
   const navigate = useNavigate()
+
+  delete L.Icon.Default.prototype._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+  });
+console.log("USER",currentUser);
   useEffect(() => {
     const fetchProperty = async () => {
       try {
@@ -48,7 +68,11 @@ const SinglePropertyDetails = () => {
     fetchProperty();
   }, [id, category]);
 
-  
+  const getLocationName = (location) => {    
+    const locationParts = location.split(','); 
+    const mainLocation = locationParts.slice(0, 2).join(','); 
+    return mainLocation;
+  };
   const handleImageClick = (image) => {
     setMainImage(image);
   };
@@ -114,41 +138,79 @@ const SinglePropertyDetails = () => {
             {/* Details Section */}
             <div>
               <h1 className="text-3xl font-bold mb-4">{property.category}</h1>
-              <p className="text-xl font-semibold text-gray-700 mb-2">
+              <h2 className="text-xl font-semibold mb-2">Property Details</h2>
+              <p className="text-l font-semibold text-gray-700 mb-2">
                 Price: ₹{property.price} Lakhs
               </p>
-              <div className="flex items-center space-x-2 mb-4">
-                <span className="text-gray-500">
-                  {property.num_rooms} bedrooms
-                </span>
-                <span className="text-gray-500">
-                  {property.num_bathrooms} bathrooms
-                </span>
+              {(property.category==='Villa' || property.category==='Apartment') &&
+                <div className="flex items-center  space-x-4">
+                    <span className=" flex items-center">
+                      <FaBed size={20} color="black" />
+                      <span className="ml-2 font-bold text-gray-600">{property.num_rooms} bedrooms</span>
+                    </span>
+                    <span className=" flex items-center">
+                      <FaBath size={20} color="black" />
+                      <span className="ml-2 font-bold text-gray-600">{property.num_bathrooms} bathrooms</span>
+                    </span>
+                </div>
+              }
+              <div className="flex items-center space-x-2 mb-4"> 
                 <span className="text-gray-500">
                   {property.property_type ? "Size " : "Area "}
                   {Math.round(property.size || property.area)}{" "}
                   {property.property_type ? "sqft" : "cents"}
                 </span>
               </div>
-              <p className="text-gray-500 mb-4">Place: {property.location}</p>
-
-              <div className="mb-4">
-                <h2 className="text-xl font-bold mb-2">Property Details</h2>
-                <ul className="list-disc list-inside text-gray-700 capitalize">
-                  <li>Type: {property.category}</li>
-                  <li>Description: {property.description}</li>
-                </ul>
+              {property.category==='Villa' && 
+              <div className="flex items-center space-x-2 mb-4"> 
+                <span className="text-gray-500">                  
+                 Land Area: {Math.round(property.land_area)} Cent              
+                </span>
               </div>
-
-              <div className="mb-4 bg-slate-200 shadow-lg">
+              }
+              <div className="mb-4">
+                <span className="list-disc list-inside text-gray-700 capitalize">
+                  Description: {property.description}
+                </span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className=" flex items-center text-gray-600 font-semibold">
+                  <FaMapMarkerAlt size={20} color="black" /> Location: {getLocationName(property.location)}
+                </span>
+              </div>
+              {property.latitude && property.longitude && (
+                <div className="map-container" style={{ display: 'flex' }}>
+                  <MapContainer
+                    center={[property.latitude, property.longitude]}
+                    zoom={13}
+                    style={{
+                      height: '200px',  
+                      width: '80%',    
+                      marginTop: '1rem',
+                      borderRadius: '8px', 
+                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', 
+                    }}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={[property.latitude, property.longitude]}>
+                      <Popup>{property.location}</Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+              )}
+              { currentUser.id !== property.seller.id &&
+              <div className="mb-4 w-3/4 bg-slate-200 shadow-lg">
                 <div className="flex space-x-28">
                   <h2 className="text-xl ml-5 font-bold mb-2">Agent Details</h2>
                   <Link to={`/chat/${property.seller.id}/${id}`}>
-                    <button className="text-right bg-red-200 rounded">Make a chat</button>
+                    <button className="text-right h-10 w-24 bg-red-200 rounded"><i class="fa-regular fa-message"></i>Make chat</button>
                   </Link>
                 </div>
                 <div className="flex ml-5 mt-5 items-center space-x-4">
-                  {property.seller && (
+                  {property.seller  && (
                     <>
                       <Link to={`/sellerprofile/${property.seller.id}`}>
                         <img
@@ -185,6 +247,7 @@ const SinglePropertyDetails = () => {
                               <i className="fas fa-phone"></i>
                             </a>
                           )}
+                          
                           {/* <a
                             href={`https://wa.me/${property.seller.contact_number}`}
                             target="_blank"
@@ -200,7 +263,7 @@ const SinglePropertyDetails = () => {
                   )}
                 </div>
               </div>
-
+}
               <div>
                 <h2 className="text-xl font-bold mb-2">
                   Amenities - Available facilities nearby

@@ -12,6 +12,7 @@ import AmenityList from "../pages/Admin/AmenityList";
 import ResidentialsList from "../pages/Admin/ResidentialsList";
 import LandsList from "../pages/Admin/LandsList";
 import SubscriptionList from "../pages/Admin/SubscriptionList";
+import SalesReport from "../pages/Admin/SalesReport";
 
 const AdminRouter = () => {
   return (
@@ -28,7 +29,7 @@ const AdminRouter = () => {
         <Route path="/category" element={< CategoryList/>} />
         <Route path="/amenity" element={< AmenityList/>} />
         <Route path="/subscriptionList" element={< SubscriptionList/>} />
-
+        <Route path="/salesreport" element={< SalesReport/>} />
       </Route>
     </Routes>
   );
