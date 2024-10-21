@@ -19,12 +19,11 @@ const Home = () => {
     <>
       <Navbar />
       
-      {/* <div className="relative">  */}
       <div>
         <div>
           <img
             className="w-full h-[300px] object-cover"
-            src="public/images/building.jpg"
+            src="Real_Ty_frontend/public/images/building.jpg"
             alt="homepage cover image"
           />
         </div>
