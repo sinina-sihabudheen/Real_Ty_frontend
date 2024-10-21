@@ -23,7 +23,7 @@ const Home = () => {
         <div>
           <img
             className="w-full h-[300px] object-cover"
-            src="Real_Ty_frontend/public/images/building.jpg"
+            src="public/images/building.jpg"
             alt="homepage cover image"
           />
         </div>
