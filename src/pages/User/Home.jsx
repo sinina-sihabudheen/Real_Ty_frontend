@@ -25,7 +25,7 @@ const Home = () => {
           <img
             className="w-full h-[300px] object-cover"
             src="public/images/building.jpg"
-            alt="homepage"
+            alt="homepage cover image"
           />
         </div>
         

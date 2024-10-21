@@ -3,8 +3,8 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
- 
+  baseURL: 'http://43.204.108.44:5003',
+  
   withCredentials: true,
 });
 
