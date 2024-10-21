@@ -452,7 +452,6 @@ export const handleCreateSubscription = async (subscriptionData) => {
    
     const response = await createSubscription(subscriptionData);
     const { checkout_session_id } = response.data;
-    // Redirect to Stripe Checkout
     const stripe = await loadStripe('pk_test_51PeAv3GYaADgjXW8SBDpSToR8TtuB29Hi5loSI4lQpi3zDc7zpZxrZiYxv6EDHiMffNmvsebBgpx0cCAyxLHiiDV00Xz1y0bpm'); // Your key is already provided in main.jsx
     const { error } = await stripe.redirectToCheckout({ sessionId: checkout_session_id });
     
