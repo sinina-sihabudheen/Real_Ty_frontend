@@ -171,7 +171,7 @@ const handleInputChange = (e) => {
             placeholder="Area in Cents" />
           </label>
           
-          <label htmlFor="location" className="block text-gray-700">Location
+          {/* <label htmlFor="location" className="block text-gray-700">Location
           <input 
             type="text" 
             id="location"
@@ -180,7 +180,7 @@ const handleInputChange = (e) => {
             onChange={handleInputChange} 
             className="w-full px-4 py-2 border border-gray-300 rounded" 
             placeholder="Location" />
-          </label>
+          </label> */}
           <label htmlFor="video" className="block text-gray-700">Images
               <input 
                 type="file" 

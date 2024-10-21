@@ -1,24 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import { handleFetchSellerProfile } from '../../utils/auth';
-import { fetchMessages, sendMessage, handleMarkMessageAsRead } from '../../utils/messageService';
+import { fetchMessages } from '../../utils/messageService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const ChatComponent = () => {
-  const { sellerId, propertyId } = useParams(); 
+  const { sellerId } = useParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [seller, setSeller] = useState(null);
+  const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
-  const currentUser = useSelector(state => state.auth.user); 
+  const currentUser = useSelector(state => state.auth.user);
+
+  const messagesEndRef = useRef(null);   
+  const chatBoxRef = useRef(null);  
 
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const data = await fetchMessages(sellerId); 
-        setMessages(Array.isArray(data.results) ? data.results : []);
-        console.log(("MSG",messages));
+        const data = await fetchMessages(sellerId);
+        const validMessages = data.results.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp).toISOString(), 
+        }));
+        setMessages(Array.isArray(validMessages) ? validMessages : []);
       } catch (error) {
         console.error('Error fetching messages:', error);
         setMessages([]);
@@ -26,21 +33,61 @@ const ChatComponent = () => {
     };
 
     loadMessages();
-  }, [sellerId]);
 
-  useEffect(() => {
-    const markMessagesAsRead = async (sellerId) => {
-        try {
-            await handleMarkMessageAsRead(sellerId);
-        } catch (error) {
-            console.error('Error marking messages as read:', error);
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const token = localStorage.getItem('access'); 
+
+    const createWebSocket = () => {
+      const wsUrl = `${protocol}://localhost:8000/ws/chat/${sellerId}/?token=${token}`;
+      
+      const ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('WebSocket connection opened');
+      };
+
+   
+    ws.onmessage = (e) => {
+      const message = JSON.parse(e.data);
+    
+      // Check if message has the text and sender info
+      if (message && message.text) {
+        const parsedTimestamp = message.timestamp ? new Date(message.timestamp) : new Date();
+        
+        // Ensure valid timestamp
+        if (!isNaN(parsedTimestamp.getTime())) {
+          message.timestamp = parsedTimestamp.toISOString();
+          
+          // Add the message to state
+          setMessages((prevMessages) => [...prevMessages, message]);
+        } else {
+          console.error("Received message does not have a valid timestamp:", message);
         }
+      } else {
+        console.error("Received message format is invalid:", message);
+      }
+    };
+    
+
+      ws.onclose = (e) => {
+        console.error('Chat socket closed unexpectedly', e.code);
+        setTimeout(createWebSocket, 5000); 
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      return ws;
     };
 
-    if (sellerId) {
-        markMessagesAsRead(sellerId); 
-    }
-}, [sellerId]);
+    const ws = createWebSocket();
+    setSocket(ws);
+ 
+    return () => {
+      ws.close();
+    };
+  }, [sellerId]);
 
   useEffect(() => {
     const loadSellerProfile = async () => {
@@ -57,28 +104,50 @@ const ChatComponent = () => {
     loadSellerProfile();
   }, [sellerId]);
 
-  
-  const handleSendMessage = async () => {
+
+  // Function to scroll to the bottom of the chat
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Use effect to scroll to the bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+
+  const handleSendMessage = () => {
     if (newMessage.trim()) {
-      try {
-        console.log("PropertyID",propertyId);
-        const newMessageObject = await sendMessage(sellerId, currentUser.id, propertyId || null, newMessage); 
-        setMessages([...messages, newMessageObject]);
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        const messageObject = {
+          sender: currentUser.id,
+          receiver: sellerId,
+          text: newMessage,
+          timestamp: new Date().toISOString(), // Current date and time in ISO format
+        };
+
+        // Log the message being sent
+        console.log('Sending message:', messageObject);
+
+        // Add the message to the local state immediately
+        setMessages((prevMessages) => [...prevMessages, messageObject]);
+
+        // Send the message through the WebSocket
+        socket.send(JSON.stringify(messageObject)); 
         setNewMessage("");
-      } catch (error) {
-        console.error('Error sending message:', error);
-        alert('Failed to send message. Please try again.');
+      } else {
+        console.error('WebSocket is not connected.');
       }
     }
   };
 
   const handleCloseChat = () => {
-    navigate(-1); 
+    navigate(-1);
   };
 
   const formatDateTime = (timestamp) => {
     const date = new Date(timestamp);
-    return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+    return isNaN(date.getTime()) ? "Invalid date" : `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
   };
 
   return (
@@ -96,7 +165,7 @@ const ChatComponent = () => {
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
-                    <p className="font-bold">{seller.username}</p>
+                    <p className="font-bold capitalize">{seller.username}</p>
                   </div>
                 </>
               )}
@@ -108,23 +177,26 @@ const ChatComponent = () => {
             </button>
           </div>
 
-          <div className="flex-grow overflow-y-auto p-4">
-            {messages.map((message) => (
+          <div ref={chatBoxRef} className="flex-grow overflow-y-auto p-4">
+            {messages.map((message, index) => (
               <div
-                key={message.id}
+                key={index}
                 className={`flex ${message.sender === currentUser.id ? "justify-end" : "justify-start"} mb-4`}
               >
                 <div
                   className={`max-w-xs ${message.sender === currentUser.id ? "bg-blue-500 text-white" : "bg-gray-100 text-black"} rounded-lg p-2`}
                 >
-                  <p className="text-sm">{message.text}</p>
+                  {/* <p className="text-sm capitalize">{message.text}</p> */}
+                  <p className="text-sm capitalize">{message.text || "No message content"}</p>
+
                   <p className="text-xs text-gray-700">{formatDateTime(message.timestamp)}</p>
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 border-t flex">
+          <div className="p-4 border-t flex ">
             <input
               type="text"
               value={newMessage}

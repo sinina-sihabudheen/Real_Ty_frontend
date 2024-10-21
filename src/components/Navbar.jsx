@@ -1,23 +1,28 @@
-
-
-import React, { useEffect, useRef, useState } from 'react';
+  import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '../redux/authSlice';
 import { handleFetchUserData } from '../utils/auth';
-import { fetchUnreadMessages } from '../utils/messageService';
+import { fetchUnreadMessages, markMessagesAsRead } from '../utils/messageService';  
+import { FaBell,FaEnvelope } from "react-icons/fa";
+import { FiChevronDown } from "react-icons/fi";
+import { MdAccountCircle } from 'react-icons/md';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const dispatch = useDispatch();
-
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [messageDropdownOpen, setMessageDropdownOpen] = useState(false);
     const [unreadMessages, setUnreadMessages] = useState([]);
+    const [websocket, setWebsocket] = useState(null);
+    const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false); // New
+    const [unreadNotifications, setUnreadNotifications] = useState([]); // New
+    const notificationDropdownRef = useRef(null); // New
+
     const dropdownRef = useRef(null);
     const messageDropdownRef = useRef(null);
 
@@ -27,6 +32,58 @@ const Navbar = () => {
             fetchUnreadMessages(setUnreadMessages);
         }
     }, [isAuthenticated]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('access'); 
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        if (isAuthenticated && user) {
+            const ws = new WebSocket(`${protocol}://localhost:8000/ws/chat/${user.id}/?token=${token}`);
+            setWebsocket(ws);
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.unread_count !== undefined) {
+                    setUnreadMessages((prevMessages) => {
+                        return prevMessages.map((msg) => {
+                            if (msg.sender === data.sender) {
+                                return { ...msg, unread_count: data.unread_count };
+                            }
+                            return msg;
+                        });
+                    });
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket closed');
+            };
+
+            return () => {
+                ws.close();
+            };
+        }
+    }, [isAuthenticated, user]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('access');
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        if (isAuthenticated && user) {
+            const ws = new WebSocket(`${protocol}://localhost:8000/ws/notification/?token=${token}`);
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data.message) {
+                    setUnreadNotifications((prevNotifications) => [...prevNotifications, data.message]);
+                }
+            };
+
+            return () => {
+                ws.close();
+            };
+        }
+    }, [isAuthenticated, user]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -55,6 +112,26 @@ const Navbar = () => {
     const toggleMessageDropdown = () => {
         setMessageDropdownOpen((prevState) => !prevState);
     };
+    // Toggle the notification dropdown (new)
+    const toggleNotificationDropdown = () => {
+        setNotificationDropdownOpen((prevState) => !prevState);
+    };
+
+    const handleOpenMessage = (senderId, propertyId, unreadCount) => {
+        navigate(`/chat/${senderId}/${propertyId}`);
+
+        markMessagesAsRead(senderId, propertyId)
+            .then(() => {
+                setUnreadMessages((prevMessages) => 
+                    prevMessages.map((msg) =>
+                        msg.sender === senderId ? { ...msg, unread_count: 0 } : msg
+                    )
+                );
+            })
+            .catch((error) => {
+                console.error('Failed to mark messages as read:', error);
+            });
+    };
 
     return (
         <nav className="bg-white drop-shadow-lg w-full">
@@ -64,9 +141,9 @@ const Navbar = () => {
                         <div className="flex flex-shrink-0 items-center">
                             <img className="h-14 w-15" src="/images/REAL-TY.png" alt="Real-Ty" />
                         </div>
-                        <div className="hidden sm:ml-6 sm:block">
+                        <div className="hidden sm:ml-6 sm:block ">
                             <div className="flex space-x-4">
-                                <Link to="/" className="text-black-700 hover:text-gray-400 px-3 py-10 text-sm font-medium">
+                                <Link to="/" className="text-black-700 hover:text-gray-400 px-3 py-10 text-sm font-medium ">
                                     Home
                                 </Link>
                                 <Link to="/propertylist" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">
@@ -78,13 +155,15 @@ const Navbar = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-5 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         {isAuthenticated ? (
                             <div className="relative flex items-center space-x-4">
                                 {/* Message Icon with Unread Count */}
                                 <div ref={messageDropdownRef} className="relative z-50">
                                     <button onClick={toggleMessageDropdown} className="text-gray-500 hover:text-gray-300 font-medium">
-                                        <i className="fa-regular fa-message"></i>
+                                        {/* <i className="fa-regular fa-message"></i> */}
+                                        <FaEnvelope style={{ fontSize: '20px', color: 'gray' }}/>
+
                                         {unreadMessages.length > 0 && (
                                             <span className="ml-1 text-red-500 font-bold">({unreadMessages.length})</span>
                                         )}
@@ -96,7 +175,7 @@ const Navbar = () => {
                                                     unreadMessages.map((msg) => (
                                                         <button
                                                             key={msg.sender}
-                                                            onClick={() => navigate(`/chat/${msg.sender}/${msg.property_id}`)}
+                                                            onClick={() => handleOpenMessage(msg.sender, msg.property_id, msg.unread_count)}
                                                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                             role="menuitem"
                                                         >
@@ -104,7 +183,36 @@ const Navbar = () => {
                                                         </button>
                                                     ))
                                                 ) : (
-                                                    <div className="px-4 py-2 text-sm text-gray-700">No messages</div>
+                                                    <div className="px-4 py-2 text-sm text-gray-700">No unread messages</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                {/* Notification Icon with Unread Count */}
+                                <div ref={notificationDropdownRef} className="relative z-50">
+                                    <button onClick={toggleNotificationDropdown} className="text-gray-500 hover:text-gray-300 font-medium">
+                                        <FaBell style={{ fontSize: '20px', color: 'gray' }}/>
+
+                                        {unreadNotifications.length > 0 && (
+                                            <span className="ml-1 text-red-500 font-bold">({unreadNotifications.length})</span>
+                                        )}
+                                    </button>
+                                    {notificationDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                            <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                                                {unreadNotifications.length > 0 ? (
+                                                    unreadNotifications.map((notif, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                            role="menuitem"
+                                                        >
+                                                            {notif}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="px-4 py-2 text-sm text-gray-700">No unread notifications</div>
                                                 )}
                                             </div>
                                         </div>
@@ -112,22 +220,23 @@ const Navbar = () => {
                                 </div>
 
                                 {/* User Profile Dropdown */}
-                                <div ref={dropdownRef} className=" z-50">
+                                <div ref={dropdownRef} className=" z-50"> 
                                     <button
                                         onClick={toggleDropdown}
-                                        className="text-gray-500 hover:text-gray-300 font-medium flex items-center capitalize"
-                                    >
+                                        className="text-gray-500 hover:text-gray-300 border-2 pr-4 pl-4 border-gray-50 rounded shadow-md flex items-center capitalize">
+                                        <MdAccountCircle style={{ fontSize: '20px', color: 'gray', marginRight: '0.5rem' }} /> 
                                         {user ? user.username : 'Profile'}
-                                    </button>
+                                        <FiChevronDown style={{ marginLeft: '0.5rem' }} />
+                                    </button> 
                                     {dropdownOpen && (
                                         <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                                             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                                                 <button
                                                     onClick={() => navigate("/userprofile")}
-                                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    className=" felx w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                     role="menuitem"
                                                 >
-                                                    Profile
+                                                    Profile 
                                                 </button>
                                                 <button
                                                     onClick={handleLogout}
@@ -157,5 +266,4 @@ const Navbar = () => {
         </nav>
     );
 };
-
-export default Navbar;
+export default Navbar

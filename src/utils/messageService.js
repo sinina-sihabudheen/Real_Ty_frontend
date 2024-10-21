@@ -2,7 +2,7 @@ import api from './api';
 
 export const fetchMessages = async (sellerId) => {
     try {
-        const response = await api.get(`/api/messages/${sellerId}/`);
+        const response = await api.get(`/notifications/messages/${sellerId}/`);
         console.log("MESSAGES DATA",response.data.results);
         return response.data;
     } catch (error) {
@@ -11,36 +11,10 @@ export const fetchMessages = async (sellerId) => {
     }
 };
 
-export const sendMessage = async (sellerId,userId,id, newMessage) => { 
-    try {
-        console.log("SELLER,USER",sellerId,userId,id);
-      const response = await api.post('/api/send-message/', {
-        text: newMessage,
-        property_content_type: 'property',
-        property_object_id: id,
-        sender: userId,
-        receiver: sellerId
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-       
-        }
-      });
-      
-      console.log("Server response:", response.data);
-
-      return response.data;
-    } catch (error) {
-      console.error('Error sending message:', error);
-      throw error;
-    }
-  };
-  
-
 
   export const fetchUnreadMessages = async (setUnreadMessages) => {
     try {
-        const response = await api.get('api/messages/unread/');
+        const response = await api.get('notifications/messages/unread/');
         console.log("UNREAD",response.data)
         setUnreadMessages(response.data);
     } catch (error) {
@@ -49,9 +23,9 @@ export const sendMessage = async (sellerId,userId,id, newMessage) => {
     }
 };
 
-export const handleMarkMessageAsRead = async(senderId) => {
+export const markMessagesAsRead = async(senderId) => {
     try{
-        const response = await api.post(`api/messages/mark-messages-as-read/${senderId}`);
+        const response = await api.post(`notifications/messages/mark-messages-as-read/${senderId}`);
         
         return response;
     }catch(error){

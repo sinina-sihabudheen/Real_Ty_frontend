@@ -7,7 +7,7 @@ import {
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { DiNancy } from 'react-icons/di';
-import { FaBed, FaBath, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaBed, FaBath, FaMapMarkerAlt,FaComment } from 'react-icons/fa';
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -16,6 +16,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useSelector } from "react-redux";
+
 
 const standardizeImage = (url, width, height) => {
   return url ? `${url}?w=${width}&h=${height}&fit=crop` : "";
@@ -133,6 +134,16 @@ console.log("USER",currentUser);
                   </button>
                 )}
               </div>
+              <div>
+                <h2 className="text-xl font-bold mb-2">
+                  Amenities - Available facilities nearby
+                </h2>
+                <p>
+                  {property.amenities_names && property.amenities_names.length > 0
+                    ? property.amenities_names.join(", ")
+                    : "N/A"}
+                </p>
+              </div>
             </div>
 
             {/* Details Section */}
@@ -179,7 +190,7 @@ console.log("USER",currentUser);
                 </span>
               </div>
               {property.latitude && property.longitude && (
-                <div className="map-container" style={{ display: 'flex' }}>
+                <div className="map-container mb-5" style={{ display: 'flex' }}>
                   <MapContainer
                     center={[property.latitude, property.longitude]}
                     zoom={13}
@@ -202,11 +213,11 @@ console.log("USER",currentUser);
                 </div>
               )}
               { currentUser.id !== property.seller.id &&
-              <div className="mb-4 w-3/4 bg-slate-200 shadow-lg">
-                <div className="flex space-x-28">
-                  <h2 className="text-xl ml-5 font-bold mb-2">Agent Details</h2>
+              <div className="mb-6 w-3/4 bg-slate-200 p-4 rounded-md shadow-lg">
+                <div className="flex justify-between items-center mb-4 ">
+                  <h2 className="text-xl ml-5 font-bold">Meet Agent/Owner</h2>
                   <Link to={`/chat/${property.seller.id}/${id}`}>
-                    <button className="text-right h-10 w-24 bg-red-200 rounded"><i class="fa-regular fa-message"></i>Make chat</button>
+                    <button className="flex items-center justify-center border-2 border-gray-400 h-10 w-24 rounded"><FaComment />Make chat</button>
                   </Link>
                 </div>
                 <div className="flex ml-5 mt-5 items-center space-x-4">
@@ -220,7 +231,7 @@ console.log("USER",currentUser);
                             75
                           )}
                           alt="Agent"
-                          className="w-16 h-16 rounded-full shadow-md"
+                          className="w-16 h-16 rounded shadow-md"
                         />
                       </Link>
                       <div>
@@ -230,32 +241,30 @@ console.log("USER",currentUser);
                         <p className="text-gray-500 capitalize">
                           Agency: {property.seller.agency_name}
                         </p>
-                        <div className="flex items-center space-x-4 mt-2">
+                        {/* contacts */}
+                        <div className="flex items-evenly space-x-4 mt-4">
                           
                           <a
                             href={`mailto:${property.seller.email}`}
-                            className="p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600"
+                            className="flex items-center justify-center p-3 border-2 border-gray-300 rounded hover:bg-red-100"
                           >
-                            <i className="fas fa-envelope"></i>
+                            <i className="fas fa-envelope text-red-500"></i>
                           </a>
                          
                           {property.seller.contact_number && (
                             <a
                               href={`tel:${property.seller.contact_number}`}
-                              className="p-3 rounded-full bg-green-500 text-white hover:bg-green-600"
+                              className="flex items-center justify-center p-3 border-2 border-gray-300 rounded hover:bg-green-100"
                             >
-                              <i className="fas fa-phone"></i>
+                              <i className="fas fa-phone text-green-500"></i>
                             </a>
                           )}
-                          
-                          {/* <a
-                            href={`https://wa.me/${property.seller.contact_number}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-3 rounded-full bg-green-500 text-white hover:bg-green-600"
-                          >
-                            <i className="fab fa-whatsapp"></i>
-                          </a> */}
+                          <a
+                              href={`https://wa.me/${property.seller.contact_number}`}
+                              className="flex items-center justify-center p-3 border-2 border-gray-300 rounded hover:bg-green-100"
+                            >
+                              <i className="fab fa-whatsapp text-green-500"></i>
+                          </a>
                         </div>
                       </div>
                      
@@ -263,17 +272,8 @@ console.log("USER",currentUser);
                   )}
                 </div>
               </div>
-}
-              <div>
-                <h2 className="text-xl font-bold mb-2">
-                  Amenities - Available facilities nearby
-                </h2>
-                <p>
-                  {property.amenities_names && property.amenities_names.length > 0
-                    ? property.amenities_names.join(", ")
-                    : "N/A"}
-                </p>
-              </div>
+            }
+             
             </div>
           </div>
         </div>

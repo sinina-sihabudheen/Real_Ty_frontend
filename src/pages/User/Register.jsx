@@ -4,33 +4,35 @@ import { useNavigate, Link } from 'react-router-dom';
 import { IoMdClose } from 'react-icons/io';
 import { GoogleLogin } from '@react-oauth/google';
 import { handleRegister, handleVerifyOtp, handleResendOtp,handleGoogleLogin, handleFetchRegions } from '../../utils/auth';
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
+import { FaEye,FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
+import { useForm } from 'react-hook-form';
+import {
+    TextField,
+    Button,
+    InputAdornment,
+    IconButton,
+    Typography,
+    Box,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+} from '@mui/material';
 
-const Register = () => {
-   
-    const [username, setUsername] = useState('');
+const Register = () => {   
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [address, setAddress] = useState('');
-    const [contactNumber, setContactNumber] = useState('');
-    const [agencyName, setAgencyName] = useState('');
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);   
     const [otpExpired, setOtpExpired] = useState(false);
     const [passwordView,setPasswordView] = useState(false)
     const [confirmPasswordView,setConfirmPasswordView] = useState(false)
-    const [errors, setErrors] = useState({});
     const [timer, setTimer] = useState(60);
 
-
+    const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-    
-    
+ 
     useEffect(() => {
         if (otpSent) {
             const otpExpiration = setInterval(() => {
@@ -53,7 +55,6 @@ const Register = () => {
     }, [otpSent]);
 
     const handleGAuth = async (credentialResponse)=>{
-        // const response = await googleLoginUser(token);
         try{
             console.log('Credential response:', credentialResponse);
             const response = await handleGoogleLogin(credentialResponse, dispatch, navigate);
@@ -63,185 +64,127 @@ const Register = () => {
           }
         };
       
-    const handleRegisterSubmit = (e) => {
-        e.preventDefault();
+    const onSubmit = async (data) => {
+            const { username, email, password, confirmPassword, address, contactNumber, agencyName } = data;
+            setEmail(email);
     
-        if (!username || !email || !password || !confirmPassword || !address || !contactNumber) {
-          toast.error('All fields are required.');
-          return;
-        }
+            const postData = { username, email, password, confirm_password: confirmPassword, address, contact_number: contactNumber, agency_name: agencyName };
     
-        if (!validateEmail(email)) {
-          toast.error('Invalid email format.');
-          return;
-        }
-    
-        if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
-          toast.error('Password must be at least 8 characters long and contain at least one digit and one letter.');
-          return;
-        }
-    
-        if (password !== confirmPassword) {
-          toast.error('Passwords do not match.');
-          return;
-        }
-    
-        const contactNumberRegex = /^[6789]\d{9}$/;
-        if (!contactNumberRegex.test(contactNumber)) {
-          let errorMessage = '';
-    
-          if (contactNumber.length !== 10) {
-            errorMessage += 'Contact number should be 10 digits long.';
-          }
-    
-          if (!/^[6789]/.test(contactNumber)) {
-            if (errorMessage !== '') {
-              errorMessage += ' ';
-            }
-            errorMessage += 'Contact number should start with 6, 7, 8, or 9.';
-          }
-    
-          toast.error(errorMessage);
-          return;
-        }
-    
-        const postData = {
-          username,
-          email,
-          password,
-          confirm_password: confirmPassword,
-          address,
-          contact_number: contactNumber,
-          agency_name : agencyName,
+            handleRegister(postData, setOtpSent, setOtpExpired);
+            setTimer(60);
+            setOtpExpired(true);
         };
-    
-        handleRegister(postData, setOtpSent, setOtpExpired, setErrors);
-        setTimer(60); 
-        // if (errors){
-        //     toast.error(errors)
-        // }
-
-      };
-
-
-    
-
-    const validateEmail = (email) => {
-        const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return re.test(String(email).toLowerCase());
-    };
 
     return (
         <div className="flex justify-center items-center min-h-screen max-h-full py-4 bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+            <Box className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
                 <div className="text-center mb-6">
                     <img src="public/images/loginlogo.png" alt="Login Illustration" className="mx-auto h-20  mb-4" />
-                    <h2 className="text-2xl font-semibold">Register Here</h2>
+                    <Typography variant="h4" align="center" gutterBottom>
+                        Register Here
+                    </Typography>                
                 </div>  
             {!otpSent ? (
-                <div>
-                <form onSubmit={handleRegisterSubmit}>
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-                        <input
-                            type="text"
-                            placeholder="Username"
-                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {/* {errors.username && <p className="text-red-500 text-sm">{errors.username.join(' ')}</p>} */}
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
+                <div className="container text-center">
+                <form onSubmit={handleSubmit(onSubmit)}>
+                <TextField
+                        label="Username"
+                        fullWidth
+                        margin="normal"
+                        {...register("username", { required: 'Username is required' })}
+                        error={!!errors.username}
+                        helperText={errors.username?.message}
                     />
-                    </div>
-                    {errors.email && <p className="text-red-500 text-sm">{errors.email.join(' ')}</p>}
+                    <TextField
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        margin="normal"
+                        {...register("email", { required: 'Email is required', pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Invalid email format' } })}
+                        error={!!errors.email}
+                        helperText={errors.email?.message}
+                    />
 
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
+                    <TextField
+                        label="Password"
+                        type={passwordView ? "text" : "password"}
+                        fullWidth
+                        margin="normal"
+                        {...register("password", { required: 'Password is required', minLength: { value: 8, message: 'Password must be at least 8 characters long' } })}
+                        error={!!errors.password}
+                        helperText={errors.password?.message}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => setPasswordView(!passwordView)}>
+                                        {passwordView ? <FaEye /> : <FaEyeSlash />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
 
-                        <input
-                            type={passwordView? "text" : "password"}
-                            placeholder="Password"
-                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                        <div className='cursor-pointer mt-2' onClick={()=>setPasswordView(!passwordView)}>
-                            {passwordView ? <FaEye/> :<FaEyeSlash/>}
-                        </div>
-                       
-                    </div>
-                    {errors.password && <p className="text-red-500 text-sm">{errors.password.join(' ')}</p>}
+                    <TextField
+                        label="Confirm Password"
+                        type={confirmPasswordView ? "text" : "password"}
+                        fullWidth
+                        margin="normal"
+                        {...register("confirmPassword", {
+                            required: 'Please confirm your password',
+                            validate: value => value === watch('password') || 'Passwords do not match',
+                        })}
+                        error={!!errors.confirmPassword}
+                        helperText={errors.confirmPassword?.message}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => setConfirmPasswordView(!confirmPasswordView)}>
+                                        {confirmPasswordView ? <FaEye /> : <FaEyeSlash />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
 
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
+                    <TextField
+                        label="Address"
+                        fullWidth
+                        margin="normal"
+                        {...register("address", { required: 'Address is required' })}
+                        error={!!errors.address}
+                        helperText={errors.address?.message}
+                    />
 
-                        <input
-                            type={confirmPasswordView? "text" : "password"}
-                            placeholder="Confirm Password"
-                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />
-                        <div className='cursor-pointer mt-2' onClick={()=>setConfirmPasswordView(!confirmPasswordView)}>
-                            {confirmPasswordView ? <FaEye/> :<FaEyeSlash/>}
-                        </div>
-                       
-                    </div>
-                    {errors.confirm_password && <p className="text-red-500 text-sm">{errors.confirm_password.join(' ')}</p>}    
+                    <TextField
+                        label="Contact Number"
+                        fullWidth
+                        margin="normal"
+                        {...register("contactNumber", { required: 'Contact Number is required', pattern: { value: /^[6789]\d{9}$/, message: 'Contact number must start with 6, 7, 8, or 9 and be 10 digits long' } })}
+                        error={!!errors.contactNumber}
+                        helperText={errors.contactNumber?.message}
+                    />
+                    <TextField
+                        label="Agency Name"
+                        fullWidth
+                        margin="normal"
+                        {...register("agencyName")}
+                    />
 
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-                        <input
-                            type="text"
-                            placeholder="Address"
-                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {errors.address && <p className="text-red-500 text-sm">{errors.address.join(' ')}</p>}
-
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-                        <input
-                            type="text"
-                            placeholder="Contact Number"
-                            className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-                            value={contactNumber}
-                            onChange={(e) => setContactNumber(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {errors.contact_number && <p className="text-red-500 text-sm">{errors.contact_number.join(' ')}</p>}
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-                                <input
-                                    type="text"
-                                    placeholder="Agency Name"
-                                    className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-                                    value={agencyName}
-                                    onChange={(e) => setAgencyName(e.target.value)}
-                                />
-                    </div>
-                    {errors.agency_name && <p className="text-red-500 text-sm">{errors.agency_name.join(' ')}</p>}
-
-                    <button type="submit" className="w-full bg-blue-400 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200">
-                        Register
-                    </button>
+                    <Button 
+                            type="submit" 
+                            variant="contained" 
+                            color="primary"  
+                            className="w-1/3 mt-6"
+                        >
+                            Register
+                    </Button>
                 </form>
                 <div className="flex items-center justify-center my-4">
                     <div className="border-t border-gray-300 flex-grow mr-3"></div>
                     <span className="text-gray-500">OR</span>
                     <div className="border-t border-gray-300 flex-grow ml-3"></div>
                 </div>
-                <div>
+                <div className="flex justify-center mt-6">
                     <GoogleLogin
                         onSuccess={(credentialResponse) => {
                             handleGAuth(credentialResponse)
@@ -253,12 +196,14 @@ const Register = () => {
                     
                 </div>
                 <div className="text-center mt-4">
-                    <p className="text-gray-500">
+                    <Typography variant="body2">
                         Already have an account? <Link to="/login" className="text-blue-500 hover:text-blue-700">Login</Link>
-                    </p>
+                    </Typography>
                 </div>
                
                 </div>
+             
+            
             ) : (
                 <div className='flex w-full justify-center items-center fixed top-0 right-0 left-0 bottom-0 z-50 bg-gray-300 bg-opacity-50 px-6'>
                     <div className="relative bg-white px-6 pt-4 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
@@ -311,274 +256,9 @@ const Register = () => {
                     </div>
                 </div>
             )}
-            </div>
+            </Box>
         </div>
     );
 };
 
 export default Register;
-
-
-// import React, { useState, useEffect } from 'react';
-// import { toast } from 'sonner';
-// import { useNavigate, Link } from 'react-router-dom';
-// import { IoMdClose } from 'react-icons/io';
-// import { GoogleLogin } from '@react-oauth/google';
-// import { handleRegister, handleVerifyOtp, handleResendOtp, handleGoogleLogin } from '../../utils/auth';
-// import { FaEye, FaEyeSlash } from "react-icons/fa";
-// import { useDispatch } from "react-redux";
-
-// const Register = () => {
-//     const [username, setUsername] = useState('');
-//     const [email, setEmail] = useState('');
-//     const [password, setPassword] = useState('');
-//     const [confirmPassword, setConfirmPassword] = useState('');
-//     const [address, setAddress] = useState('');
-//     const [contactNumber, setContactNumber] = useState('');
-//     const [agencyName, setAgencyName] = useState('');
-//     const [otp, setOtp] = useState('');
-//     const [otpSent, setOtpSent] = useState(false);   
-//     const [otpExpired, setOtpExpired] = useState(false);
-//     const [passwordView, setPasswordView] = useState(false);
-//     const [confirmPasswordView, setConfirmPasswordView] = useState(false);
-//     const [errors, setErrors] = useState({});
-//     const [timer, setTimer] = useState(60);
-
-//     const navigate = useNavigate();
-//     const dispatch = useDispatch();
-
-//     useEffect(() => {
-//         if (otpSent) {
-//             const otpExpiration = setInterval(() => {
-//                 setTimer(prevTimer => prevTimer - 1);
-//             }, 1000);
-
-//             const otpExpiryTimer = setTimeout(() => {
-//                 setOtpExpired(true);
-//                 toast.error('OTP has expired.');
-//                 clearInterval(otpExpiryTimer);
-//             }, 60000); // 60000 for 1 minute
-
-//             return () => {
-//                 clearInterval(otpExpiration);
-//                 clearTimeout(otpExpiryTimer);
-//             };
-//         }
-//     }, [otpSent]);
-
-//     const handleGAuth = async (credentialResponse) => {
-//         try {
-//             const response = await handleGoogleLogin(credentialResponse, dispatch, navigate);
-//         } catch (error) {
-//             console.error('Google login failed', error);
-//             toast.error('Google Login Failed: Please try again');
-//         }
-//     };
-
-//     const handleRegisterSubmit = (e) => {
-//         e.preventDefault();
-    
-//         if (!username || !email || !password || !confirmPassword || !address || !contactNumber) {
-//           toast.error('All fields are required.');
-//           return;
-//         }
-    
-//         if (!validateEmail(email)) {
-//           toast.error('Invalid email format.');
-//           return;
-//         }
-    
-//         if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
-//           toast.error('Password must be at least 8 characters long and contain at least one digit and one letter.');
-//           return;
-//         }
-    
-//         if (password !== confirmPassword) {
-//           toast.error('Passwords do not match.');
-//           return;
-//         }
-    
-//         const contactNumberRegex = /^[6789]\d{9}$/;
-//         if (!contactNumberRegex.test(contactNumber)) {
-//           let errorMessage = '';
-    
-//           if (contactNumber.length !== 10) {
-//             errorMessage += 'Contact number should be 10 digits long.';
-//           }
-    
-//           if (!/^[6789]/.test(contactNumber)) {
-//             if (errorMessage !== '') {
-//               errorMessage += ' ';
-//             }
-//             errorMessage += 'Contact number should start with 6, 7, 8, or 9.';
-//           }
-    
-//           toast.error(errorMessage);
-//           return;
-//         }
-    
-//         const postData = {
-//           username,
-//           email,
-//           password,
-//           confirm_password: confirmPassword,
-//           address,
-//           contact_number: contactNumber,
-//           agency_name: agencyName,
-//         };
-    
-//         handleRegister(postData, setOtpSent, setOtpExpired, setErrors);
-//         setTimer(60); 
-//       };
-
-//     const validateEmail = (email) => {
-//         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-//         return re.test(String(email).toLowerCase());
-//     };
-
-//     return (
-//         <div className="flex justify-center items-center min-h-screen max-h-full py-4 bg-gray-100">
-//             <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-//                 <div className="text-center mb-6">
-//                     <img src="public/images/loginlogo.png" alt="Login Illustration" className="mx-auto h-20 mb-4" />
-//                     <h2 className="text-2xl font-semibold">Register Here</h2>
-//                 </div>  
-//                 {!otpSent ? (
-//                     <div>
-//                         <form onSubmit={handleRegisterSubmit}>
-//                             <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                                 <input
-//                                     type="text"
-//                                     placeholder="Username"
-//                                     className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                     value={username}
-//                                     onChange={(e) => setUsername(e.target.value)}
-//                                     required
-//                                 />
-//                             </div>
-//                             <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                                 <input
-//                                     type="email"
-//                                     placeholder="Email"
-//                                     className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                     value={email}
-//                                     onChange={(e) => setEmail(e.target.value)}
-//                                     required
-//                                 />
-//                             </div>
-//                             <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                                 <input
-//                                     type={passwordView ? "text" : "password"}
-//                                     placeholder="Password"
-//                                     className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                     value={password}
-//                                     onChange={(e) => setPassword(e.target.value)}
-//                                     required
-//                                 />
-//                                 <div className='cursor-pointer mt-2' onClick={() => setPasswordView(!passwordView)}>
-//                                     {passwordView ? <FaEye /> : <FaEyeSlash />}
-//                                 </div>
-//                             </div>
-//                             <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                                 <input
-//                                     type={confirmPasswordView ? "text" : "password"}
-//                                     placeholder="Confirm Password"
-//                                     className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                     value={confirmPassword}
-//                                     onChange={(e) => setConfirmPassword(e.target.value)}
-//                                     required
-//                                 />
-//                                 <div className='cursor-pointer mt-2' onClick={() => setConfirmPasswordView(!confirmPasswordView)}>
-//                                     {confirmPasswordView ? <FaEye /> : <FaEyeSlash />}
-//                                 </div>
-//                             </div>
-//                             <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                                 <input
-//                                     type="text"
-//                                     placeholder="Address"
-//                                     className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                     value={address}
-//                                     onChange={(e) => setAddress(e.target.value)}
-//                                     required
-//                                 />
-//                             </div>
-//                             <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                                 <input
-//                                     type="text"
-//                                     placeholder="Contact Number"
-//                                     className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                     value={contactNumber}
-//                                     onChange={(e) => setContactNumber(e.target.value)}
-//                                     required
-//                                 />
-//                             </div>
-//                             <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                                 <input
-//                                     type="text"
-//                                     placeholder="Agency Name"
-//                                     className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                     value={agencyName}
-//                                     onChange={(e) => setAgencyName(e.target.value)}
-//                                 />
-//                             </div>
-//                             <button type="submit" className="w-full bg-blue-400 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200">
-//                                 Register
-//                             </button>
-//                         </form>
-//                         <div className="flex items-center justify-center my-4">
-//                             <div className="border-t border-gray-300 flex-grow mr-3"></div>
-//                             <span className="text-gray-500">OR</span>
-//                             <div className="border-t border-gray-300 flex-grow ml-3"></div>
-//                         </div>
-//                         <div>
-//                             <GoogleLogin
-//                                 onSuccess={(credentialResponse) => {
-//                                     handleGAuth(credentialResponse)
-//                                 }}
-//                                 onError={() => {
-//                                     console.log("Login Failed");
-//                                 }}
-//                             />
-//                         </div>
-//                         <div className="text-center mt-4">
-//                             <p className="text-gray-500">
-//                                 Already have an account? <Link to="/login" className="text-blue-500 hover:text-blue-700">Login</Link>
-//                             </p>
-//                         </div>
-//                     </div>
-//                 ) : (
-//                     <div className='text-center'>
-//                         <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-//                             <input
-//                                 type="text"
-//                                 placeholder="Enter OTP"
-//                                 className="w-full px-4 py-2 border-white rounded-md focus:outline-none focus:border-blue-400"
-//                                 value={otp}
-//                                 onChange={(e) => setOtp(e.target.value)}
-//                                 required
-//                             />
-//                         </div>
-//                         <button 
-//                             onClick={() => handleVerifyOtp(otp, email, setErrors, navigate)}
-//                             className="w-full bg-blue-400 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200"
-//                         >
-//                             Verify OTP
-//                         </button>
-//                         <div className="text-center mt-4">
-//                             <p className="text-gray-500">
-//                                 Didn't receive OTP? 
-//                                 {otpExpired ? (
-//                                     <span onClick={() => handleResendOtp(email, setOtpExpired, setTimer)} className="text-blue-500 hover:text-blue-700 cursor-pointer"> Resend OTP</span>
-//                                 ) : (
-//                                     <span className="text-gray-400 cursor-not-allowed ml-2">{`Resend OTP in ${timer}s`}</span>
-//                                 )}
-//                             </p>
-//                         </div>
-//                     </div>
-//                 )}
-//             </div>
-//         </div>
-//     );
-// }
-
-// export default Register;

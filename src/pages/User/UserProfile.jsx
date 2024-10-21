@@ -282,7 +282,7 @@ const handlePasswordChange = async (event) => {
         <div>No user data available</div>
       )}
     </div>
-    <div className='w-full absolute bottom-0'>
+    <div >
       <Footer />
     </div>
     </div>

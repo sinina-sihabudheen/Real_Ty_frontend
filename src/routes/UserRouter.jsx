@@ -16,7 +16,6 @@ import SubscriptionPage from "../components/subscriptions/Stripe";
 import UserProfile from "../pages/User/UserProfile";
 import SellerProfile from "../pages/User/SellerProfile";
 import SuccessSubscription from "../pages/Seller/SuccessSubscription";
-import CancelSubscription from "../pages/Seller/CancelSubscription";
 import SellerSingleProperty from "../pages/Seller/SellerSingleProperty";
 import Invoice from "../pages/Seller/Invoice";
 import ChatComponent from "../pages/User/ChatComponent";
@@ -39,7 +38,6 @@ function UserRouter() {
         <Route path="/single_property/:id/:category" element={<SinglePropertyDetails />} />
         <Route path="/subscription" element={<SubscriptionPage />} />
         <Route path="/success" element={<SuccessSubscription />} />
-        <Route path="/cancel" element={<CancelSubscription />} />
         <Route path="/sellerprofile/:userId" element={<SellerProfile />} />
         <Route path="/seller_singleproperty/:id/:category" element={<SellerSingleProperty />} />
         <Route path="/invoice/:subscriptionId" element={<Invoice />} />

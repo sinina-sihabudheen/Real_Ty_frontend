@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { handleFetchSellerProfileLands, handleFetchSellerProfile, handleFetchSellerProfileResidents} from '../../utils/auth';
 import { toast } from 'sonner';
-import { FaEyeSlash, FaEye } from "react-icons/fa";
+import { FaComment } from "react-icons/fa";
 import 'react-datepicker/dist/react-datepicker.css';
-import { format } from 'date-fns';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 
@@ -110,6 +109,44 @@ const SellerProfile = () => {
                   {seller.address ? <p className="text-gray-500 capitalize">Addresss: {seller.address} </p>: null}
                    {seller.contact_number ? <p className="text-gray-500">Contact Number: {seller.contact_number} </p>: null}       
                   <p className="text-gray-500">Agency Name: {seller.agency_name }</p>
+                 
+                </div>
+                
+                <div className="flex ml-5 mt-5 items-center space-x-4">
+                  {seller  && (
+                    <>
+                        {/* contacts */}
+                        <div className="flex items-evenly space-x-4 mt-4">
+                          
+                          <a
+                            href={`mailto:${seller.email}`}
+                            className="flex items-center justify-center p-3 border-2 border-gray-300 rounded hover:bg-red-100"
+                          >
+                            <i className="fas fa-envelope text-red-500"></i>
+                          </a>
+                         
+                          {seller.contact_number && (
+                            <a
+                              href={`tel:${seller.contact_number}`}
+                              className="flex items-center justify-center p-3 border-2 border-gray-300 rounded hover:bg-green-100"
+                            >
+                              <i className="fas fa-phone text-green-500"></i>
+                            </a>
+                          )}
+                          <a
+                              href={`https://wa.me/${seller.contact_number}`}
+                              className="flex items-center justify-center p-3 border-2 border-gray-300 rounded hover:bg-green-100"
+                            >
+                              <i className="fab fa-whatsapp text-green-500"></i>
+                          </a>
+                          <Link to={`/chat/${userId}/${userId}`}>
+                    <button className="flex items-center justify-center border-2 border-gray-400 h-10 w-24 rounded"><FaComment />Make chat</button>
+                  </Link>
+                        </div>
+                    
+                     
+                    </>
+                  )}
                 </div>
               </div>
           </div>

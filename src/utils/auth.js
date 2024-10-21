@@ -155,16 +155,23 @@ export const handleVerifyOtp = async (email, otp, navigate) => {
             console.log(response.data.success);
             if(response.data.success=true){
             toast.success(response.data.message);
+            console.log(response);
             navigate('/login')
 
             }
             else{
-                toast.error(response.data.message)
+                toast.error(response.message)
+                console.log(response);
             }
         } catch (error) {
-            console.error(error);
-            toast.error(' Please try again..',error.message);
-        }
+          if (error.response && error.response.status === 400) {
+              toast.error('Invalid OTP or email');  // Error handling for wrong OTP or email
+          } else if (error.response && error.response.status === 404) {
+              toast.error('User not found');  // Error handling for user not found
+          } else {
+              toast.error('An unexpected error occurred. Please try again.'); // General error handling
+          }
+      }
     };
 export const handleResendOtp = async (email, setOtpExpired, setOtp) => {
         try {

@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { handleAdminLogin} from '../../utils/adminAuth';
 import { toast } from 'sonner';
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
-
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { TextField, Button, InputAdornment, IconButton } from '@mui/material';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -33,33 +31,64 @@ const Login = () => {
                     {/* <img src="public/images/loginlogo.png" alt="Login Illustration" className="mx-auto h-20  mb-4" /> */}
                     <h2 className="text-2xl font-semibold">Admin Login</h2>
                 </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-                        <input
+                <div className="container text-center">
+
+                    <form onSubmit={handleSubmit}>
+                        
+                        <TextField
+                            className="w-full mt-3"
                             type="email"
-                            placeholder="Email"
-                            className="w-full px-4 py-2  border-white rounded-md focus:outline-none focus:border-blue-400"
+                            label="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            InputProps={{
+                                sx: {
+                                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                    border: "none", 
+                                },
+                                },
+                            }}
                         />
-                    </div>
-                    <div className="mb-4 flex items-center border rounded-md px-4 py-2">
-                        <input
-                            type={passwordView? "text" : "password"}
-                            placeholder="Password"
-                            className="w-full px-4 py-2  border-white rounded-md focus:outline-none focus:border-blue-400"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <div className='cursor-pointer mt-2' onClick={()=>setPasswordView(!passwordView)}>
-                            {passwordView ? <FaEye/> :<FaEyeSlash/>}
+                                
+                        <div className="flex items-center mt-5">
+                            <TextField
+                                className="w-full"
+                                label="Password"
+                                type={passwordView ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="current-password"
+                                InputProps={{
+                                sx: {
+                                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                    border: "none", 
+                                    },
+                                },
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={() => setPasswordView(!passwordView)}
+                                        edge="end"
+                                    >
+                                        {passwordView ? <FaEye /> : <FaEyeSlash />}
+                                    </IconButton>
+                                    </InputAdornment>
+                                ),
+                                
+                                }}
+                            />
                         </div>
-                      
-                    </div>
-                    <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200">
-                            Login
-                    </button>                
-                </form>            
+                        <div className="items-center mt-6">
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                className="w-1/3 mt-6"
+                            >
+                                Login
+                            </Button>
+                        </div>
+                    </form>     
+                </div>       
             </div>
         </div>
     );

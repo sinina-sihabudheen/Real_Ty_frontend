@@ -23,6 +23,7 @@ const Invoice = () => {
         paymentInvoice(subscriptionId)
             .then(response => {
                 setInvoiceData(response.data);
+                console.log("INVOICE DATA",response.data);
             })
             .catch(error => {
                 setError('Failed to load invoice details.');
@@ -51,6 +52,11 @@ const Invoice = () => {
             border: 0,
         },
     }));
+    const getNextPaymentDate = (paymentDate) => {
+        const date = new Date(paymentDate * 1000); 
+        date.setMonth(date.getMonth() + 1); 
+        return date.toLocaleDateString(); 
+    };
 
     const rows = invoiceData ? [
         { label: 'Amount Paid', value: `₹ ${invoiceData.amount_paid}` },
@@ -58,6 +64,8 @@ const Invoice = () => {
         { label: 'Payment Date', value: new Date(invoiceData.payment_date * 1000).toLocaleDateString() },
         { label: 'Customer Name', value: invoiceData.customerName },
         { label: 'Customer Email', value: invoiceData.customerEmail },
+        { label: 'Next Payment Date', value: getNextPaymentDate(invoiceData.payment_date) }, 
+
     ] : [];
 
     if (error) return <p>{error}</p>;

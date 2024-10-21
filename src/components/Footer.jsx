@@ -25,11 +25,11 @@ const Footer = () => {
   }, []);
 
   return (
-    <div className='bg-gray-300 p-6 left-0 bottom-0 w-full'>
-      <div className="max-w-7xl mx-auto grid grid-cols-5 gap-8">
+    <div className='bg-gray-300 p-6 w-full'>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
         <div className="flex flex-col items-start">
           <img
-            className="h-40 w-40 mb-4"
+            className="h-20 w-20 md:h-40 md:w-40 mb-4"
             src="public/images/REAL-TY.png"
             alt="Real-Ty"
           />

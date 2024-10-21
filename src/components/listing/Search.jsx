@@ -19,7 +19,7 @@ const Search = ({ onSearch }) => {
           <div className="flex items-center space-x-2 p-4 w-6/12 bg-gray-700 bg-opacity-50 rounded-lg">
             <input
               type="text"
-              placeholder="Search by location, seller, or category..."
+              placeholder="Search by location or seller name."
               onChange={handleInputChange}
               className="px-4 py-2 w-full text-white bg-transparent border border-gray-300 rounded-l-md focus:outline-none focus:border-red-500 placeholder-white"
             />

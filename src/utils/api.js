@@ -4,11 +4,14 @@ import { toast } from 'sonner';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000',
-  // headers: {
-  //   'Content-Type': 'application/json',
-  // },
+ 
   withCredentials: true,
 });
+
+
+ // headers: {
+  //   'Content-Type': 'application/json',
+  // },
 
 // Request interceptor to add token to headers
 api.interceptors.request.use(
@@ -42,9 +45,6 @@ api.interceptors.response.use(
     }
   }
 );
-
-
-
 
 export const loginUser = async (email, password) => {
 

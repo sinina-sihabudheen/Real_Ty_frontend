@@ -194,8 +194,6 @@ const PropertyList = () => {
                       activeClassName={'active'}
                       className="flex justify-center space-x-4 mt-4"
                       pageClassName="bg-gray-200 px-4 py-2 rounded hover:bg-blue-300"
-                      // previousClassName="bg-gray-500 px-4 py-2 rounded text-white hover:bg-blue-500"
-                      // nextClassName="bg-gray-500 px-4 py-2 rounded text-white hover:bg-blue-500"
                       previousClassName="hidden"
                       nextClassName="hidden"
                       disabledClassName={'disabled'}
