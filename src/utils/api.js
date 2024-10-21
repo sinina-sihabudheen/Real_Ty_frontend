@@ -1,12 +1,5 @@
-
-import axios from 'axios';
+import api from './conf';
 import { toast } from 'sonner';
-
-const api = axios.create({
-  baseURL: 'http://43.204.108.44:5003',
-  
-  withCredentials: true,
-});
 
 
  // headers: {
