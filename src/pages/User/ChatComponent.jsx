@@ -4,6 +4,7 @@ import { handleFetchSellerProfile } from '../../utils/auth';
 import { fetchMessages } from '../../utils/messageService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import api from '../../utils/conf';
 
 const ChatComponent = () => {
   const { sellerId } = useParams();
