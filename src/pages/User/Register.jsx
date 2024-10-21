@@ -79,7 +79,7 @@ const Register = () => {
         <div className="flex justify-center items-center min-h-screen max-h-full py-4 bg-gray-100">
             <Box className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
                 <div className="text-center mb-6">
-                    <img src="public/images/loginlogo.png" alt="Login Illustration" className="mx-auto h-20  mb-4" />
+                    <img src="/images/loginlogo.png" alt="Login Illustration" className="mx-auto h-20  mb-4" />
                     <Typography variant="h4" align="center" gutterBottom>
                         Register Here
                     </Typography>                

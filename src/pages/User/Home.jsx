@@ -70,7 +70,7 @@ const Home = () => {
                 <a href="#">
                   <img
                     className="w-full h-auto rounded-lg"
-                    src="public/images/adv.png"
+                    src="/images/adv.png"
                     alt="Banner Template"
                   />
                 </a>

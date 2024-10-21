@@ -36,7 +36,7 @@ const Login = () => {
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <div className="text-center mb-6">
           <img
-            src="public/images/loginlogo.png"
+            src="/images/loginlogo.png"
             alt="Login Illustration"
             className="mx-auto h-20 mb-4"
           />
