@@ -150,7 +150,7 @@ const handlePasswordChange = async (event) => {
               <h2 className="text-xl text-gray-700 font-bold">My Profile</h2>
               <div className="mt-4 flex items-center space-x-4">
                 <img 
-                  src={user.profile_image? user.profile_image : '/images/user.png'}                  
+                  src={user.profile_image? user.profile_image : 'images/user.png'}                  
                   alt="Profile" 
                   className="w-20 h-20 rounded-full" 
                 />              

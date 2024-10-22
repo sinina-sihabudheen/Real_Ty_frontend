@@ -97,7 +97,7 @@ const SellerProfile = () => {
               <h2 className="text-xl text-gray-700 font-bold">Seller Profile</h2>
               <div className="mt-4 flex items-center space-x-4">
                 <img 
-                  src={seller.profile_image? seller.profile_image : '/images/user.png'}                  
+                  src={seller.profile_image? seller.profile_image : 'images/user.png'}                  
                   alt="Profile" 
                   className="w-20 h-20 rounded-full" 
                 />
