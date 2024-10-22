@@ -30,7 +30,7 @@ const Footer = () => {
         <div className="flex flex-col items-start">
           <img
             className="h-20 w-20 md:h-40 md:w-40 mb-4"
-            src="public/images/REAL-TY.png"
+            src="/images/REAL-TY.png"
             alt="Real-Ty"
           />
         </div>
