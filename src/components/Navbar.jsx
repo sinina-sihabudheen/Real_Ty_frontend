@@ -69,7 +69,7 @@ const Navbar = () => {
         const token = localStorage.getItem('access');
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         if (isAuthenticated && user) {
-            const ws = new WebSocket(`${protocol}://localhost:8000/ws/notification/?token=${token}`);
+            const ws = new WebSocket(`${protocol}://realty-backend.soloshoes.online/ws/notification/?token=${token}`);
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);

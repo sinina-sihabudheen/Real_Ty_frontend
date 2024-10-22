@@ -4,7 +4,6 @@ import { handleFetchSellerProfile } from '../../utils/auth';
 import { fetchMessages } from '../../utils/messageService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import api from '../../utils/conf';
 
 const ChatComponent = () => {
   const { sellerId } = useParams();
@@ -39,7 +38,7 @@ const ChatComponent = () => {
     const token = localStorage.getItem('access'); 
 
     const createWebSocket = () => {
-      const wsUrl = `${protocol}://localhost:8000/ws/chat/${sellerId}/?token=${token}`;
+      const wsUrl = `${protocol}://realty-backend.soloshoes.online/ws/chat/${sellerId}/?token=${token}`;
       
       const ws = new WebSocket(wsUrl);
 
