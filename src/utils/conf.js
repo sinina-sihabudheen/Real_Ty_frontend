@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    // baseURL: 'https://realty-properties.duckdns.org',
-    baseURL: 'http://localhost:8000/',
+    baseURL: 'https://realty-backend.soloshoes.online',
     withCredentials: true,
   });
 
