@@ -10,7 +10,7 @@ const Search = ({ onSearch }) => {
 
       <header className="relative w-full h-48">
         <img
-          src="/public/images/searchbg.jpg"
+          src="images/searchbg.jpg"
           alt="background"
           className="object-cover w-full h-full z-10"
         />
