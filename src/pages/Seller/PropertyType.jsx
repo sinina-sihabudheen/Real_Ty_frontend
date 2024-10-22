@@ -18,7 +18,7 @@ const PropertyType = () => {
       <Navbar />
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
         <div className="mb-4">
-          <img src="/public/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
+          <img src="/images/REAL-TY.png" alt="Realty Logo" className="w-24 h-24" />
         </div>
         <h1 className="text-2xl font-bold">WELCOME!</h1>
         <p className="mt-2 text-lg">Are you going to place an ad?</p>
