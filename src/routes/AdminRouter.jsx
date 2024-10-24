@@ -6,7 +6,6 @@ import AdminAuth from "../auth/AdminAuth";
 import AllUsers from "../pages/Admin/AllUsers";
 import RegionsList from "../pages/Admin/RegionsList";
 import PropertyCategory from "../pages/Admin/PropertyCategory";
-import PropertyLists from "../pages/Admin/PropertyLists";
 import CategoryList from "../pages/Admin/CategoryList";
 import AmenityList from "../pages/Admin/AmenityList";
 import ResidentialsList from "../pages/Admin/ResidentialsList";
