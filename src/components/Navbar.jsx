@@ -281,29 +281,27 @@ const Navbar = () => {
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const dispatch = useDispatch();
     const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [messageDropdownOpen, setMessageDropdownOpen] = useState(false);
     const [unreadMessages, setUnreadMessages] = useState([]);
     const [websocket, setWebsocket] = useState(null);
     const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
     const [unreadNotifications, setUnreadNotifications] = useState([]);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // New
-    const notificationDropdownRef = useRef(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const dropdownRef = useRef(null);
     const messageDropdownRef = useRef(null);
+    const notificationDropdownRef = useRef(null);
 
     useEffect(() => {
         if (isAuthenticated) {
-            handleFetchUserData(setUser, setIsLoading, setError);
+            handleFetchUserData(setUser);
             fetchUnreadMessages(setUnreadMessages);
         }
     }, [isAuthenticated]);
 
     useEffect(() => {
-        const token = localStorage.getItem('access'); 
+        const token = localStorage.getItem('access');
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         if (isAuthenticated && user) {
             const ws = new WebSocket(`${protocol}://realty-backend.soloshoes.online/ws/chat/${user.id}/?token=${token}`);
@@ -311,26 +309,14 @@ const Navbar = () => {
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                
                 if (data.unread_count !== undefined) {
-                    setUnreadMessages((prevMessages) => {
-                        return prevMessages.map((msg) => {
-                            if (msg.sender === data.sender) {
-                                return { ...msg, unread_count: data.unread_count };
-                            }
-                            return msg;
-                        });
-                    });
+                    setUnreadMessages(prevMessages =>
+                        prevMessages.map(msg => (msg.sender === data.sender ? { ...msg, unread_count: data.unread_count } : msg))
+                    );
                 }
             };
 
-            ws.onclose = () => {
-                console.log('WebSocket closed');
-            };
-
-            return () => {
-                ws.close();
-            };
+            return () => ws.close();
         }
     }, [isAuthenticated, user]);
 
@@ -339,145 +325,141 @@ const Navbar = () => {
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         if (isAuthenticated && user) {
             const ws = new WebSocket(`${protocol}://realty-backend.soloshoes.online/ws/notification/?token=${token}`);
-
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-
                 if (data.message) {
-                    setUnreadNotifications((prevNotifications) => [...prevNotifications, data.message]);
+                    setUnreadNotifications(prevNotifications => [...prevNotifications, data.message]);
                 }
             };
 
-            return () => {
-                ws.close();
-            };
+            return () => ws.close();
         }
     }, [isAuthenticated, user]);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                if (!event.target.closest('.text-gray-500')) {
-                    setDropdownOpen(false);
-                }
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [dropdownRef]);
 
     const handleLogout = () => {
         dispatch(logout());
         navigate('/');
     };
 
-    const toggleDropdown = () => {
-        setDropdownOpen((prevState) => !prevState);
-    };
+    const toggleDropdown = () => setDropdownOpen(prevState => !prevState);
+    const toggleMessageDropdown = () => setMessageDropdownOpen(prevState => !prevState);
+    const toggleNotificationDropdown = () => setNotificationDropdownOpen(prevState => !prevState);
+    const toggleMobileMenu = () => setMobileMenuOpen(prevState => !prevState);
 
-    const toggleMessageDropdown = () => {
-        setMessageDropdownOpen((prevState) => !prevState);
-    };
-    
-    const toggleNotificationDropdown = () => {
-        setNotificationDropdownOpen((prevState) => !prevState);
-    };
-
-    const toggleMobileMenu = () => {
-        setMobileMenuOpen((prevState) => !prevState);
+    const handleOpenMessage = (senderId, propertyId) => {
+        navigate(`/chat/${senderId}/${propertyId}`);
+        markMessagesAsRead(senderId, propertyId).then(() => {
+            setUnreadMessages(prevMessages =>
+                prevMessages.map(msg => (msg.sender === senderId ? { ...msg, unread_count: 0 } : msg))
+            );
+        });
     };
 
     return (
         <nav className="bg-white drop-shadow-lg w-full">
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-                <div className="relative flex h-16 items-center justify-between">
-                    <div className="flex items-center justify-start">
+                <div className="flex h-16 items-center justify-between">
+                    <div className="flex items-center">
                         <img className="h-14 w-15" src="/images/REAL-TY.png" alt="Real-Ty" />
                     </div>
-                    
-                    {/* Hamburger Menu Icon */}
-                    <div className="flex items-center sm:hidden">
-                        <button onClick={toggleMobileMenu} className="text-gray-500 focus:outline-none">
-                            <FaBars style={{ fontSize: '24px' }} />
-                        </button>
+                    {/* Desktop Links */}
+                    <div className="hidden sm:flex items-center space-x-4">
+                        <Link to="/" className="text-black-700 hover:text-gray-400 px-3 py-10 text-sm font-medium">Home</Link>
+                        <Link to="/propertylist" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">Property</Link>
+                        <Link to="/about-us" className="text-gray-500 hover:text-gray-300 px-3 py-10 text-sm font-medium">About Us</Link>
                     </div>
-                    
-                    {/* Full Menu for Desktop */}
-                    <div className="hidden sm:flex sm:items-center sm:space-x-4">
-                        <Link to="/" className="text-black-700 hover:text-gray-400 px-3 py-2 text-sm font-medium">
-                            Home
-                        </Link>
-                        <Link to="/propertylist" className="text-gray-500 hover:text-gray-300 px-3 py-2 text-sm font-medium">
-                            Property
-                        </Link>
-                        <Link to="/about-us" className="text-gray-500 hover:text-gray-300 px-3 py-2 text-sm font-medium">
-                            About Us
-                        </Link>
-                    </div>
-
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-5">
-                        {isAuthenticated ? (
-                            <div className="relative flex items-center space-x-4">
-                                {/* Notification and Profile icons for desktop view */}
-                                <div ref={notificationDropdownRef} className="relative z-50">
+                    {/* Mobile Menu Icon */}
+                    <button onClick={toggleMobileMenu} className="sm:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <FaBars size={20} />
+                    </button>
+                    {/* Icons and User Dropdown */}
+                    <div className="flex items-center space-x-4">
+                        {isAuthenticated && (
+                            <>
+                                <div ref={messageDropdownRef} className="relative">
+                                    <button onClick={toggleMessageDropdown} className="text-gray-500 hover:text-gray-300 font-medium">
+                                        <FaEnvelope size={20} />
+                                        {unreadMessages.length > 0 && (
+                                            <span className="ml-1 text-red-500 font-bold">({unreadMessages.length})</span>
+                                        )}
+                                    </button>
+                                    {messageDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                            {unreadMessages.length > 0 ? (
+                                                unreadMessages.map(msg => (
+                                                    <button key={msg.sender} onClick={() => handleOpenMessage(msg.sender, msg.property_id)} className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        {msg.sender_name} ({msg.unread_count})
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                <div className="px-4 py-2 text-sm text-gray-700">No unread messages</div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                <div ref={notificationDropdownRef} className="relative">
                                     <button onClick={toggleNotificationDropdown} className="text-gray-500 hover:text-gray-300 font-medium">
-                                        <FaBell style={{ fontSize: '20px', color: 'gray' }} />
+                                        <FaBell size={20} />
                                         {unreadNotifications.length > 0 && (
                                             <span className="ml-1 text-red-500 font-bold">({unreadNotifications.length})</span>
                                         )}
                                     </button>
                                     {notificationDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                            <div className="py-1">
-                                                {unreadNotifications.length > 0 ? (
-                                                    unreadNotifications.map((notif, index) => (
-                                                        <div key={index} className="px-4 py-2 text-sm text-gray-700">
-                                                            {notif}
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <div className="px-4 py-2 text-sm text-gray-700">No notifications</div>
-                                                )}
-                                            </div>
+                                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                            {unreadNotifications.length > 0 ? (
+                                                unreadNotifications.map((notif, index) => (
+                                                    <div key={index} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        {notif}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="px-4 py-2 text-sm text-gray-700">No unread notifications</div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
-                                
-                                <div ref={dropdownRef}>
-                                    <button onClick={toggleDropdown} className="text-gray-500 flex items-center">
-                                        <MdAccountCircle style={{ fontSize: '20px', color: 'gray', marginRight: '0.5rem' }} />
-                                        {user ? user.username : 'Profile'}
-                                        <FiChevronDown style={{ marginLeft: '0.5rem' }} />
+                                <div ref={dropdownRef} className="relative">
+                                    <button onClick={toggleDropdown} className="flex items-center text-gray-500 hover:text-gray-300 border-2 border-gray-50 rounded shadow-md px-4">
+                                        <MdAccountCircle size={20} className="mr-2" /> {user ? user.username : 'Profile'}
+                                        <FiChevronDown className="ml-2" />
                                     </button>
                                     {dropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                            <button onClick={() => navigate("/userprofile")} className="px-4 py-2 text-gray-700">Profile</button>
-                                            <button onClick={handleLogout} className="px-4 py-2 text-gray-700">Logout</button>
+                                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                            <button onClick={() => navigate("/userprofile")} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</button>
+                                            <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        ) : (
+                            </>
+                        )}
+                        {!isAuthenticated && (
                             <div className="hidden sm:flex space-x-4">
-                                <Link to="/register" className="text-gray-500">Sign Up</Link>
-                                <Link to="/login" className="text-gray-500">Sign In</Link>
+                                <Link to="/register" className="text-gray-500 hover:text-gray-300 font-medium">Sign Up</Link>
+                                <Link to="/login" className="text-gray-500 hover:text-gray-300 font-medium">Sign In</Link>
                             </div>
                         )}
                     </div>
                 </div>
+                {/* Mobile Menu Links */}
+                {mobileMenuOpen && (
+                    <div className="sm:hidden">
+                        <Link to="/" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={toggleMobileMenu}>Home</Link>
+                        <Link to="/propertylist" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={toggleMobileMenu}>Property</Link>
+                        <Link to="/about-us" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={toggleMobileMenu}>About Us</Link>
+                        {isAuthenticated ? (
+                            <>
+                                <Link to="/userprofile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={toggleMobileMenu}>Profile</Link>
+                                <button onClick={() => { handleLogout(); toggleMobileMenu(); }} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/register" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={toggleMobileMenu}>Sign Up</Link>
+                                <Link to="/login" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={toggleMobileMenu}>Sign In</Link>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
-
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-                <div className="sm:hidden bg-white px-2 pt-2 pb-3 space-y-1">
-                    <Link to="/" className="block px-3 py-2 text-gray-700">Home</Link>
-                    <Link to="/propertylist" className="block px-3 py-2 text-gray-700">Property</Link>
-                    <Link to="/about-us" className="block px-3 py-2 text-gray-700">About Us</Link>
-                </div>
-            )}
         </nav>
     );
 };
