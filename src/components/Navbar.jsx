@@ -37,7 +37,7 @@ const Navbar = () => {
         const token = localStorage.getItem('access'); 
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         if (isAuthenticated && user) {
-            const ws = new WebSocket(`${protocol}://localhost:8000/ws/chat/${user.id}/?token=${token}`);
+            const ws = new WebSocket(`${protocol}://realty-backend.soloshoes.online/ws/chat/${user.id}/?token=${token}`);
             setWebsocket(ws);
 
             ws.onmessage = (event) => {
