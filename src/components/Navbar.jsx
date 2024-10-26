@@ -488,6 +488,8 @@ const Navbar = () => {
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const dispatch = useDispatch();
     const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [messageDropdownOpen, setMessageDropdownOpen] = useState(false);
     const [unreadMessages, setUnreadMessages] = useState([]);
